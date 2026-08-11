@@ -1,0 +1,18 @@
+.login-page {
+  width: 100%;
+}
+
+.login-page h1 {
+  margin-bottom: 24px;
+}
+
+.login-page form {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.error-message {
+  margin-bottom: 12px;
+  padding: 10px;
+}

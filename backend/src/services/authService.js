@@ -1,0 +1,41 @@
+const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
+const User = require("../models/User");
+
+const auditLogService = require("./auditLogService");
+
+exports.login = async (username, password, ipAddress) => {
+  // tìm tài khoản theo username
+  const user = await User.findOne({ username });
+  if (!user) {
+    // ghi nhận đăng nhập thất bại
+    await auditLogService.log({
+      action: "LOGIN_FAILED",
+      result: "FAILED",
+      ipAddress,
+      details: { username },
+    });
+    throw new Error("Invalid username or password");
+  }
+
+  //   so sánh mật khẩu đã mã hóa
+  const isMatch = await bcrypt.compare(password, user.password);
+  if (!isMatch) {
+    await auditLogService.log({
+      userId: user._id,
+      action: "LOGIN_FAILED",
+      result: "FAILED",
+      ipAddress,
+    });
+
+    throw new Error("Invalid username or password!");
+  }
+
+  //   sinh Access Token
+  const token = jwt.sign(
+    { id: user._id, role: user.role },
+    process.env.JWT_SECRET,
+    { expiresIn: "1h" },
+  );
+  return { token, user };
+};
