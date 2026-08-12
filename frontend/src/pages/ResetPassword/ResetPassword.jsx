@@ -1,25 +1,28 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useSearchParams } from "react-router-dom";
 
 import AuthLayout from "../../layouts/AuthLayout/AuthLayout";
 import FormInput from "../../components/FormInput/FormInput";
 
 import authService from "../../services/authService";
 
-import "./Register.css";
+import "./ResetPassword.css";
 
-export default function Register() {
+export default function ResetPassword() {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const token = searchParams.get("token");
   const [formData, setFormData] = useState({
-    username: "",
     password: "",
     confirmPassword: "",
   });
   const [error, setError] = useState("");
+  const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
+
     setFormData((prev) => ({ ...prev, [name]: value }));
     setError("");
   };
@@ -27,31 +30,35 @@ export default function Register() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
-    if (!formData.username.trim()) {
-      setError("vui lòng nhập tên đăng nhập.");
+    if (!token) {
+      setError("Liên kết đặt lại mật khẩu không hợp lệ.");
       return;
     }
 
     if (!formData.password) {
-      setError("Vui lòng nhập mật khẩu.");
+      setError("Vui lòng nhập mật khẩu mới");
+      return;
+    }
+
+    if (!formData.password) {
+      setError("Vui lòng nhập mật khẩu mới.");
       return;
     }
 
     if (formData.password !== formData.confirmPassword) {
-      setError("Mật khẩu xác nhận không khớp.");
+      setError("Mật khẩu xác nhận không khớp!");
       return;
     }
 
     try {
       setLoading(true);
-      setError("");
-      await authService.register({
-        username: formData.username,
-        password: formData.password,
-      });
-      navigate("/login");
+      await authService.resetPassword({ token, password: formData.password });
+      setMessage("Đặt lại mật khẩu thành công!");
+      setTimeout(() => {
+        navigate("/login");
+      }, 1000);
     } catch (err) {
-      setError(err?.message || "Đăng ký thất bại.");
+      setError(err?.message || "Không thể đặt lại mật khẩu.");
     } finally {
       setLoading(false);
     }
@@ -59,33 +66,22 @@ export default function Register() {
 
   return (
     <AuthLayout>
-      <div className="register-page">
-        <div className="register-card">
-          <div className="register-car__header">
-            <h1>Đăng ký</h1>
-            <p>Tạo tài khoản mới</p>
+      <div className="reset-password-page">
+        <div className="reset-password-card">
+          <div className="reset-password-card__header">
+            <h1>Đặt lại mật khẩu</h1>
           </div>
 
           {error && <div className="error-message">{error}</div>}
 
-          <form className="register-form" onSubmit={handleSubmit}>
-            <FormInput
-              label="Tên đăng nhập"
-              name="username"
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="Nhập tên đăng nhập"
-              required
-              disabled={loading}
-            />
+          {message && <div className="success-message">{message}</div>}
 
+          <form className="reset-password-form" onSubmit={handleSubmit}>
             <FormInput
-              label="Mật khẩu"
+              label="Mật khẩu mới"
               name="password"
-              type="password"
               value={formData.password}
               onChange={handleChange}
-              placeholder="Nhập mật khẩu"
               required
               disabled={loading}
             />
@@ -96,23 +92,21 @@ export default function Register() {
               type="password"
               value={formData.confirmPassword}
               onChange={handleChange}
-              placeholder="Nhập lại mật khẩu"
               required
               disabled={loading}
             />
 
             <button
               type="submit"
-              className="btn btn-primary register-form__submit"
+              className="btn btn-primary"
               disabled={loading}
             >
-              {loading ? "Đang đăng ký..." : "Đăng ký"}
+              {loading ? "Đang xử lý..." : "Đặt lại mật khẩu"}
             </button>
           </form>
 
-          <div className="register-card__login">
-            <span>Đã có tài khoản?</span>
-            <Link to="/login">Đăng nhập</Link>
+          <div className="reset-password-card__back">
+            <Link to="/login">Quay lại đăng nhập</Link>
           </div>
         </div>
       </div>

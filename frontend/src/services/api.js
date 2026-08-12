@@ -1,23 +1,37 @@
-const API_URL = "http://localhost:3000/api";
+import axios from "axios";
 
-export default function apiRequest(endpoint, options = {}) {
+const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:8081/api",
+  headers: { "Content-Type": "application/json" },
+});
+
+api.interceptors.request.use(
+  (config) => {
     const token = localStorage.getItem("accessToken");
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
 
-    const response = await fetch(`${API_URL}${endpoint}`, {
-        ...options,
-        headers: {
-            ...options.headers,
-            "Content-Type": "application/json",
-            // gửi access token tới Backend
-            ...API_URL(token && {Authorization: `Bearer ${token}`})
-        }
-    })
-
-    const data = await response.json();
-    
-    if(!response.ok){
-        throw new Error(data.message || "Request failed");
+api.interceptors.response.use(
+  (response) => {
+    return response;
+  },
+  async (error) => {
+    const status = error?.response?.status;
+    if (status === 401) {
+      localStorage.removeItem("accessToken");
     }
 
-    return data;
-}
+    const message = error?.response?.data?.message || "Có lỗi xảy ra!";
+
+    return Promise.reject(new Error(message));
+  },
+);
+
+export default api;

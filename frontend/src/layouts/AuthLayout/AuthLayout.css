@@ -3,10 +3,11 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: var(--spacing-lg);
+  background-color: var(--color-background);
 }
 
-.auth-content {
+.auth-layout__container {
   width: 100%;
   max-width: 420px;
-  padding: 24px;
 }

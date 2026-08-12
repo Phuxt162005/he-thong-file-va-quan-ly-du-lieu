@@ -8,10 +8,10 @@ function MainLayout({ children }) {
     <div className="main-layout">
       <Header />
 
-      <div className="main-body">
+      <div className="main-layout__body">
         <Sidebar />
 
-        <main className="main-content">{children}</main>
+        <main className="main-layout__content">{children}</main>
       </div>
     </div>
   );

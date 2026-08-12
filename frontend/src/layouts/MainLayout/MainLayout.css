@@ -1,13 +1,26 @@
 .main-layout {
   min-height: 100vh;
-}
-
-.main-body {
+  width: 100%;
   display: flex;
-  min-height: calc(100vh - 60px);
+  flex-direction: column;
 }
 
-.main-content {
+.main-layout__body {
   flex: 1;
-  padding: 24px;
+  display: flex;
+  min-height: 0;
+}
+
+.main-layout__content {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  padding: var(--spacing-lg);
+  overflow: auto;
+}
+
+@media (max-width: 768px) {
+  .main-layout__content {
+    padding: var(--spacing-md);
+  }
 }

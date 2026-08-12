@@ -1,14 +1,20 @@
-import apiRequest, { apiRoutes } from "./api";
+import api from "./api";
 
-// lấy thông tin cá nhân
-export function getProfile() {
-  return apiRequest("/users/profile");
-}
+const userService = {
+  async getProfile() {
+    const response = await api.get("/users/profile");
+    return response.data;
+  },
 
-// cập nhật thông tin
-export function updateProfile(data) {
-  return apiRequest("/users/profile", {
-    method: "PUT",
-    body: JSON.stringify(data),
-  });
-}
+  async updateProfile(data) {
+    const response = await api.put("/users/profile", data);
+    return response.data;
+  },
+
+  async getStorageQuota() {
+    const response = await api.get("/users/storage");
+    return response.data;
+  },
+};
+
+export default userService;
