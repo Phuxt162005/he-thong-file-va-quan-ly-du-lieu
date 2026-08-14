@@ -1,0 +1,231 @@
+.shares-page {
+  width: 100%;
+}
+
+.shares-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
+  margin-bottom: var(--spacing-lg);
+}
+
+.shares-page__header h1 {
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-xl);
+}
+
+.shares-page__header p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.shares-page__filter {
+  width: 180px;
+}
+
+/* List */
+.shares-list {
+  overflow: hidden;
+  background-color: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+}
+
+.shares-list__header,
+.share-item {
+  display: grid;
+  grid-template-columns: minmax(200px, 1.5fr) 100px 180px 120px 130px minmax(
+      260px,
+      auto
+    );
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.shares-list__header {
+  min-height: 48px;
+  background-color: var(--color-background);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.share-item {
+  min-height: 72px;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.share-item:last-child {
+  border-bottom: none;
+}
+
+.share-item:hover {
+  background-color: var(--color-hover);
+}
+
+/* Resource */
+.share-item__resource {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.share-item__icon {
+  flex-shrink: 0;
+  font-size: 22px;
+}
+
+.share-item__resource > div {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.share-item__resource strong {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+}
+
+.share-item__resource span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+/* Other fields */
+.share-item__type,
+.share-item__expiry,
+.share-item__downloads {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.share-item__expiry {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Status */
+.share-status {
+  display: inline-flex;
+  padding: 4px 8px;
+  border-radius: 20px;
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+}
+
+.share-status--active {
+  color: var(--color-success);
+  background-color: #f0fdf4;
+}
+
+.share-status--expired {
+  color: var(--color-warning);
+  background-color: #fffbeb;
+}
+
+.share-status--revoked {
+  color: var(--color-danger);
+  background-color: #fef2f2;
+}
+
+/* Actions */
+
+.share-item__actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--spacing-xs);
+  flex-wrap: wrap;
+}
+
+.share-item__actions .btn {
+  min-height: 34px;
+  padding: 6px 10px;
+  font-size: var(--font-size-xs);
+}
+
+/* Empty */
+.shares-list__empty {
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+/* Edit */
+.share-edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.share-edit-form__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.share-edit-form__group label {
+  font-size: var(--font-size-sm);
+  font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .shares-list__header,
+  .share-item {
+    grid-template-columns: minmax(180px, 1.5fr) 90px 150px 100px 120px minmax(
+        220px,
+        auto
+      );
+  }
+}
+
+@media (max-width: 950px) {
+  .shares-list__header {
+    display: none;
+  }
+
+  .share-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+  }
+
+  .share-item__resource {
+    width: 100%;
+  }
+
+  .share-item__actions {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 600px) {
+  .shares-page__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .shares-page__filter {
+    width: 100%;
+  }
+
+  .share-item__actions {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .share-item__actions .btn {
+    width: 100%;
+  }
+}

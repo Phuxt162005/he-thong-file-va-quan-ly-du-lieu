@@ -1,0 +1,125 @@
+.files-page {
+  width: 100%;
+}
+
+.files-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
+}
+
+.files-page__header h1 {
+  font-size: var(--font-size-xl);
+}
+
+.folder-list {
+  display: flex;
+  flex-direction: column;
+  background-color: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+
+.folder-item {
+  min-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-md);
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.folder-item:last-child {
+  border-bottom: none;
+}
+
+.folder-item:hover {
+  background-color: var(--color-hover);
+}
+
+.folder-item__main {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  text-align: left;
+  background: transparent;
+}
+
+.folder-item__icon {
+  width: 32px;
+  flex-shrink: 0;
+  font-size: 24px;
+}
+
+.folder-item__name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+}
+
+.folder-item__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+}
+
+.folder-item__action {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: transparent;
+  border-radius: var(--radius-sm);
+}
+
+.folder-item__action:hover {
+  background-color: var(--color-border);
+}
+
+.folder-list__empty {
+  padding: var(--spacing-xl);
+  text-align: center;
+  color: var(--color-text-secondary);
+}
+
+.files-page__section {
+  margin-top: var(--spacing-xl);
+}
+
+.files-page__section-header {
+  margin-bottom: var(--spacing-md);
+}
+
+.files-page__section-header h2 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+}
+
+@media (max-width: 600px) {
+  .files-page__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .files-page__header .btn {
+    width: 100%;
+  }
+
+  .folder-item {
+    padding: var(--spacing-sm);
+  }
+
+  .folder-item__action {
+    width: 32px;
+    height: 32px;
+  }
+}

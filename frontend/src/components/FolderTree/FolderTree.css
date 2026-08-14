@@ -1,0 +1,65 @@
+.folder-tree {
+  width: 100%;
+}
+
+.folder-tree__item {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.folder-tree__item:hover {
+  background-color: var(--color-hover);
+}
+
+.folder-tree__item--selected {
+  color: var(--color-primary);
+  background-color: var(--color-selected);
+}
+
+.folder-tree__expand {
+  width: 20px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--color-text-secondary);
+  background: transparent;
+  font-size: 10px;
+}
+
+.folder-tree__icon {
+  width: 24px;
+  flex-shrink: 0;
+}
+
+.folder-tree__name {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: var(--font-size-sm);
+}
+
+.folder-tree__children {
+  margin-left: 20px;
+  padding-left: var(--spacing-xs);
+  border-left: var(--border-width) solid var(--color-border);
+}
+
+.folder-tree__loading {
+  padding: var(--spacing-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.folder-tree__error {
+  padding: var(--spacing-sm);
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+}

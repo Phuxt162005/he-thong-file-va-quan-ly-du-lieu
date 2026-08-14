@@ -1,0 +1,8 @@
+.folder-picker {
+  width: 100%;
+}
+
+.folder-picker--error {
+  color: var(--color-danger);
+  font-size: var(--font-size-sm);
+}
