@@ -9,6 +9,7 @@ import Shares from "../pages/Shares/Shares";
 import ShareAccess from "../pages/ShareAccess/ShareAccess";
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
 import ChangePassword from "../pages/ChangePassword/ChangePassword";
+import Admin from "../pages/Admin/Admin";
 
 import MainLayout from "../layouts/MainLayout/MainLayout";
 import ProtectedRoute from "./ProtectedRoute";
@@ -30,6 +31,17 @@ function AppRoutes() {
             <ProtectedRoute>
               <MainLayout>
                 <Dashboard />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Admin />
               </MainLayout>
             </ProtectedRoute>
           }

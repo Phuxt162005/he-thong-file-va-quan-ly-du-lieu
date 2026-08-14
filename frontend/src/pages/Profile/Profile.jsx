@@ -140,26 +140,75 @@ function Profile() {
               />
 
               <div className="profile-form__actions">
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={saving}
-                >
-                  {saving ? "Đang lưu..." : "Lưu thay đổi"}
-                </button>
+                <div className="profile-form__actions">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => (window.location.href = "/change-password")}
+                  >
+                    Đổi mật khẩu
+                  </button>
+
+                  <button
+                    type="submit"
+                    className="btn btn-primary"
+                    disabled={saving}
+                  >
+                    {saving ? "Đang lưu..." : "Lưu thay đổi"}
+                  </button>
+                </div>
               </div>
             </form>
           </div>
         </div>
-        <StorageQuota user={user} />
+        <StorageQuota />
       </div>
     </MainLayout>
   );
 }
 
-function StorageQuota({ user }) {
-  const used = Number(user?.storageUsed || 0);
-  const quota = Number(user?.storageQuota || 0);
+function StorageQuota() {
+  const [storage, setStorage] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    loadStorage();
+  }, []);
+
+  const loadStorage = async () => {
+    try {
+      setLoading(true);
+      setError("");
+
+      const response = await userService.getStorageQuota();
+      const data = response?.data || response;
+      setStorage(data);
+    } catch (err) {
+      setError(err?.message || "Không thể tải thông tin dung lượng.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="profile-card storage-card">
+        <Loading message="Đang tải dung lượng..." />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="profile-card storage-card">
+        <div className="error-message">{error}</div>
+      </div>
+    );
+  }
+
+  const used = Number(storage?.storageUsed || storage?.used || 0);
+  const quota = Number(storage?.storageQuota || storage?.quota || 0);
   const percentage = quota > 0 ? Math.min((used / quota) * 100, 100) : 0;
 
   return (
@@ -195,7 +244,6 @@ function StorageQuota({ user }) {
     </div>
   );
 }
-
 function formatStorage(bytes) {
   if (!bytes || bytes <= 0) {
     return "0 B";
