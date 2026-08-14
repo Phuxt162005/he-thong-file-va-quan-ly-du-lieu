@@ -9,7 +9,7 @@ import { clearAuth } from "../../utils/authStorage";
 
 import "./MainLayout.css";
 
-function MainLayout({ children }) {
+export default function MainLayout({ children }) {
   const navigate = useNavigate();
 
   const handleLogout = async () => {
@@ -24,24 +24,50 @@ function MainLayout({ children }) {
   };
   return (
     <div className="main-layout">
-      <Header />
+      {/* Sidebar */}
 
-      <div className="main-layout__body">
-        <Sidebar />
+      <aside className="sidebar">
+        <div className="sidebar__header">
+          <h2>Tệp của tôi</h2>
+        </div>
 
-        <main className="main-layout__content">{children}</main>
-      </div>
+        <nav className="sidebar-menu">
+          <Link to="/" className="sidebar-menu__item">
+            <span>🏠</span>
+            <span>Tổng quan</span>
+          </Link>
 
-      <Link to="/trash" className="sidebar-menu__item">
-        <span>🗑️</span>
-        <span>Thùng rác</span>
-      </Link>
+          <Link to="/files" className="sidebar-menu__item">
+            <span>📁</span>
+            <span>Tệp của tôi</span>
+          </Link>
 
-      <button className="btn btn-danger" onClick={handleLogout}>
-        Đăng xuất
-      </button>
+          <Link to="/shares" className="sidebar-menu__item">
+            <span>🔗</span>
+            <span>Được chia sẻ</span>
+          </Link>
+
+          <Link to="/trash" className="sidebar-menu__item">
+            <span>🗑️</span>
+            <span>Thùng rác</span>
+          </Link>
+
+          <Link to="/profile" className="sidebar-menu__item">
+            <span>👤</span>
+            <span>Hồ sơ</span>
+          </Link>
+        </nav>
+
+        <div className="sidebar__footer">
+          <button className="btn btn-danger" onClick={handleLogout}>
+            Đăng xuất
+          </button>
+        </div>
+      </aside>
+
+      {/* Nội dung chính */}
+
+      <main className="main-layout__content">{children}</main>
     </div>
   );
 }
-
-export default MainLayout;
