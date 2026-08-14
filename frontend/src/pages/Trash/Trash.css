@@ -2,7 +2,12 @@
   width: 100%;
 }
 
+/* Header */
 .trash-page__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-lg);
   margin-bottom: var(--spacing-lg);
 }
 
@@ -16,21 +21,38 @@
   font-size: var(--font-size-sm);
 }
 
-.trash-list {
-  display: flex;
-  flex-direction: column;
+/* Card */
+.trash-card {
+  overflow: hidden;
   background-color: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
-  overflow: hidden;
+  box-shadow: var(--shadow-sm);
 }
 
+/* List */
+.trash-list__header,
 .trash-item {
-  min-height: 64px;
-  display: flex;
+  display: grid;
+  grid-template-columns:
+    minmax(240px, 1.5fr) 120px minmax(180px, 1fr)
+    180px 130px;
   align-items: center;
   gap: var(--spacing-md);
   padding: var(--spacing-sm) var(--spacing-md);
+}
+
+.trash-list__header {
+  min-height: 48px;
+  background-color: var(--color-background);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  font-weight: 600;
+  border-bottom: var(--border-width) solid var(--color-border);
+}
+
+.trash-item {
+  min-height: 72px;
   border-bottom: var(--border-width) solid var(--color-border);
 }
 
@@ -38,42 +60,153 @@
   border-bottom: none;
 }
 
+.trash-item:hover {
+  background-color: var(--color-hover);
+}
+
+/* File */
+.trash-item__name {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
 .trash-item__icon {
-  font-size: 24px;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 22px;
 }
 
 .trash-item__info {
   min-width: 0;
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 2px;
 }
 
 .trash-item__info strong {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  font-size: var(--font-size-sm);
 }
 
 .trash-item__info span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
 }
 
-.trash-list__empty {
-  padding: var(--spacing-xl);
-  text-align: center;
+/* Other */
+.trash-item__size,
+.trash-item__folder,
+.trash-item__date {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
 }
 
-@media (max-width: 600px) {
-  .trash-item {
-    align-items: flex-start;
-    flex-wrap: wrap;
+.trash-item__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.trash-item__actions .btn {
+  white-space: nowrap;
+}
+
+/* Empty */
+.trash-empty {
+  min-height: 360px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-xl);
+  text-align: center;
+}
+
+.trash-empty__icon {
+  margin-bottom: var(--spacing-sm);
+  font-size: 52px;
+}
+
+.trash-empty h2 {
+  font-size: var(--font-size-lg);
+}
+
+.trash-empty p {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+/* Responsive */
+@media (max-width: 1100px) {
+  .trash-list__header {
+    display: none;
   }
 
-  .trash-item .btn {
+  .trash-item {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    padding: var(--spacing-md);
+  }
+
+  .trash-item__name {
+    width: 100%;
+  }
+
+  .trash-item__size,
+  .trash-item__folder,
+  .trash-item__date {
+    flex: 1;
+    min-width: 150px;
+  }
+
+  .trash-item__actions {
+    flex-shrink: 0;
+  }
+}
+
+@media (max-width: 650px) {
+  .trash-page__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .trash-page__header .btn {
+    width: 100%;
+  }
+
+  .trash-item {
+    flex-direction: column;
+    align-items: stretch;
+    gap: var(--spacing-sm);
+  }
+
+  .trash-item__size,
+  .trash-item__folder,
+  .trash-item__date {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .trash-item__actions {
+    width: 100%;
+  }
+
+  .trash-item__actions .btn {
     width: 100%;
   }
 }

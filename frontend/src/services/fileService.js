@@ -79,13 +79,13 @@ const fileService = {
 
   // khôi phục file
   async restoreFile(fileId) {
-    const response = await api.put(`/files/${fileId}/restore`);
+    const response = await api.put(`/files/${fileId}/restore`, data);
     return response.data;
   },
 
   // khôi phục lại file bị xóa
   async getDeletedFiles() {
-    const response = await api.get("/files/trash");
+    const response = await api.get("/files/deleted");
     return response.data;
   },
 };

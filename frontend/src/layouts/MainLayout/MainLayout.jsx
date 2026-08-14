@@ -32,6 +32,11 @@ function MainLayout({ children }) {
         <main className="main-layout__content">{children}</main>
       </div>
 
+      <Link to="/trash" className="sidebar-menu__item">
+        <span>🗑️</span>
+        <span>Thùng rác</span>
+      </Link>
+
       <button className="btn btn-danger" onClick={handleLogout}>
         Đăng xuất
       </button>

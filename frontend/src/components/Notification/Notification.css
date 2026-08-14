@@ -1,0 +1,128 @@
+.notification {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  width: min(420px, calc(100vw - 48px));
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 14px 16px;
+  background-color: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-md);
+  animation: notification-slide-in 0.2s ease-out;
+}
+
+.notification__icon {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  border-radius: 50%;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.notification__content {
+  min-width: 0;
+  flex: 1;
+}
+
+.notification__content > span {
+  display: block;
+  margin-bottom: 3px;
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}
+
+.notification__content p {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.notification__close {
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+  font-size: 20px;
+  line-height: 1;
+  border-radius: var(--radius-sm);
+}
+
+.notification__close:hover {
+  background-color: var(--color-hover);
+}
+
+/* Success */
+.notification--success {
+  border-left: 4px solid var(--color-success);
+}
+
+.notification--success .notification__icon {
+  background-color: #f0fdf4;
+  color: var(--color-success);
+}
+
+/* Error */
+.notification--error {
+  border-left: 4px solid var(--color-danger);
+}
+
+.notification--error .notification__icon {
+  background-color: #fef2f2;
+  color: var(--color-danger);
+}
+
+/* Warning */
+.notification--warning {
+  border-left: 4px solid var(--color-warning);
+}
+
+.notification--warning .notification__icon {
+  background-color: #fffbeb;
+  color: var(--color-warning);
+}
+
+/* Info */
+.notification--info {
+  border-left: 4px solid var(--color-primary);
+}
+
+.notification--info .notification__icon {
+  background-color: var(--color-background);
+  color: var(--color-primary);
+}
+
+@keyframes notification-slide-in {
+  from {
+    opacity: 0;
+    transform: translateX(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@media (max-width: 600px) {
+  .notification {
+    top: 16px;
+    right: 16px;
+    width: calc(100vw - 32px);
+  }
+}

@@ -10,6 +10,7 @@ import ShareAccess from "../pages/ShareAccess/ShareAccess";
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
 import ChangePassword from "../pages/ChangePassword/ChangePassword";
 import Admin from "../pages/Admin/Admin";
+import Trash from "../pages/Trash/Trash";
 
 import MainLayout from "../layouts/MainLayout/MainLayout";
 import ProtectedRoute from "./ProtectedRoute";
@@ -86,6 +87,17 @@ function AppRoutes() {
             <ProtectedRoute>
               <MainLayout>
                 <ChangePassword />
+              </MainLayout>
+            </ProtectedRoute>
+          }
+        />
+
+        <Route
+          path="/trash"
+          element={
+            <ProtectedRoute>
+              <MainLayout>
+                <Trash />
               </MainLayout>
             </ProtectedRoute>
           }

@@ -1,0 +1,25 @@
+.notification-container {
+  position: fixed;
+  top: 24px;
+  right: 24px;
+  z-index: 9999;
+  width: min(420px, calc(100vw - 48px));
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  pointer-events: none;
+}
+
+.notification-container .notification {
+  position: static;
+  width: 100%;
+  pointer-events: auto;
+}
+
+@media (max-width: 600px) {
+  .notification-container {
+    top: 16px;
+    right: 16px;
+    width: calc(100vw - 32px);
+  }
+}
