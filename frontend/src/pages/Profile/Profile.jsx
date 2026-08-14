@@ -4,7 +4,7 @@ import MainLayout from "../../layouts/MainLayout/MainLayout";
 import FormInput from "../../components/FormInput/FormInput";
 import Loading from "../../components/Loading/Loading";
 
-import userService from "../../services/user.service";
+import userService from "../../services/userService";
 
 import "./Profile.css";
 

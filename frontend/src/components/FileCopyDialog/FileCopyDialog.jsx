@@ -3,7 +3,7 @@ import { useState } from "react";
 import Modal from "../Modal/Modal";
 import FolderPicker from "../FolderPicker/FolderPicker";
 
-import fileService from "../../services/file.service";
+import fileService from "../../services/fileService";
 
 export default function FileCopyDialog({ file, isOpen, onClose, onCopied }) {
   const [destinationFolderId, setDestinationFolderId] = useState(null);

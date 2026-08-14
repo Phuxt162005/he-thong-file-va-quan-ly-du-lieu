@@ -9,7 +9,7 @@ import Modal from "../../components/Modal/Modal";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import FormInput from "../../components/FormInput/FormInput";
 
-import folderService from "../../services/folder.service";
+import folderService from "../../services/folderService";
 
 import FileList from "./FileList";
 import "./Files.css";

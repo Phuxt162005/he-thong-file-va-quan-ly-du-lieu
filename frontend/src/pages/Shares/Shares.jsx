@@ -6,7 +6,7 @@ import Modal from "../../components/Modal/Modal";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import FormInput from "../../components/FormInput/FormInput";
 
-import shareService from "../../services/share.service";
+import shareService from "../../services/shareService";
 
 import "./Shares.css";
 

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 
 import FormInput from "../../components/FormInput/FormInput";
 
-import authService from "../../services/auth.service";
+import authService from "../../services/authService";
 import { setAccessToken, setCurrentUser } from "../../utils/authStorage";
 
 import "./Login.css";

@@ -4,7 +4,7 @@ import { useParams } from "react-router-dom";
 import Loading from "../../components/Loading/Loading";
 import FormInput from "../../components/FormInput/FormInput";
 
-import shareService from "../../services/share.service";
+import shareService from "../../services/shareService";
 
 import "./ShareAccess.css";
 

@@ -4,7 +4,7 @@ import MainLayout from "../../layouts/MainLayout/MainLayout";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import Loading from "../../components/Loading/Loading";
 
-import fileService from "../../services/file.service";
+import fileService from "../../services/fileService";
 
 import "./Trash.css";
 

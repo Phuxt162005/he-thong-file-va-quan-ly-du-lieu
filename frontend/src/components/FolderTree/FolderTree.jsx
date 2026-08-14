@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-import folderService from "../../services/folder.service";
+import folderService from "../../services/folderService";
 
 import "./FolderTree.css";
 

@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-import fileService from "../../services/file.service";
+import fileService from "../../services/fileService";
 
 import "./FileUpload.css";
 

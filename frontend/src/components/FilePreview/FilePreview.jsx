@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import Modal from "../Modal/Modal";
 import Loading from "../Loading/Loading";
 
-import fileService from "../../services/file.service";
+import fileService from "../../services/fileService";
 
 import "./FilePreview.css";
 

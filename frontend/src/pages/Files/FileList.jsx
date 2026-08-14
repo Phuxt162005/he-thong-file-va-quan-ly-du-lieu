@@ -8,7 +8,7 @@ import FileCopyDialog from "../../components/FileCopyDialog/FileCopyDialog";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import Loading from "../../components/Loading/Loading";
 
-import fileService from "../../services/file.service";
+import fileService from "../../services/fileService";
 
 export default function FileList() {
   const [searchParams] = useSearchParams();

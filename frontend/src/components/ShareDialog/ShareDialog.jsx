@@ -3,7 +3,7 @@ import { useState } from "react";
 import Modal from "../Modal/Modal";
 import FormInput from "../FormInput/FormInput";
 
-import shareService from "../../services/share.service";
+import shareService from "../../services/shareService";
 
 import "./ShareDialog.css";
 
