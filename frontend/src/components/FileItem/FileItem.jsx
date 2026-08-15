@@ -11,6 +11,7 @@ function FileItem({
   onMove,
   onCopy,
   onDelete,
+  onPermission,
 }) {
   const handleSelect = () => {
     if (onSelect) {
@@ -65,6 +66,9 @@ function FileItem({
         </button>
         <button onClick={() => onCopy?.(file)} title="Sao chép">
           📋
+        </button>
+        <button onClick={() => onPermission?.(file)} title="Quản lý quyền">
+          🔐
         </button>
         <button onClick={() => onDelete?.(file)} title="Xóa">
           🗑️

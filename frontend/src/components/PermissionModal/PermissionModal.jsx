@@ -71,10 +71,7 @@ export default function PermissionModal({
       setSaving(true);
       setError("");
 
-      // tạm thời tìm User
-      const response = await userService.getUsers();
-      const users = response?.data || response || [];
-      const user = users.find((item) => item.login_name === loginName.trim());
+      const user = await userService.findByLoginName(loginName.trim());
 
       if (!user) {
         throw new Error("Không tìm thấy người dùng.");

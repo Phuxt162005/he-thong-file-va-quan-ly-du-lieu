@@ -6,6 +6,7 @@ import FilePreview from "../../components/FilePreview/FilePreview";
 import FileMoveDialog from "../../components/FileMoveDialog/FileMoveDialog";
 import FileCopyDialog from "../../components/FileCopyDialog/FileCopyDialog";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
+import PermissionModal from "../../components/PermissionModal/PermissionModal";
 import Loading from "../../components/Loading/Loading";
 
 import fileService from "../../services/fileService";
@@ -22,6 +23,7 @@ export default function FileList() {
   const [copyFile, setCopyFile] = useState(null);
   const [deleteFile, setDeleteFile] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [permissionFile, setPermissionFile] = useState(null);
 
   useEffect(() => {
     loadFiles();
@@ -116,6 +118,7 @@ export default function FileList() {
               onMove={setMoveFile}
               onCopy={setCopyFile}
               onDelete={setDeleteFile}
+              onPermission={setPermissionFile}
             />
           ))
         )}
@@ -139,6 +142,13 @@ export default function FileList() {
         isOpen={Boolean(copyFile)}
         onClose={() => setCopyFile(null)}
         onCopied={loadFiles}
+      />
+
+      <PermissionModal
+        isOpen={Boolean(permissionFile)}
+        resourceId={permissionFile?._id}
+        resourceType="file"
+        onClose={() => setPermissionFile(null)}
       />
 
       <ConfirmDialog

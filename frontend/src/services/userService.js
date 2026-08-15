@@ -15,6 +15,13 @@ const userService = {
     const response = await api.get("/users/storage");
     return response.data;
   },
+
+  async findByLoginName(loginName) {
+    const response = await api.get("/users/search", {
+      params: { login_name: loginName },
+    });
+    return response.data;
+  },
 };
 
 export default userService;
