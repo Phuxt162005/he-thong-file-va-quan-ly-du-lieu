@@ -26,6 +26,7 @@ exports.uploadChunk = async (req, res) => {
       chunkIndex,
       req.body,
       checksum,
+      req.user.id,
     );
 
     return res.json(result);
@@ -38,7 +39,10 @@ exports.uploadChunk = async (req, res) => {
 
 exports.status = async (req, res) => {
   try {
-    const result = await uploadService.getUploadStatus(req.params.uploadId);
+    const result = await uploadService.getUploadStatus(
+      req.params.uploadId,
+      req.user.id,
+    );
 
     return res.json(result);
   } catch (error) {

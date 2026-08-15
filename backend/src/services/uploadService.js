@@ -42,11 +42,20 @@ exports.initiateUpload = async (
   };
 };
 
-exports.uploadChunk = async (uploadId, chunkIndex, buffer, checksum) => {
+exports.uploadChunk = async (
+  uploadId,
+  chunkIndex,
+  buffer,
+  checksum,
+  userId,
+) => {
   const session = await uploadRepository.findById(uploadId);
 
   if (!session) {
     throw new Error("Upload session not found");
+  }
+  if (session.user.toString() !== userId.toString()) {
+    throw new Error("You do not own this upload.");
   }
   if (session.status !== "uploading") {
     throw new Error("Upload session is not active");
@@ -81,11 +90,15 @@ exports.uploadChunk = async (uploadId, chunkIndex, buffer, checksum) => {
   };
 };
 
-exports.getUploadStatus = async (uploadId) => {
+exports.getUploadStatus = async (uploadId, userId) => {
   const session = await uploadRepository.findById(uploadId);
 
   if (!session) {
     throw new Error("Upload session not found");
+  }
+
+  if (session.user.toString() !== userId.toString()) {
+    throw new Error("You do not own this upload");
   }
 
   const receivedChunks = chunkStorage.getReceivedChunks(
@@ -111,6 +124,19 @@ exports.getUploadStatus = async (uploadId) => {
     missingChunks,
     expiresAt: session.expiresAt,
   };
+};
+
+exports.status = async (req, res) => {
+  try {
+    const result = await uploadService.getUploadStatus(
+      req.params.uploadId,
+      req.user.id,
+    );
+
+    return res.json(result);
+  } catch (error) {
+    return res.status(404).json({ message: error.message });
+  }
 };
 
 exports.completeUpload = async (uploadId, userId) => {
@@ -154,7 +180,7 @@ exports.completeUpload = async (uploadId, userId) => {
       mimeType: session.mimeType,
       size: stats.size,
     });
-    await activityLogService.log(userId, "File upload", "file", file_id, {
+    await activityLogService.log(userId, "File upload", "file", file._id, {
       uploadType: "chunk",
       fileName: session.fileName,
       totalChunks: session.totalChunks,
