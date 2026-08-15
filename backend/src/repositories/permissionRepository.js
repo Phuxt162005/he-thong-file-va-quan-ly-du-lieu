@@ -5,6 +5,13 @@ exports.findDirect = (userId, resourceId) => {
   return Permission.findOne({ user: userId, resourceId: resourceId });
 };
 
+// lấy toàn bộ permission của resource
+exports.findByResource = (resourceId, resourceType) => {
+  return Permission.find({ resourceId, resourceType })
+    .populate("user", "login_name first_name last_name")
+    .sort({ createdAt: -1 });
+};
+
 // tạo permission
 exports.create = (data) => {
   return Permission.create(data);

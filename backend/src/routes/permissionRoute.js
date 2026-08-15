@@ -6,6 +6,13 @@ const controller = require("../controllers/permissionController");
 // cấp quyền
 router.post("/", auth, controller.grant);
 
+// xem danh sách quyền
+router.get(
+  "/resource/:resourceType/:resourceId",
+  auth,
+  controller.getByResource,
+);
+
 // chỉnh sửa quyền
 router.put("/:id", auth, controller.update);
 

@@ -23,6 +23,19 @@ exports.grantPermission = async (
   });
 };
 
+// lấy danh sách quyền của resource
+exports.getPermissions = async (resourceId, resourceType) => {
+  if (!resourceId || !resourceType) {
+    throw new Error("Resource information is required");
+  }
+
+  if (!["file", "folder"].includes(resourceType)) {
+    throw new Error("Invalid resource type");
+  }
+
+  return await permissionRepository.findByResource(resourceId, resourceType);
+};
+
 // cập nhật quyền
 exports.updatePermission = async (permissionId, permissions) => {
   // cập nhật quyền mới cho các request tiếp theo

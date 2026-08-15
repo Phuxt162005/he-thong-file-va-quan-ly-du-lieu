@@ -11,6 +11,20 @@ exports.grant = async (req, res) => {
   return res.status(201).json(permission);
 };
 
+// xem danh sách permission
+exports.getByResource = async (req, res) => {
+  try {
+    const permissions = await service.getPermissions(
+      req.params.resourceId,
+      req.params.resourceType,
+    );
+
+    return res.json(permissions);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};
+
 // cập nhật quyền
 exports.update = async (req, res) => {
   const permission = await service.updatePermission(

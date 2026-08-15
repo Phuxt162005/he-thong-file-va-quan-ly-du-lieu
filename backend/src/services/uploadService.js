@@ -101,6 +101,12 @@ exports.getUploadStatus = async (uploadId, userId) => {
     throw new Error("You do not own this upload");
   }
 
+  if (new Date() > session.expiresAt) {
+    await uploadRepository.markExpired(uploadId);
+    chunkStorage.deleteUploadDirectory(uploadId);
+    throw new Error("Upload session expired");
+  }
+
   const receivedChunks = chunkStorage.getReceivedChunks(
     uploadId,
     session.totalChunks,
@@ -124,19 +130,6 @@ exports.getUploadStatus = async (uploadId, userId) => {
     missingChunks,
     expiresAt: session.expiresAt,
   };
-};
-
-exports.status = async (req, res) => {
-  try {
-    const result = await uploadService.getUploadStatus(
-      req.params.uploadId,
-      req.user.id,
-    );
-
-    return res.json(result);
-  } catch (error) {
-    return res.status(404).json({ message: error.message });
-  }
 };
 
 exports.completeUpload = async (uploadId, userId) => {

@@ -1,4 +1,5 @@
 const app = require("./src/app");
+require("./src/jobs/uploadCleanupJob");
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

@@ -35,3 +35,18 @@ exports.markFailed = (uploadId) => {
 exports.delete = (uploadId) => {
   return UploadSession.findByIdAndDelete(uploadId);
 };
+
+exports.findExpired = () => {
+  return UploadSession.find({
+    expiresAt: { $lt: new Date() },
+    status: "uploading",
+  });
+};
+
+exports.markExpired = (uploadId) => {
+  return UploadSession.findByIdAndUpdate(
+    uploadId,
+    { status: "expired" },
+    { new: true },
+  );
+};
