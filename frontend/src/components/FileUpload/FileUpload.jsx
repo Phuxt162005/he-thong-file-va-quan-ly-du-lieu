@@ -25,28 +25,41 @@ export default function FileUpload({ folderId = null, onUploaded }) {
     try {
       setUploading(true);
       setError("");
+
       for (const file of files) {
-        await fileService.uploadFile(file, folderId, (event) => {
-          if (!event.total) {
-            return;
+        const session = await fileService.initiateChunkUpload(file, folderId);
+        const uploadId = session.uploadId;
+        const chunkSize = session.chunkSize;
+        const totalChunks = session.totalChunks;
+        // kiểm tra Chunk đã tồn tại
+        const status = await fileService.getChunkUploadStatus(uploadId);
+        const receivedChunks = new Set(status.receivedChunks);
+
+        for (let index = 0; index < totalChunks; index++) {
+          if (receivedChunks.has(index)) {
+            updateProgress(file, index + 1, totalChunks);
+            continue;
           }
-          const progress = Math.round((event.loaded / event.total) * 100);
-          setFiles((prev) =>
-            prev.map((item) => (item === file ? { ...item, progress } : item)),
-          );
-        });
+
+          const start = index * chunkSize;
+          const end = Math.min(start + chunkSize, file.size);
+          const chunk = file.slice(start, end);
+
+          await fileService.uploadChunk(uploadId, index, chunk);
+          updateProgress(file, index + 1, totalChunks);
+        }
+        await fileService.completeChunkUpload(uploadId);
       }
       setFiles([]);
 
       if (inputRef.current) {
         inputRef.current.value = "";
       }
-
       if (onUploaded) {
         onUploaded();
       }
     } catch (err) {
-      setError(err?.message || "Upload file thất bại.");
+      setError(err?.message || "Chunk Upload thất bại.");
     } finally {
       setUploading(false);
     }
