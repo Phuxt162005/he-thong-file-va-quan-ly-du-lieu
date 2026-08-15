@@ -5,6 +5,7 @@ const fs = require("fs");
 const uploadRepository = require("../repositories/uploadSessionRepository");
 const chunkStorage = require("./chunkStorageService");
 const fileService = require("./fileService");
+const activityLogService = require("./activityLogService");
 
 const DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024;
 const SESSION_EXPIRE_MS = 24 * 60 * 60 * 1000;
@@ -152,6 +153,11 @@ exports.completeUpload = async (uploadId, userId) => {
       filename: storageName,
       mimeType: session.mimeType,
       size: stats.size,
+    });
+    await activityLogService.log(userId, "File upload", "file", file_id, {
+      uploadType: "chunk",
+      fileName: session.fileName,
+      totalChunks: session.totalChunks,
     });
     await uploadRepository.markCompleted(uploadId);
     chunkStorage.deleteUploadDirectory(uploadId);

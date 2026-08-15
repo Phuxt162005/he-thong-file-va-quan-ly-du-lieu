@@ -13,7 +13,7 @@ exports.getFile = async (req, res) => {
 // xóa file
 exports.deleteFile = async (req, res) => {
   // permission được kiểm tra trước khi gọi service
-  const file = await fileService.deleteFile(req.params.id);
+  const file = await fileService.deleteFile(req.user.id, req.params.id);
 
   return res.json({ message: "File deleted successfully", file });
 };

@@ -11,7 +11,7 @@ exports.findById = (id) => {
 };
 
 // đánh dấu file đã xóa
-exports.create.softDelete = (id) => {
+exports.softDelete = (id) => {
   return File.findByIdAndUpdate(
     id,
     { isDeleted: true, deletedAt: new Date() },

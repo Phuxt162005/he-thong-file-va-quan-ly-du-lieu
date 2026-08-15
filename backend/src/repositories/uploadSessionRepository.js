@@ -8,12 +8,10 @@ exports.findById = (uploadId) => {
   return UploadSession.findById(uploadId);
 };
 
-exports.addReceiveChunk = async (uploadId, chunkIndex) => {
+exports.addReceivedChunk = async (uploadId, chunkIndex) => {
   return UploadSession.findByIdAndUpdate(
     uploadId,
-    {
-      $addToSet: { receivedChunks: chunkIndex },
-    },
+    { $addToSet: { receivedChunks: chunkIndex } },
     { new: true },
   );
 };

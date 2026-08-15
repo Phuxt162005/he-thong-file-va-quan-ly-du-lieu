@@ -54,19 +54,22 @@ exports.deleteUploadDirectory = (uploadId) => {
 
 exports.mergeChunks = (uploadId, totalChunks, outputPath) => {
   const outputDirectory = path.dirname(outputPath);
+
   fs.mkdirSync(outputDirectory, { recursive: true });
 
-  const output = fs.createWriteStream(outputPath);
+  //   xóa file cũ nếu tồn tại
+  if (fs.existsSync(outputPath)) {
+    fs.unlinkSync(outputPath);
+  }
+
+  // ghép chunk
   for (let i = 0; i < totalChunks; i++) {
     const chunkPath = exports.getChunkPath(uploadId, i);
-
-    if (fs.existsSync(chunkPath)) {
-      output.close();
+    // nếu thiếu 1 chunk thì không merge
+    if (!fs.existsSync(chunkPath)) {
       throw new Error(`Chunk ${i} is missing.`);
     }
-
     const chunk = fs.readFileSync(chunkPath);
-    output.write(chunk);
+    fs.appendFileSync(outputPath, chunk);
   }
-  output.end();
 };

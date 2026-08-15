@@ -79,7 +79,7 @@ const fileService = {
 
   // khôi phục file
   async restoreFile(fileId) {
-    const response = await api.put(`/files/${fileId}/restore`, data);
+    const response = await api.put(`/files/${fileId}/restore`);
     return response.data;
   },
 
@@ -88,6 +88,57 @@ const fileService = {
     const response = await api.get("/files/deleted");
     return response.data;
   },
+
+  // tạo Upload Session cho Chunk Upload
+  async initiateChunkUpload(
+    file,
+    folderId = null,
+    chunkSize = 5 * 1024 * 1024,
+  ) {
+    const response = await api.post("/files/upload/initiate", {
+      fileName: file.name,
+      mimeType: file.type || "application/octet-stream",
+      fileSize: file.size,
+      folderId,
+      chunkSize,
+    });
+
+    return response.data;
+  },
+
+  // upload một Chunk
+  async uploadChunk(uploadId, chunkIndex, chunk) {
+    const checksum = await calculateChecksum(chunk);
+    const response = await api.post(`/files/upload/${uploadId}/chunk`, chunk, {
+      headers: {
+        "Content-Type": "application/octet-stream",
+        "X-Chunk-Index": chunkIndex,
+        "X-Chunk-Checksum": checksum,
+      },
+    });
+
+    return response.data;
+  },
+
+  // lấy trạng thái Upload Session
+  async getChunkUploadStatus(uploadId) {
+    const response = await api.get(`/files/upload/${uploadId}/status`);
+    return response.data;
+  },
+
+  // hoàn tất Upload và Merge Chunk
+  async completeChunkUpload(uploadId) {
+    const response = await api.post(`/files/upload/${uploadId}/complete`);
+    return response.data;
+  },
 };
+
+async function calculateChecksum(blob) {
+  const buffer = await blob.arrayBuffer();
+  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+
+  return hashArray.map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
 
 export default fileService;
