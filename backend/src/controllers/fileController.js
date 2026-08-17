@@ -79,3 +79,26 @@ exports.download = async (req, res) => {
     return res.status(403).json({ message: error.message });
   }
 };
+
+// preview
+exports.preview = async (req, res) => {
+  try {
+    const result = await fileService.previewFile(req.user.id, req.params.id);
+    if (!result) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    res.setHeader(
+      "Content-Type",
+      result.file.mimeType || "application/octet-stream",
+    );
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="${encodeURIComponent(result.file.name)}"`,
+    );
+
+    return res.sendFile(result.filePath);
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};

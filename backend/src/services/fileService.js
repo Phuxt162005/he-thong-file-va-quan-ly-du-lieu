@@ -88,3 +88,29 @@ exports.downloadFile = async (userId, fileId) => {
   const filePath = storageService.getDownloadPath(file.storageName);
   return { file, filePath };
 };
+
+// preview file
+exports.previewFile = async (userId, fileId) => {
+  const file = await fileRepository.findById(fileId);
+  if (!file) {
+    return null;
+  }
+
+  // Owner luôn được preview
+  const owner = await permissionService.isOwner(userId, fileId, "file");
+  if (!owner) {
+    const permissions = await permissionService.resolvePermission(
+      userId,
+      fileId,
+      "file",
+    );
+
+    // Preview cần quyền read.
+    if (!permissions.includes("read")) {
+      throw new Error("You do not have permission to preview this file");
+    }
+  }
+
+  const filePath = storageService.getDownloadPath(file.storageName);
+  return { file, filePath };
+};

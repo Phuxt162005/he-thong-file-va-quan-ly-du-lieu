@@ -25,6 +25,10 @@ router.post("/upload", auth, upload.single("file"), controller.upload);
 // download
 router.get("/:id/download", auth, controller.download);
 
+// preview
+router.get("/:id/preview", auth, controller.preview);
+
+// lấy thông tin file
 router.get("/:id", auth, controller.getFile);
 
 router.delete("/:id", auth, controller.deleteFile);
