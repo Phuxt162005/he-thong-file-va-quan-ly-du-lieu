@@ -5,6 +5,8 @@ import fileService from "../../services/fileService";
 import "./FileUpload.css";
 
 const UPLOAD_SESSION_KEY = "active_upload_sessions";
+const NORMAL_UPLOAD_LIMIT = 50 * 1024 * 1024;
+
 function getSavedSessions() {
   try {
     return JSON.parse(localStorage.getItem(UPLOAD_SESSION_KEY) || "{}");
@@ -73,14 +75,43 @@ export default function FileUpload({ folderId = null, onUploaded }) {
       setError("");
 
       for (const file of files) {
+        // File nhỏ: Upload trực tiếp bằng Multipart.
+        if (file.size <= NORMAL_UPLOAD_LIMIT) {
+          await fileService.uploadFile(file, folderId, (event) => {
+            if (event.total) {
+              const progress = Math.round((event.loaded / event.total) * 100);
+              setFiles((prev) =>
+                prev.map((item) => {
+                  if (item === file) {
+                    const updateProgress = (file, completed, total) => {
+                      const progress = Math.round((completed / total) * 100);
+
+                      setFiles((prev) =>
+                        prev.map((item) => {
+                          if (item === file) {
+                            return { ...item, progress };
+                          }
+                          return item;
+                        }),
+                      );
+                    };
+                  }
+                  return item;
+                }),
+              );
+            }
+          });
+          continue;
+        }
+
+        // File lớn: sử dụng Chunk Upload.
         const sessionKey = createFileKey(file, folderId);
-        // Kiểm tra xem file này đã có Upload Session trước đó chưa.
         let savedSession = getUploadSession(sessionKey);
         let uploadId;
         let chunkSize;
         let totalChunks;
 
-        // nếu chưa có thì tạo Session mới
+        // Chưa có session
         if (!savedSession) {
           const session = await fileService.initiateChunkUpload(file, folderId);
           uploadId = session.uploadId;
@@ -95,14 +126,15 @@ export default function FileUpload({ folderId = null, onUploaded }) {
             folderId,
           });
         } else {
-          // resume session cũ
+          // Có session cũ
           uploadId = savedSession.uploadId;
           chunkSize = savedSession.chunkSize;
           totalChunks = savedSession.totalChunks;
         }
-        // lấy status từ server
-        const status = await fileService.getChunkUploadStatus(uploadId);
-        // nếu hết hạn thì tạo session mới
+
+        // Kiểm tra session trên Server
+        let status = await fileService.getChunkUploadStatus(uploadId);
+        // Session không còn tồn tại
         if (status.status !== "uploading") {
           removeUploadSession(sessionKey);
           const session = await fileService.initiateChunkUpload(file, folderId);
@@ -117,12 +149,15 @@ export default function FileUpload({ folderId = null, onUploaded }) {
             fileSize: file.size,
             folderId,
           });
+          status = await fileService.getChunkUploadStatus(uploadId);
         }
-        // lấy lại status sau khi có session mới
-        const currentStatus = await fileService.getChunkUploadStatus(uploadId);
-        const receivedChunks = new Set(currentStatus.receivedChunks);
-        // upload chunk còn thiếu
+
+        // Các Chunk đã upload
+        const receivedChunks = new Set(status.receivedChunks);
+
+        // Upload các Chunk còn thiếu
         for (let index = 0; index < totalChunks; index++) {
+          // Chunk đã tồn tại
           if (receivedChunks.has(index)) {
             updateProgress(file, index + 1, totalChunks);
             continue;
@@ -132,11 +167,12 @@ export default function FileUpload({ folderId = null, onUploaded }) {
           const end = Math.min(start + chunkSize, file.size);
           const chunk = file.slice(start, end);
           await fileService.uploadChunk(uploadId, index, chunk);
-          updateProgress(file, index + 1, totalChunks);
+
+          pdateProgress(file, index + 1, totalChunks);
         }
-        // yêu cầu serve mới
+        // Merge Chunk
         await fileService.completeChunkUpload(uploadId);
-        // xóa session sau khi hoàn tất
+        // Upload hoàn tất
         removeUploadSession(sessionKey);
       }
       setFiles([]);
@@ -148,9 +184,11 @@ export default function FileUpload({ folderId = null, onUploaded }) {
         onUploaded();
       }
     } catch (err) {
-      // Không xóa Upload Session khi upload thất bại, lần upload tiếp theo sẽ dùng lại session này.
+      // Không xóa Chunk Upload Session khi upload thất bại.
       setError(
-        err?.message || "Upload thất bại. Bạn có thể Upload lại để tiếp tục.",
+        err?.response?.data?.message ||
+          err?.message ||
+          "Upload thất bại. Bạn có thể Upload lại để tiếp tục.",
       );
     } finally {
       setUploading(false);
