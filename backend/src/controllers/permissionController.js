@@ -3,6 +3,7 @@ const service = require("../services/permissionService");
 // cấp quyền
 exports.grant = async (req, res) => {
   const permission = await service.grantPermission(
+    req.user.id,
     req.body.userId,
     req.body.resourceId,
     req.body.resourceType,
@@ -28,6 +29,7 @@ exports.getByResource = async (req, res) => {
 // cập nhật quyền
 exports.update = async (req, res) => {
   const permission = await service.updatePermission(
+    req.user.id,
     req.params.id,
     req.body.permissions,
   );
@@ -36,7 +38,7 @@ exports.update = async (req, res) => {
 
 // thu hồi quyền
 exports.revoke = async (req, res) => {
-  await service.revokePermission(req.params.id);
+  await service.revokePermission(req.user.id, req.params.id);
 
   return res.json({ message: "Permission revoked successfully" });
 };

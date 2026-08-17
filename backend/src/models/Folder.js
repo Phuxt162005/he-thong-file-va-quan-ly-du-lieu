@@ -8,7 +8,7 @@ const folderSchema = new mongoose.Schema(
       required: true,
     },
     parentFolder: {
-      type: mongoose.Schema.Types.ObjectIdm,
+      type: mongoose.Schema.Types.ObjectId,
       ref: "Folder",
       default: null,
     },
