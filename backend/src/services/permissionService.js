@@ -1,6 +1,7 @@
 const permissionRepository = require("../repositories/permissionRepository");
 const Permission = require("../models/Permission");
 const Folder = require("../models/Folder");
+const File = require("../models/File");
 
 // cấp quyền
 exports.grantPermission = async (
@@ -82,4 +83,53 @@ exports.resolvePermission = async (userId, resourceId, resourceType) => {
     current = await Folder.findById(current.parentFolder);
   }
   return [];
+};
+
+// kiểm tra người dùng có quyền quản lý Permission hay không
+exports.canManagePermission = async (userId, resourceId, resourceType) => {
+  // kiểm tra quyền trực tiếp
+  const direct = await Permission.findOne({
+    user: userId,
+    resourceId,
+    resourceType,
+  });
+  if (direct && direct.permissions.includes("permission_management")) {
+    return true;
+  }
+
+  // nếu là Folder thì kiểm tra quyền được kế thừa từ Folder cha
+  if (resourceType === "folder") {
+    let current = await Folder.findById(resourceId);
+
+    while (current && current.parentFolder) {
+      const inherited = await Permission.findOne({
+        user: userId,
+        resourceId: current.parentFolder,
+        resourceType: "folder",
+      });
+      if (
+        inherited &&
+        inherited.permissions.includes("permission_management")
+      ) {
+        return true;
+      }
+      current = await Folder.findById(current.parentFolder);
+    }
+  }
+  return false;
+};
+
+// kiểm tra người dùng có phải Owner hay không
+exports.isOwner = async (userId, resourceId, resourceType) => {
+  let resource;
+
+  if (resourceType === "file") {
+    resource = await File.findById(resourceId);
+  } else if (resourceType === "folder") {
+    resource = await Folder.findById(resourceId);
+  }
+  if (!resource) {
+    return false;
+  }
+  return resource.owner.toString() === userId.toString();
 };
