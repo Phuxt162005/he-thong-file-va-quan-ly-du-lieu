@@ -57,3 +57,17 @@ exports.deleteFile = (storageName) => {
     fs.unlinkSync(filePath);
   }
 };
+
+// lưu file
+exports.saveFile = (buffer, originalName) => {
+  if (!Buffer.isBuffer(buffer)) {
+    throw new Error("Invalid file buffer");
+  }
+
+  exports.ensureStorageDirectory();
+  const storageName = exports.generateStorageName(originalName);
+  const filePath = exports.getFilePath(storageName);
+  fs.writeFileSync(filePath, buffer);
+
+  return { storageName, filePath };
+};

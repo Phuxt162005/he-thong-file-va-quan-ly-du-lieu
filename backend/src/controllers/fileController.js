@@ -1,4 +1,5 @@
 const fileService = require("../services/fileService");
+const storageService = require("../services/storageService");
 
 // lấy file
 exports.getFile = async (req, res) => {
@@ -37,18 +38,32 @@ exports.deleteFile = async (req, res) => {
 
 // upload file
 exports.upload = async (req, res) => {
-  // req.file chứa thông file đã được Storage xử lý
-  if (!req.file) {
-    return res.status(400).json({ message: "File is required" });
+  try {
+    if (!req.file) {
+      return res.status(400).json({
+        message: "File is required",
+      });
+    }
+
+    const stored = storageService.saveFile(
+      req.file.buffer,
+      req.file.originalname,
+    );
+
+    const file = await fileService.createFile(
+      req.user.id,
+      req.body.folderId || null,
+      {
+        originalname: req.file.originalname,
+        filename: stored.storageName,
+        mimeType: req.file.mimetype,
+        size: req.file.size,
+      },
+    );
+    return res.status(201).json({ message: "Upload successfully", file });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
   }
-
-  const file = await fileService.createFile(
-    req.user.id,
-    req.body.folderId || null,
-    req.file,
-  );
-
-  return res.status(201).json({ message: "Upload successfully", file });
 };
 
 // download
