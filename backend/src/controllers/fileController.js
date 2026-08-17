@@ -2,20 +2,37 @@ const fileService = require("../services/fileService");
 
 // lấy file
 exports.getFile = async (req, res) => {
-  const file = await fileService.getFile(req.params.id);
-  if (!file) {
-    return res.status(404).json({ message: "File not found" });
-  }
+  try {
+    const file = await fileService.getFile(req.user.id, req.params.id);
+    if (!file) {
+      return res.status(404).json({
+        message: "File not found",
+      });
+    }
 
-  return res.json(file);
+    return res.json(file);
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
 };
 
 // xóa file
 exports.deleteFile = async (req, res) => {
-  // permission được kiểm tra trước khi gọi service
-  const file = await fileService.deleteFile(req.user.id, req.params.id);
+  try {
+    const file = await fileService.deleteFile(req.user.id, req.params.id);
+    if (!file) {
+      return res.status(404).json({
+        message: "File not found",
+      });
+    }
 
-  return res.json({ message: "File deleted successfully", file });
+    return res.json({
+      message: "File deleted successfully",
+      file,
+    });
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
 };
 
 // upload file
@@ -32,4 +49,18 @@ exports.upload = async (req, res) => {
   );
 
   return res.status(201).json({ message: "Upload successfully", file });
+};
+
+// download
+exports.download = async (req, res) => {
+  try {
+    const result = await fileService.downloadFile(req.user.id, req.params.id);
+    if (!result) {
+      return res.status(404).json({ message: "File not found" });
+    }
+
+    return res.download(result.filePath, result.file.name);
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
 };

@@ -18,6 +18,7 @@ router.post("/upload/:uploadId/complete", auth, uploadController.complete);
 // upload file thường
 
 // các API hiện tại
+router.get("/:id/download", auth, controller.download);
 router.get("/:id", auth, controller.getFile);
 router.delete("/:id", auth, controller.deleteFile);
 
