@@ -5,34 +5,59 @@ const File = require("../models/File");
 
 // kiểm tra người dùng có quyền quản lý Permission hay không
 exports.canManagePermission = async (userId, resourceId, resourceType) => {
-  // kiểm tra quyền trực tiếp
+  // Owner luôn được quản lý Permission
+  const owner = await exports.isOwner(userId, resourceId, resourceType);
+  if (owner) {
+    return true;
+  }
+
+  // kiểm tra Permission trực tiếp
   const direct = await Permission.findOne({
     user: userId,
     resourceId,
     resourceType,
   });
+
   if (direct && direct.permissions.includes("permission_management")) {
     return true;
   }
 
-  // nếu là Folder thì kiểm tra quyền được kế thừa từ Folder cha
-  if (resourceType === "folder") {
-    let current = await Folder.findById(resourceId);
+  /*
+   * Xác định Folder chứa Resource:
+   * Nếu Resource là File: File -> folder
+   * Nếu Resource là Folder: Folder hiện tại
+   */
+  let currentFolder = null;
+  if (resourceType === "file") {
+    const file = await File.findById(resourceId);
 
-    while (current && current.parentFolder) {
-      const inherited = await Permission.findOne({
-        user: userId,
-        resourceId: current.parentFolder,
-        resourceType: "folder",
-      });
-      if (
-        inherited &&
-        inherited.permissions.includes("permission_management")
-      ) {
-        return true;
-      }
-      current = await Folder.findById(current.parentFolder);
+    if (!file || !file.folder) {
+      return false;
     }
+
+    currentFolder = await Folder.findById(file.folder);
+  } else if (resourceType === "folder") {
+    currentFolder = await Folder.findById(resourceId);
+  }
+
+  // Đi ngược lên cây thư mục.
+  while (currentFolder) {
+    const inherited = await Permission.findOne({
+      user: userId,
+      resourceId: currentFolder._id,
+      resourceType: "folder",
+    });
+
+    if (inherited && inherited.permissions.includes("permission_management")) {
+      return true;
+    }
+
+    // Nếu Folder hiện tại có Folder cha thì tiếp tục đi lên.
+    if (!currentFolder.parentFolder) {
+      break;
+    }
+
+    currentFolder = await Folder.findById(currentFolder.parentFolder);
   }
   return false;
 };
@@ -139,9 +164,9 @@ exports.revokePermission = async (currentUserId, permissionId) => {
   return await permissionRepository.remove(permissionId);
 };
 
-// kiểm tra quyền
+// kiểm tra quyền thực tế của User trên Resource
 exports.resolvePermission = async (userId, resourceId, resourceType) => {
-  // kiểm tra quyền trực tiếp trên Resource
+  // 1. Kiểm tra Permission trực tiếp
   const direct = await Permission.findOne({
     user: userId,
     resourceId,
@@ -151,26 +176,47 @@ exports.resolvePermission = async (userId, resourceId, resourceType) => {
     return direct.permissions;
   }
 
-  // nếu resource là Folder thì bắt đầu tìm quyền cha
-  if (resourceType !== "folder") {
+  /*
+  // 2. Xác định Folder cần kiểm tra.
+   * File: File -> Folder chứa File
+   * Folder: Folder hiện tại
+   */
+  let currentFolder = null;
+
+  if (resourceType === "file") {
+    const file = await File.findById(resourceId);
+
+    if (!file || !file.folder) {
+      return [];
+    }
+
+    currentFolder = await Folder.findById(file.folder);
+  } else if (resourceType === "folder") {
+    currentFolder = await Folder.findById(resourceId);
+  } else {
     return [];
   }
 
-  let current = await Folder.findById(resourceId);
-
-  while (current && current.parentFolder) {
-    // tìm permission tại folder cha
+  // 3. Đi ngược lên cây Folder để tìm Permission được kế thừa.
+  while (currentFolder) {
     const inherited = await Permission.findOne({
       user: userId,
-      resourceId: current.parentFolder,
+      resourceId: currentFolder._id,
       resourceType: "folder",
     });
+
     if (inherited) {
       return inherited.permissions;
     }
 
-    // tiếp tục đi lên cây thư mục
-    current = await Folder.findById(current.parentFolder);
+    // Không còn Folder cha
+    if (!currentFolder.parentFolder) {
+      break;
+    }
+
+    // Đi lên Folder cha
+    currentFolder = await Folder.findById(currentFolder.parentFolder);
   }
+  // 4. Không tìm thấy quyền
   return [];
 };
