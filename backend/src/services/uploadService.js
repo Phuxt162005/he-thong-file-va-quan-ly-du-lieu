@@ -6,6 +6,7 @@ const uploadRepository = require("../repositories/uploadSessionRepository");
 const chunkStorage = require("./chunkStorageService");
 const fileService = require("./fileService");
 const activityLogService = require("./activityLogService");
+const storageService = require("./storageService");
 
 const DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024;
 const SESSION_EXPIRE_MS = 24 * 60 * 60 * 1000;
@@ -134,10 +135,10 @@ exports.getUploadStatus = async (uploadId, userId) => {
 
 exports.completeUpload = async (uploadId, userId) => {
   const session = await uploadRepository.findById(uploadId);
-
   if (!session) {
     throw new Error("Upload session not found");
   }
+
   if (session.user.toString() !== userId.toString()) {
     throw new Error("You do not own this upload");
   }
@@ -146,24 +147,21 @@ exports.completeUpload = async (uploadId, userId) => {
     uploadId,
     session.totalChunks,
   );
-
   if (receivedChunks.length !== session.totalChunks) {
     throw new Error("Not all chunks have been uploaded");
   }
-  const storageDirectory = path.join(process.cwd(), "storage", "files");
-
-  fs.mkdirSync(storageDirectory, {
-    recursive: true,
-  });
-
-  const storageName = `${crypto.randomUUID()}-${session.fileName}`;
+  const storageDirectory = storageService.ensureStorageDirectory();
+  const storageName = storageService.generateStorageName(session.fileName);
   const outputPath = path.join(storageDirectory, storageName);
 
   try {
     chunkStorage.mergeChunks(uploadId, session.totalChunks, outputPath);
-    const stats = fs.statSync(outputPath);
+    const stats = storageService.getFileInfo(storageName);
+    if (!stats) {
+      throw new Error("Merged file was not created");
+    }
     if (stats.size !== session.fileSize) {
-      fs.unlinkSync(outputPath);
+      storageService.deleteFile(storageName);
       throw new Error("Merged file size mismatch");
     }
 
@@ -173,6 +171,7 @@ exports.completeUpload = async (uploadId, userId) => {
       mimeType: session.mimeType,
       size: stats.size,
     });
+
     await activityLogService.log(userId, "File upload", "file", file._id, {
       uploadType: "chunk",
       fileName: session.fileName,
@@ -183,8 +182,8 @@ exports.completeUpload = async (uploadId, userId) => {
 
     return file;
   } catch (error) {
-    if (fs.existsSync(outputPath)) {
-      fs.unlinkSync(outputPath);
+    if (storageService.fileExists(storageName)) {
+      storageService.deleteFile(storageName);
     }
     await uploadRepository.markFailed(uploadId);
     throw error;

@@ -1,5 +1,6 @@
 const fs = require("fs");
 const path = require("path");
+const crypto = require("crypto");
 
 const STORAGE_ROOT = path.join(process.cwd(), "storage", "files");
 
@@ -9,7 +10,12 @@ exports.ensureStorageDirectory = () => {
   return STORAGE_ROOT;
 };
 
-// lấy đường dẫn của File
+// tạo tên Storage duy nhất
+exports.generateStorageName = (fileName) => {
+  return `${crypto.randomUUID()}-${fileName}`;
+};
+
+// lấy đường dẫn vật lý của File
 exports.getFilePath = (storageName) => {
   if (!storageName) {
     throw new Error("Storage name is required");
@@ -17,10 +23,9 @@ exports.getFilePath = (storageName) => {
   return path.join(STORAGE_ROOT, storageName);
 };
 
-// kiểm tra File có tồn tại
+// kiểm tra File tồn tại
 exports.fileExists = (storageName) => {
   const filePath = exports.getFilePath(storageName);
-
   return fs.existsSync(filePath);
 };
 
@@ -34,16 +39,7 @@ exports.getFileInfo = (storageName) => {
   return fs.statSync(filePath);
 };
 
-// xóa File vật lý
-exports.deleteFile = (storageName) => {
-  const filePath = exports.getFilePath(storageName);
-
-  if (fs.existsSync(filePath)) {
-    fs.unlinkSync(filePath);
-  }
-};
-
-// lấy đường dẫn để download
+// lấy đường dẫn Download
 exports.getDownloadPath = (storageName) => {
   const filePath = exports.getFilePath(storageName);
 
@@ -51,4 +47,13 @@ exports.getDownloadPath = (storageName) => {
     throw new Error("Physical file not found");
   }
   return filePath;
+};
+
+// xóa File vật lý
+exports.deleteFile = (storageName) => {
+  const filePath = exports.getFilePath(storageName);
+
+  if (fs.existsSync(filePath)) {
+    fs.unlinkSync(filePath);
+  }
 };
