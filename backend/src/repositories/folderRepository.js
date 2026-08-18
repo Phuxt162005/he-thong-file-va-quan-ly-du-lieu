@@ -38,3 +38,12 @@ exports.softDelete = (folderId) => {
     { new: true },
   );
 };
+
+// di chuyển Folder
+exports.move = (folderId, parentFolder) => {
+  return Folder.findOneAndUpdate(
+    { _id: folderId, isDeleted: false },
+    { parentFolder },
+    { new: true },
+  );
+};

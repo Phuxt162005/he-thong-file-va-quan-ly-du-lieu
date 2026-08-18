@@ -9,6 +9,9 @@ router.post("/", auth, controller.create);
 // lấy danh sách thư mục con
 router.get("/:id/children", auth, controller.children);
 
+// di chuyển
+router.put("/:id/move", auth, controller.move);
+
 // đổi tên
 router.put("/:id", auth, controller.rename);
 

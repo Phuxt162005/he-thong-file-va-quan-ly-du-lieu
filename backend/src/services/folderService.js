@@ -82,6 +82,113 @@ exports.deleteFolder = async (userId, folderId) => {
   return await repository.softDelete(folderId);
 };
 
-exports.getChildren = async (folderId) => {
+exports.getChildren = async (userId, folderId) => {
+  const folder = await repository.findById(folderId);
+  2;
+  if (!folder) {
+    return null;
+  }
+
+  // Owner luôn được xem Folder
+  const isOwner = await permissionService.isOwner(userId, folderId, "folder");
+  if (!isOwner) {
+    const permissions = await permissionService.resolvePermission(
+      userId,
+      folderId,
+      "folder",
+    );
+
+    if (!permissions.includes("read")) {
+      throw new Error("You do not have permission to read this folder");
+    }
+  }
   return await repository.findChildren(folderId);
+};
+
+// di chuyển Folder
+exports.moveFolder = async (userId, folderId, newParentFolder) => {
+  const folder = await repository.findById(folderId);
+  if (!folder) {
+    return null;
+  }
+
+  // Không được đặt Folder vào chính nó.
+  if (newParentFolder && folderId.toString() === newParentFolder.toString()) {
+    throw new Error("Cannot move folder into itself");
+  }
+  // Kiểm tra Folder đích tồn tại.
+  let destination = null;
+
+  if (newParentFolder) {
+    destination = await repository.findById(newParentFolder);
+    if (!destination) {
+      throw new Error("Destination folder not found");
+    }
+  }
+
+  // Không được di chuyển Folder vào bên trong chính cây con
+  let current = destination;
+  while (current) {
+    if (current._id.toString() === folderId.toString()) {
+      throw new Error("Cannot move folder into its own descendant");
+    }
+    if (!current.parentFolder) {
+      break;
+    }
+    current = await repository.findById(current.parentFolder);
+  }
+
+  /*
+   * Kiểm tra quyền tại Folder hiện tại.
+   * Muốn lấy Folder ra khỏi Folder cha thì phải có write trên Folder cha.
+   */
+  if (folder.parentFolder) {
+    const sourceOwner = await permissionService.isOwner(
+      userId,
+      folder.parentFolder,
+      "folder",
+    );
+    if (!sourceOwner) {
+      const sourcePermissions = await permissionService.resolvePermission(
+        userId,
+        folder.parentFolder,
+        "folder",
+      );
+      if (!sourcePermissions.includes("write")) {
+        throw new Error(
+          "You do not have permission to move this folder from its current location",
+        );
+      }
+    }
+  } else {
+    // Folder ở Root. Chỉ Owner được phép di chuyển Root Folder.
+    const owner = await permissionService.isOwner(userId, folderId, "folder");
+    if (!owner) {
+      throw new Error("Only the owner can move a root folder");
+    }
+  }
+
+  /*
+   * Kiểm tra quyền tại Folder đích.
+   * Muốn đặt Folder vào Folder đích phải có write trên Folder đích.
+   */
+  if (newParentFolder) {
+    const destinationOwner = await permissionService.isOwner(
+      userId,
+      newParentFolder,
+      "folder",
+    );
+    if (!destinationOwner) {
+      const destinationPermissions = await permissionService.resolvePermission(
+        userId,
+        newParentFolder,
+        "folder",
+      );
+
+      if (!destinationPermissions.includes("write")) {
+        throw new Error("You do not have permission to move a folder here");
+      }
+    }
+  }
+  return await repository.move(folderId, newParentFolder || null);
 };
