@@ -2,8 +2,8 @@ const mongoose = require("mongoose");
 
 const shareLinkSchema = new mongoose.Schema(
   {
-    resoureId: { type: mongoose.Schema.Types.ObjectId, required: true },
-    resoureType: { type: String, enum: ["file", "folder"], required: true },
+    resourceId: { type: mongoose.Schema.Types.ObjectId, required: true },
+    resourceType: { type: String, enum: ["file", "folder"], required: true },
     owner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
