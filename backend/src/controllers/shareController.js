@@ -48,3 +48,58 @@ exports.download = async (req, res) => {
     return res.status(403).json({ message: error.message });
   }
 };
+
+exports.folder = async (req, res) => {
+  try {
+    const share = await shareService.accessShare(
+      req.params.token,
+      req.body.password,
+    );
+
+    if (share.resourceType !== "folder") {
+      return res
+        .status(400)
+        .json({ message: "Shared resource is not a folder" });
+    }
+
+    const result = await shareService.getSharedFolderFiles(
+      share,
+      share.resourceId,
+    );
+
+    return res.json({
+      folder: result.folder,
+      folders: result.folders,
+      files: result.files,
+    });
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};
+
+exports.folderChildren = async (req, res) => {
+  try {
+    const share = await shareService.accessShare(
+      req.params.token,
+      req.body.password,
+    );
+    if (share.resourceType !== "folder") {
+      return res
+        .status(400)
+        .json({ message: "Shared resource is not a folder" });
+    }
+
+    const result = await shareService.getSharedFolderFiles(
+      share,
+      req.params.folderId,
+    );
+
+    return res.json({
+      folder: result.folder,
+      folders: result.folders,
+      files: result.files,
+    });
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};

@@ -9,6 +9,12 @@ router.post("/", auth, controller.create);
 // truy cập tài nguyên thông qua share link
 router.post("/access/:token", controller.access);
 
+// lấy folder
+router.post("/folder/:token", controller.folder);
+
+// lấy folder con
+router.post("/folder/:token/:folderId", controller.folderChildren);
+
 // download file thông qua share
 router.post("/download/:token", controller.download);
 
