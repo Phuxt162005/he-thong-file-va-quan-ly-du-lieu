@@ -9,4 +9,10 @@ router.post("/", auth, controller.create);
 // lấy danh sách thư mục con
 router.get("/:id/children", auth, controller.children);
 
+// đổi tên
+router.put("/:id", auth, controller.rename);
+
+// xóa
+router.delete("/:id", auth, controller.remove);
+
 module.exports = router;
