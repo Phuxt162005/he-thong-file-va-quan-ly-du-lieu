@@ -29,3 +29,22 @@ exports.access = async (req, res) => {
     return res.status(403).json({ message: err.message });
   }
 };
+
+exports.download = async (req, res) => {
+  try {
+    const share = await shareService.accessShare(
+      req.params.token,
+      req.body.password,
+    );
+    const result = await shareService.getSharedFile(share);
+
+    res.download(result.filePath, result.file.name, async (error) => {
+      if (error) {
+        return;
+      }
+      await shareService.completeSharedDownload(share._id);
+    });
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};

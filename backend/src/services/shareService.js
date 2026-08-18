@@ -3,6 +3,8 @@ const bcrypt = require("bcrypt");
 
 const shareRepository = require("../repositories/shareRepository");
 const permissionService = require("./permissionService");
+const File = require("../models/File");
+const storageService = require("./storageService");
 
 exports.createShare = async (userId, data) => {
   if (!data.resourceId) {
@@ -82,11 +84,23 @@ exports.accessShare = async (token, password) => {
       throw new Error("Invalid password");
     }
   }
+  return share;
+};
 
-  /*
-   * Truy cập thành công.
-   * Tăng số lượt sử dụng.
-   */
-  const updatedShare = await shareRepository.increaseDownloadCount(share._id);
-  return updatedShare;
+exports.getSharedFile = async (share) => {
+  if (share.resourceType !== "file") {
+    throw new Error("Shared resource is not a file");
+  }
+
+  const file = await File.findOne({ _id: share.resourceId, isDeleted: false });
+  if (!file) {
+    throw new Error("Shared file not found");
+  }
+
+  const filePath = storageService.getDownloadPath(file.storageName);
+  return { file, filePath };
+};
+
+exports.completeSharedDownload = async (shareId) => {
+  return await shareRepository.increaseDownloadCount(shareId);
 };
