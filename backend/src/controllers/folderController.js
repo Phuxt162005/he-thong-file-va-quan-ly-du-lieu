@@ -73,3 +73,17 @@ exports.move = async (req, res) => {
     return res.status(403).json({ message: error.message });
   }
 };
+
+// lấy thông tin Folder
+exports.get = async (req, res) => {
+  try {
+    const folder = await service.getFolder(req.user.id, req.params.id);
+    if (!folder) {
+      return res.status(404).json({ message: "Folder not found" });
+    }
+
+    return res.json(folder);
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};

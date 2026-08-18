@@ -82,6 +82,31 @@ exports.deleteFolder = async (userId, folderId) => {
   return await repository.softDelete(folderId);
 };
 
+// lấy thông tin Folder
+exports.getFolder = async (userId, folderId) => {
+  const folder = await repository.findById(folderId);
+  if (!folder) {
+    return null;
+  }
+
+  // Owner luôn được xem
+  const isOwner = await permissionService.isOwner(userId, folderId, "folder");
+  if (isOwner) {
+    return folder;
+  }
+
+  // Kiểm tra quyền read
+  const permissions = await permissionService.resolvePermission(
+    userId,
+    folderId,
+    "folder",
+  );
+  if (!permissions.includes("read")) {
+    throw new Error("You do not have permission to read this folder");
+  }
+  return folder;
+};
+
 exports.getChildren = async (userId, folderId) => {
   const folder = await repository.findById(folderId);
   2;
