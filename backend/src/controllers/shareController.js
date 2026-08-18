@@ -36,7 +36,13 @@ exports.download = async (req, res) => {
       req.params.token,
       req.body.password,
     );
-    const result = await shareService.getSharedFile(share);
+
+    let result;
+    if (share.resourceType === "file") {
+      result = await shareService.getSharedFile(share);
+    } else {
+      result = await shareService.getSharedFolderFile(share, req.params.fileId);
+    }
 
     res.download(result.filePath, result.file.name, async (error) => {
       if (error) {

@@ -17,5 +17,6 @@ router.post("/folder/:token/:folderId", controller.folderChildren);
 
 // download file thông qua share
 router.post("/download/:token", controller.download);
+router.post("/folder-download/:token/:fileId", controller.download);
 
 module.exports = router;

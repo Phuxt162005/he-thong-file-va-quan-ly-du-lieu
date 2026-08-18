@@ -103,6 +103,7 @@ exports.getSharedFolder = async (share) => {
   return folder;
 };
 
+// lấy folder share con
 exports.getSharedFolderChildren = async (share, folderId) => {
   if (share.resourceType !== "folder") {
     throw new Error("Shared resource is not a folder");
@@ -148,6 +149,7 @@ exports.getSharedFolderChildren = async (share, folderId) => {
   throw new Error("Folder is outside the shared folder");
 };
 
+// lấy các file của folder share
 exports.getSharedFolderFiles = async (share, folderId) => {
   const result = await exports.getSharedFolderChildren(share, folderId);
   const files = await File.find({
@@ -160,6 +162,54 @@ exports.getSharedFolderFiles = async (share, folderId) => {
     folders: result.children,
     files,
   };
+};
+
+// lấy 1 file của folder share
+exports.getSharedFolderFile = async (share, fileId) => {
+  if (share.resourceType !== "folder") {
+    throw new Error("Shared resource is not a folder");
+  }
+
+  const sharedFolder = await Folder.findOne({
+    _id: share.resourceId,
+    isDeleted: false,
+  });
+  if (!sharedFolder) {
+    throw new Error("Shared folder not found");
+  }
+
+  const file = await File.findOne({ _id: fileId, isDeleted: false });
+  if (!file) {
+    throw new Error("Shared file not found");
+  }
+  // File phải nằm bên trong Folder được Share.
+  if (!file.folder) {
+    throw new Error("File is outside the shared folder");
+  }
+
+  let currentFolder = await Folder.findOne({
+    _id: file.folder,
+    isDeleted: false,
+  });
+
+  while (currentFolder) {
+    // Đã tìm thấy Folder gốc của Share.
+    if (currentFolder._id.toString() === sharedFolder._id.toString()) {
+      const filePath = storageService.getDownloadPath(file.storageName);
+
+      return { file, filePath };
+    }
+    // Đi lên Folder cha.
+    if (!currentFolder.parentFolder) {
+      break;
+    }
+
+    currentFolder = await Folder.findOne({
+      _id: currentFolder.parentFolder,
+      isDeleted: false,
+    });
+  }
+  throw new Error("File is outside the shared folder");
 };
 
 exports.getSharedFile = async (share) => {
