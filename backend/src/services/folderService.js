@@ -1,5 +1,6 @@
 const repository = require("../repositories/folderRepository");
 const permissionService = require("./permissionService");
+const fileRepository = require("../repositories/fileRepository");
 
 // tạo thư mục
 exports.createFolder = async (userId, data) => {
@@ -79,7 +80,7 @@ exports.deleteFolder = async (userId, folderId) => {
       throw new Error("You do not have permission to delete this folder");
     }
   }
-  return await repository.softDelete(folderId);
+  return await repository.softDeleteCascade(folderId);
 };
 
 // lấy thông tin Folder
