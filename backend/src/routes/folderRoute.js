@@ -21,4 +21,7 @@ router.put("/:id", auth, controller.rename);
 // xóa
 router.delete("/:id", auth, controller.remove);
 
+// khôi phục folder bị soft delete
+router.put("/:id/restore", auth, controller.restore);
+
 module.exports = router;

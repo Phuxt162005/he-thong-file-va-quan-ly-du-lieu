@@ -87,3 +87,16 @@ exports.get = async (req, res) => {
     return res.status(403).json({ message: error.message });
   }
 };
+
+exports.restore = async (req, res) => {
+  try {
+    const folder = await service.restoreFolder(req.user.id, req.params.id);
+
+    return res.json({
+      message: "Folder restored successfully",
+      folder,
+    });
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};

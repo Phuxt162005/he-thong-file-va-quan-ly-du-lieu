@@ -154,3 +154,17 @@ exports.checkUploadPermission = async (userId, folderId) => {
   }
   return true;
 };
+
+// lấy File trong Recycle Bin
+exports.getDeletedFiles = async (userId) => {
+  return await fileRepository.findDeletedByOwner(userId);
+};
+
+// khôi phục File
+exports.restoreFile = async (userId, fileId) => {
+  const file = await fileRepository.findDeletedById(fileId, userId);
+  if (!file) {
+    throw new Error("Deleted file not found");
+  }
+  return await fileRepository.restore(fileId);
+};

@@ -31,4 +31,7 @@ router.get("/:id/preview", auth, controller.preview);
 // lấy thông tin file
 router.get("/:id", auth, controller.getFile);
 
+// restore file bị soft delete
+router.put("/:id/restore", auth, controller.restore);
+
 router.delete("/:id", auth, controller.deleteFile);

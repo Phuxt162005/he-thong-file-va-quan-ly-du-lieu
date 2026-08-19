@@ -103,3 +103,17 @@ exports.preview = async (req, res) => {
     return res.status(403).json({ message: error.message });
   }
 };
+
+// restore
+exports.restore = async (req, res) => {
+  try {
+    const file = await fileService.restoreFile(req.user.id, req.params.id);
+
+    return res.json({
+      message: "File restored successfully",
+      file,
+    });
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};

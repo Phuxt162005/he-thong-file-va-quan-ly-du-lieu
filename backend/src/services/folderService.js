@@ -218,3 +218,38 @@ exports.moveFolder = async (userId, folderId, newParentFolder) => {
   }
   return await repository.move(folderId, newParentFolder || null);
 };
+
+// khôi phục Folder
+exports.restoreFolder = async (userId, folderId) => {
+  const folder = await repository.findDeletedById(folderId, userId);
+  if (!folder) {
+    throw new Error("Deleted folder not found");
+  }
+
+  const hasDeletedParent = await repository.hasDeletedParent(folder);
+  if (hasDeletedParent) {
+    throw new Error(
+      "Cannot restore this folder because its parent folder is deleted",
+    );
+  }
+
+  // Restore toàn bộ cây Folder
+  const restored = await repository.restoreTree(folderId);
+
+  // Lấy lại danh sách Folder đã được restore để tìm File.
+  const folderIds = [folderId];
+  let currentIds = [folderId];
+  while (currentIds.length > 0) {
+    const children = await repository.findChildrenByIds(currentIds);
+    if (children.length === 0) {
+      break;
+    }
+
+    const childIds = children.map((child) => child._id);
+    folderIds.push(...childIds);
+    currentIds = childIds;
+  }
+  // Restore File trong cây.
+  await fileRepository.restoreByFolders(folderIds);
+  return restored;
+};

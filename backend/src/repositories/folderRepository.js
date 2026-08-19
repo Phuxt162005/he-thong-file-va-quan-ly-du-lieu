@@ -87,3 +87,23 @@ exports.softDeleteByFolders = (folderIds) => {
     { $set: { isDeleted: true, deletedAt: new Date() } },
   );
 };
+
+exports.findByIdIncludingDeleted = (folderId) => {
+  return Folder.findById(folderId);
+};
+
+exports.hasDeletedParent = async (folder) => {
+  let currentParent = folder.parentFolder;
+
+  while (currentParent) {
+    const parent = await Folder.findById(currentParent);
+    if (!parent) {
+      return false;
+    }
+    if (parent.isDeleted) {
+      return true;
+    }
+    currentParent = parent.parentFolder;
+  }
+  return false;
+};
