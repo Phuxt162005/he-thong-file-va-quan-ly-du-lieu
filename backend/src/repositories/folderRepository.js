@@ -80,14 +80,6 @@ exports.softDeleteCascade = async (folderId) => {
   return Folder.findOne({ _id: folderId });
 };
 
-// soft delete toàn bộ File trong các Folder
-exports.softDeleteByFolders = (folderIds) => {
-  return File.updateMany(
-    { folder: { $in: folderIds }, isDeleted: false },
-    { $set: { isDeleted: true, deletedAt: new Date() } },
-  );
-};
-
 exports.findByIdIncludingDeleted = (folderId) => {
   return Folder.findById(folderId);
 };
@@ -133,4 +125,10 @@ exports.restoreTree = async (folderId) => {
   );
 
   return Folder.findOne({ _id: folderId });
+};
+
+exports.findDeletedByOwner = (ownerId) => {
+  return Folder.find({ owner: ownerId, isDeleted: true }).sort({
+    updatedAt: -1,
+  });
 };

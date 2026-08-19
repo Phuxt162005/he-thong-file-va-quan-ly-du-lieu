@@ -253,3 +253,7 @@ exports.restoreFolder = async (userId, folderId) => {
   await fileRepository.restoreByFolders(folderIds);
   return restored;
 };
+
+exports.getDeletedFolders = async (userId) => {
+  return await repository.findDeletedByOwner(userId);
+};

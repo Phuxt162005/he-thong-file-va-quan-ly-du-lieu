@@ -117,3 +117,14 @@ exports.restore = async (req, res) => {
     return res.status(403).json({ message: error.message });
   }
 };
+
+exports.getTrash = async (req, res) => {
+  try {
+    const files = await fileService.getDeletedFiles(req.user.id);
+    return res.json({
+      files,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};

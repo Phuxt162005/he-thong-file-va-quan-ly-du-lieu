@@ -53,6 +53,14 @@ exports.restoreByFolders = (folderIds) => {
   );
 };
 
+// soft delete toàn bộ File trong các Folder
+exports.softDeleteByFolders = (folderIds) => {
+  return File.updateMany(
+    { folder: { $in: folderIds }, isDeleted: false },
+    { $set: { isDeleted: true, deletedAt: new Date() } },
+  );
+};
+
 exports.findDeletedByIdWithFolder = (fileId, ownerId) => {
   return File.findOne({
     _id: fileId,
