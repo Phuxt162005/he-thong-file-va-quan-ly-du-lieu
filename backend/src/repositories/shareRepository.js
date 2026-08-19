@@ -28,3 +28,10 @@ exports.increaseDownloadCount = (id) => {
 exports.disable = (id) => {
   return ShareLink.findByIdAndUpdate(id, { isActive: false }, { new: true });
 };
+
+// lấy các Share Link của User
+exports.findByOwner = (ownerId) => {
+  return ShareLink.find({ owner: ownerId })
+    .select("-password")
+    .sort({ createdAt: -1 });
+};

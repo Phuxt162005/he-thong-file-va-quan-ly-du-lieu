@@ -126,3 +126,14 @@ exports.disable = async (req, res) => {
     return res.status(403).json({ message: error.message });
   }
 };
+
+// danh sách Share Link của User
+exports.list = async (req, res) => {
+  try {
+    const shares = await shareService.getMyShares(req.user.id);
+
+    return res.json(shares);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
