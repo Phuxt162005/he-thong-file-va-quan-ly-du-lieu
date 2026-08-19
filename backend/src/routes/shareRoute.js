@@ -17,10 +17,11 @@ router.post("/folder/:token/:folderId", controller.folderChildren);
 
 // download file thông qua share
 router.post("/download/:token", controller.download);
-router.post("/folder-download/:token/:fileId", controller.download);
+router.post("/folder-download/:token/:fileId", controller.folderDownload);
 
 // danh sách Share Link
 router.get("/", auth, controller.list);
+router.get("/:id", auth, controller.get);
 
 // cập nhật share link
 router.put("/:id", auth, controller.update);

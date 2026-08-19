@@ -152,3 +152,13 @@ exports.update = async (req, res) => {
     return res.status(403).json({ message: error.message });
   }
 };
+
+exports.get = async (req, res) => {
+  try {
+    const share = await shareService.getShare(req.user.id, req.params.id);
+
+    return res.json(share);
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};

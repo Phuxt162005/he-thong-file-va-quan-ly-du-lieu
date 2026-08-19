@@ -299,3 +299,16 @@ exports.updateShare = async (userId, shareId, data) => {
   }
   return await shareRepository.update(shareId, updateData);
 };
+
+// lấy link share
+exports.getShare = async (userId, shareId) => {
+  const share = await shareRepository.findById(shareId);
+  if (!share) {
+    throw new Error("Share link not found");
+  }
+  if (share.owner.toString() !== userId.toString()) {
+    throw new Error("You do not own this share link");
+  }
+
+  return share;
+};
