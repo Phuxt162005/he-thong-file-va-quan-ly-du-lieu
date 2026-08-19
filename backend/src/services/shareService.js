@@ -258,3 +258,44 @@ exports.disableShare = async (userId, shareId) => {
 exports.getMyShares = async (userId) => {
   return await shareRepository.findByOwner(userId);
 };
+
+exports.updateShare = async (userId, shareId, data) => {
+  const share = await shareRepository.findById(shareId);
+  if (!share) {
+    throw new Error("Share link not found");
+  }
+  if (share.owner.toString() !== userId.toString()) {
+    throw new Error("You do not own this share link");
+  }
+
+  if (data.maxDownloads !== null && data.maxDownloads !== undefined) {
+    if (Number(data.maxDownloads) < 1) {
+      throw new Error("maxDownloads must be greater than 0");
+    }
+
+    // Không cho giảm giới hạn xuống thấp hơn số lượt đã sử dụng.
+    if (Number(data.maxDownloads) < share.downloadCount) {
+      throw new Error(
+        "maxDownloads cannot be lower than current download count",
+      );
+    }
+  }
+
+  if (data.expiresAt) {
+    const expiresAt = new Date(data.expiresAt);
+    if (expiresAt <= new Date()) {
+      throw new Error("Expiration date must be in the future");
+    }
+  }
+
+  const updateData = {
+    expiresAt: data.expiresAt ?? share.expiresAt,
+    maxDownloads: data.maxDownloads ?? share.maxDownloads,
+  };
+
+  // Password mới
+  if (data.password) {
+    updateData.password = await bcrypt.hash(data.password, 10);
+  }
+  return await shareRepository.update(shareId, updateData);
+};

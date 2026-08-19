@@ -78,8 +78,6 @@ export default function Shares() {
         maxDownloads: formData.maxDownloads
           ? Number(formData.maxDownloads)
           : null,
-        accessType: formData.accessType,
-        permission: formData.permission,
       };
 
       if (formData.password) {

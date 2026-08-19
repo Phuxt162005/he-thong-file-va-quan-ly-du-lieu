@@ -30,8 +30,24 @@ exports.disable = (id) => {
 };
 
 // lấy các Share Link của User
-exports.findByOwner = (ownerId) => {
-  return ShareLink.find({ owner: ownerId })
-    .select("-password")
-    .sort({ createdAt: -1 });
+exports.findByOwner = (ownerId, status) => {
+  const query = {
+    owner: ownerId,
+  };
+
+  if (status === "active") {
+    query.isActive = true;
+  } else if (status === "revoked") {
+    query.isActive = false;
+  }
+
+  return ShareLink.find(query).select("-password").sort({
+    createdAt: -1,
+  });
+};
+
+exports.update = async (shareId, data) => {
+  return ShareLink.findByIdAndUpdate(shareId, data, { new: true }).select(
+    "-password",
+  );
 };

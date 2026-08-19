@@ -22,6 +22,9 @@ router.post("/folder-download/:token/:fileId", controller.download);
 // danh sách Share Link
 router.get("/", auth, controller.list);
 
+// cập nhật share link
+router.put("/:id", auth, controller.update);
+
 // vô hiệu hóa Share Link
 router.delete("/:id", auth, controller.disable);
 
