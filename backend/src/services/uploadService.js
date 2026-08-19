@@ -7,6 +7,7 @@ const chunkStorage = require("./chunkStorageService");
 const fileService = require("./fileService");
 const activityLogService = require("./activityLogService");
 const storageService = require("./storageService");
+const permissionService = require("./permissionService");
 
 const DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024;
 const SESSION_EXPIRE_MS = 24 * 60 * 60 * 1000;
@@ -20,6 +21,24 @@ exports.initiateUpload = async (
   }
   if (!fileSize || fileSize <= 0) {
     throw new Error("File size is invalid");
+  }
+
+  // Kiểm tra quyền write trước khi tạo Upload Session.
+  if (folderId) {
+    const owner = await permissionService.isOwner(userId, folderId, "folder");
+    if (!owner) {
+      const permissions = await permissionService.resolvePermission(
+        userId,
+        folderId,
+        "folder",
+      );
+
+      if (!permissions.includes("write")) {
+        throw new Error(
+          "You do not have permission to upload files to this folder",
+        );
+      }
+    }
   }
 
   const totalChunks = Math.ceil(fileSize / chunkSize);
