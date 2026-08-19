@@ -31,12 +31,14 @@ exports.disable = (id) => {
 
 // lấy các Share Link của User
 exports.findByOwner = (ownerId, status) => {
-  const query = {
-    owner: ownerId,
-  };
+  const query = { owner: userId };
 
   if (status === "active") {
     query.isActive = true;
+    query.$or = [{ expiresAt: null }, { expiresAt: { $gt: new Date() } }];
+  } else if (status === "expired") {
+    query.isActive = true;
+    query.expiresAt = { $lte: new Date() };
   } else if (status === "revoked") {
     query.isActive = false;
   }

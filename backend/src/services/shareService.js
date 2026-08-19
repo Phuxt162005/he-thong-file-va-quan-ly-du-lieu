@@ -255,8 +255,8 @@ exports.disableShare = async (userId, shareId) => {
 };
 
 // lấy danh sách Share Link của User
-exports.getMyShares = async (userId) => {
-  return await shareRepository.findByOwner(userId);
+exports.getMyShares = async (userId, status) => {
+  return await shareRepository.findByOwner(userId, status);
 };
 
 exports.updateShare = async (userId, shareId, data) => {

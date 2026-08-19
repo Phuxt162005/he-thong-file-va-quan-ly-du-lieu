@@ -130,7 +130,10 @@ exports.disable = async (req, res) => {
 // danh sách Share Link của User
 exports.list = async (req, res) => {
   try {
-    const shares = await shareService.getMyShares(req.user.id);
+    const shares = await shareService.getMyShares(
+      req.user.id,
+      req.query.status,
+    );
 
     return res.json(shares);
   } catch (error) {
