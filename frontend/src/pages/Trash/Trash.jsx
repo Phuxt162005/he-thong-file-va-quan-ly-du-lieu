@@ -5,36 +5,78 @@ import Loading from "../../components/Loading/Loading";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 
 import fileService from "../../services/fileService";
+import folderService from "../../services/folderService";
 
 import "./Trash.css";
 
 export default function Trash() {
   const [files, setFiles] = useState([]);
+  const [folders, setFolder] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
   const [restoreModal, setRestoreModal] = useState(false);
   const [restoring, setRestoring] = useState(false);
+  const [selectedFolder, setSelectedFolder] = useState(null);
+  const [restoreFolderModal, setRestoreFolderModal] = useState(false);
+
+  const openRestoreFolderModal = (folder) => {
+    setSelectedFolder(folder);
+    setRestoreFolderModal(true);
+  };
+  const handleRestoreFolder = async () => {
+    if (!selectedFolder?._id) {
+      return;
+    }
+
+    try {
+      setRestoring(true);
+      setError("");
+
+      await folderService.restoreFolder(selectedFolder._id);
+      setFolders((prev) =>
+        prev.filter((folder) => folder._id !== selectedFolder._id),
+      );
+
+      setRestoreFolderModal(false);
+      setSelectedFolder(null);
+    } catch (err) {
+      setError(err?.message || "Không thể khôi phục thư mục.");
+    } finally {
+      setRestoring(false);
+    }
+  };
 
   useEffect(() => {
     loadDeletedFiles();
   }, []);
 
-  const loadDeletedFiles = async () => {
+  const loadTrash = async () => {
     try {
       setLoading(true);
       setError("");
 
-      const response = await fileService.getDeletedFiles();
-      const data = response?.data || response || [];
+      const [fileResponse, folderResponse] = await Promise.all([
+        fileService.getDeletedFiles(),
+        folderService.getDeletedFolders(),
+      ]);
+      const fileData = fileResponse?.data || fileResponse || [];
+      const folderData = folderResponse?.data || folderResponse || [];
 
-      setFiles(Array.isArray(data) ? data : []);
+      setFiles(Array.isArray(fileData) ? fileData : fileData.files || []);
+      setFolders(
+        Array.isArray(folderData) ? folderData : folderData.folders || [],
+      );
     } catch (err) {
       setError(err?.message || "Không thể tải Thùng rác.");
     } finally {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    loadTrash();
+  }, []);
 
   const openRestoreModal = (file) => {
     setSelectedFile(file);
@@ -69,72 +111,54 @@ export default function Trash() {
   };
 
   if (loading) {
-    return (
-      <MainLayout>
-        <Loading message="Đang tải Thùng rác..." />
-      </MainLayout>
-    );
+    return <Loading message="Đang tải Thùng rác..." />;
   }
 
   return (
-    <MainLayout>
-      <div className="trash-page">
-        {/* Header */}
-        <div className="trash-page__header">
-          <div>
-            <h1>Thùng rác</h1>
-            <p>Các file đã bị xóa khỏi thư mục hiện tại</p>
-          </div>
-
-          <button className="btn btn-secondary" onClick={loadDeletedFiles}>
-            Làm mới
-          </button>
+    <div className="trash-page">
+      {/* Header */}
+      <div className="trash-page__header">
+        <div>
+          <h1>Thùng rác</h1>
+          <p>Các file đã bị xóa khỏi thư mục hiện tại</p>
         </div>
 
-        {error && <div className="error-message">{error}</div>}
-
-        {/* Trash list */}
-        <div className="trash-card">
-          {files.length === 0 ? (
-            <div className="trash-empty">
-              <div className="trash-empty__icon">🗑️</div>
-              <h2>Thùng rác trống</h2>
-              <p>Không có file nào đã bị xóa.</p>
-            </div>
-          ) : (
-            <div className="trash-list">
-              <div className="trash-list__header">
-                <span>Tệp</span>
-                <span>Kích thước</span>
-                <span>Thư mục cũ</span>
-                <span>Ngày xóa</span>
-                <span>Thao tác</span>
-              </div>
-
-              {files.map((file) => (
-                <TrashItem
-                  key={file._id}
-                  file={file}
-                  onRestore={openRestoreModal}
-                />
-              ))}
-            </div>
-          )}
-        </div>
+        <button className="btn btn-secondary" onClick={loadTrash}>
+          Làm mới
+        </button>
       </div>
 
-      {/* Restore confirmation */}
-      <ConfirmDialog
-        isOpen={restoreModal}
-        title="Khôi phục file"
-        message={`Bạn có chắc muốn khôi phục file "${selectedFile?.name || ""}"?`}
-        confirmText="Khôi phục"
-        cancelText="Hủy"
-        loading={restoring}
-        onConfirm={handleRestore}
-        onCancel={closeRestoreModal}
-      />
-    </MainLayout>
+      {error && <div className="error-message">{error}</div>}
+
+      {/* Trash list */}
+      <div className="trash-card">
+        {files.length === 0 ? (
+          <div className="trash-empty">
+            <div className="trash-empty__icon">🗑️</div>
+            <h2>Thùng rác trống</h2>
+            <p>Không có file nào đã bị xóa.</p>
+          </div>
+        ) : (
+          <div className="trash-list">
+            <div className="trash-list__header">
+              <span>Tệp</span>
+              <span>Kích thước</span>
+              <span>Thư mục cũ</span>
+              <span>Ngày xóa</span>
+              <span>Thao tác</span>
+            </div>
+
+            {files.map((file) => (
+              <TrashItem
+                key={file._id}
+                file={file}
+                onRestore={openRestoreModal}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -163,6 +187,22 @@ function TrashItem({ file, onRestore }) {
           Khôi phục
         </button>
       </div>
+
+      <ConfirmDialog
+        isOpen={restoreFolderModal}
+        title="Khôi phục thư mục"
+        message={`Bạn có chắc muốn khôi phục thư mục "${selectedFolder?.name || ""}"?`}
+        confirmText="Khôi phục"
+        cancelText="Hủy"
+        loading={restoring}
+        onConfirm={handleRestoreFolder}
+        onCancel={() => {
+          if (!restoring) {
+            setRestoreFolderModal(false);
+            setSelectedFolder(null);
+          }
+        }}
+      />
     </div>
   );
 }
@@ -215,4 +255,31 @@ function formatDate(date) {
   }
 
   return new Date(date).toLocaleString("vi-VN");
+}
+
+function TrashFolderItem({ folder, onRestore }) {
+  return (
+    <div className="trash-item">
+      <div className="trash-item__name">
+        <div className="trash-item__icon">📁</div>
+
+        <div className="trash-item__info">
+          <strong title={folder.name}>{folder.name || "Không có tên"}</strong>
+          <span>Thư mục</span>
+        </div>
+      </div>
+
+      <div className="trash-item__size">—</div>
+
+      <div className="trash-item__folder">Thư mục</div>
+
+      <div className="trash-item__date">{formatDate(folder.updatedAt)}</div>
+
+      <div className="trash-item__actions">
+        <button className="btn btn-primary" onClick={() => onRestore(folder)}>
+          Khôi phục
+        </button>
+      </div>
+    </div>
+  );
 }

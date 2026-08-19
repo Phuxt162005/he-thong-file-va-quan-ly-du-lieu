@@ -58,6 +58,16 @@ const folderService = {
     const response = await api.put(`/folders/${folderId}/restore`);
     return response.data;
   },
+
+  // lấy folder đã bị xóa
+  async getDeletedFolders() {
+    return api.get("/folders/trash");
+  },
+
+  // khôi phục folder bị xóa
+  async restoreFolder(folderId) {
+    return api.put(`/folders/${folderId}/restore`);
+  },
 };
 
 export default folderService;
