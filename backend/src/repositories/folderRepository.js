@@ -107,3 +107,30 @@ exports.hasDeletedParent = async (folder) => {
   }
   return false;
 };
+
+exports.restoreTree = async (folderId) => {
+  const folderIds = [folderId];
+
+  let currentIds = [folderId];
+
+  while (currentIds.length > 0) {
+    const children = await Folder.find({
+      parentFolder: { $in: currentIds },
+      isDeleted: true,
+    }).select("_id");
+    if (children.length === 0) {
+      break;
+    }
+
+    const childIds = children.map((child) => child._id);
+    folderIds.push(...childIds);
+    currentIds = childIds;
+  }
+
+  await Folder.updateMany(
+    { _id: { $in: folderIds }, isDeleted: true },
+    { $set: { isDeleted: false } },
+  );
+
+  return Folder.findOne({ _id: folderId });
+};

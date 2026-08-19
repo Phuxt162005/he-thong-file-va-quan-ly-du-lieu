@@ -53,50 +53,10 @@ exports.restoreByFolders = (folderIds) => {
   );
 };
 
-exports.restoreTree = async (folderId) => {
-  const folderIds = [folderId];
-
-  let currentIds = [folderId];
-
-  while (currentIds.length > 0) {
-    const children = await Folder.find({
-      parentFolder: { $in: currentIds },
-      isDeleted: true,
-    }).select("_id");
-    if (children.length === 0) {
-      break;
-    }
-
-    const childIds = children.map((child) => child._id);
-    folderIds.push(...childIds);
-    currentIds = childIds;
-  }
-
-  await Folder.updateMany(
-    { _id: { $in: folderIds }, isDeleted: true },
-    { $set: { isDeleted: false } },
-  );
-
-  return Folder.findOne({ _id: folderId });
-};
-
 exports.findDeletedByIdWithFolder = (fileId, ownerId) => {
   return File.findOne({
     _id: fileId,
     owner: ownerId,
     isDeleted: true,
   }).populate("folder");
-};
-
-exports.restoreFile = async (userId, fileId) => {
-  const file = await fileRepository.findDeletedByIdWithFolder(fileId, userId);
-  if (!file) {
-    throw new Error("Deleted file not found");
-  }
-  if (file.folder && file.folder.isDeleted) {
-    throw new Error(
-      "Cannot restore this file because its parent folder is deleted",
-    );
-  }
-  return await fileRepository.restore(fileId);
 };

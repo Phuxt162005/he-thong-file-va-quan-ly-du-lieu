@@ -162,9 +162,14 @@ exports.getDeletedFiles = async (userId) => {
 
 // khôi phục File
 exports.restoreFile = async (userId, fileId) => {
-  const file = await fileRepository.findDeletedById(fileId, userId);
+  const file = await fileRepository.findDeletedByIdWithFolder(fileId, userId);
   if (!file) {
     throw new Error("Deleted file not found");
+  }
+  if (file.folder && file.folder.isDeleted) {
+    throw new Error(
+      "Cannot restore this file because its parent folder is deleted",
+    );
   }
   return await fileRepository.restore(fileId);
 };
