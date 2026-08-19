@@ -4,7 +4,24 @@ const permissionService = require("./permissionService");
 const storageService = require("./storageService");
 
 exports.createFile = async (userId, folderId, fileData) => {
-  // metadata chỉ được tạo sau khi Storage xử lý file thành công
+  // Nếu upload vào Root thì không cần kiểm tra Folder.
+  if (folderId) {
+    const owner = await permissionService.isOwner(userId, folderId, "folder");
+    if (!owner) {
+      const permissions = await permissionService.resolvePermission(
+        userId,
+        folderId,
+        "folder",
+      );
+
+      if (!permissions.includes("write")) {
+        throw new Error(
+          "You do not have permission to upload files to this folder",
+        );
+      }
+    }
+  }
+
   return await fileRepository.create({
     name: fileData.originalname,
     owner: userId,
@@ -113,4 +130,27 @@ exports.previewFile = async (userId, fileId) => {
 
   const filePath = storageService.getDownloadPath(file.storageName);
   return { file, filePath };
+};
+
+exports.checkUploadPermission = async (userId, folderId) => {
+  if (!folderId) {
+    return true;
+  }
+
+  const owner = await permissionService.isOwner(userId, folderId, "folder");
+  if (owner) {
+    return true;
+  }
+
+  const permissions = await permissionService.resolvePermission(
+    userId,
+    folderId,
+    "folder",
+  );
+  if (!permissions.includes("write")) {
+    throw new Error(
+      "You do not have permission to upload files to this folder",
+    );
+  }
+  return true;
 };

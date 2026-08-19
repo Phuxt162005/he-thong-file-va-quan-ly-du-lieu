@@ -45,21 +45,22 @@ exports.upload = async (req, res) => {
       });
     }
 
+    const folderId = req.body.folderId || null;
+
+    // Kiểm tra quyền trước khi lưu Storage
+    await fileService.checkUploadPermission(req.user.id, folderId);
+
     const stored = storageService.saveFile(
       req.file.buffer,
       req.file.originalname,
     );
 
-    const file = await fileService.createFile(
-      req.user.id,
-      req.body.folderId || null,
-      {
-        originalname: req.file.originalname,
-        filename: stored.storageName,
-        mimeType: req.file.mimetype,
-        size: req.file.size,
-      },
-    );
+    const file = await fileService.createFile(req.user.id, folderId, {
+      originalname: req.file.originalname,
+      filename: stored.storageName,
+      mimeType: req.file.mimetype,
+      size: req.file.size,
+    });
     return res.status(201).json({ message: "Upload successfully", file });
   } catch (error) {
     return res.status(500).json({ message: error.message });
