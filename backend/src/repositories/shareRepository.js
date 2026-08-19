@@ -10,6 +10,11 @@ exports.findByToken = (token) => {
   return ShareLink.findOne({ token, isActive: true });
 };
 
+// tìm Share theo ID
+exports.findById = (shareId) => {
+  return ShareLink.findById(shareId);
+};
+
 // tăng số lượt download
 exports.increaseDownloadCount = (id) => {
   return ShareLink.findByIdAndUpdate(

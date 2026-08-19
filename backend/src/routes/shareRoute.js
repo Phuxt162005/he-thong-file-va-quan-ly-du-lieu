@@ -19,4 +19,7 @@ router.post("/folder/:token/:folderId", controller.folderChildren);
 router.post("/download/:token", controller.download);
 router.post("/folder-download/:token/:fileId", controller.download);
 
+// vô hiệu hóa Share Link
+router.delete("/:id", auth, controller.disable);
+
 module.exports = router;

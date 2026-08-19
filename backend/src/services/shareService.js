@@ -229,3 +229,27 @@ exports.getSharedFile = async (share) => {
 exports.completeSharedDownload = async (shareId) => {
   return await shareRepository.increaseDownloadCount(shareId);
 };
+
+// vô hiệu hóa Share Link
+exports.disableShare = async (userId, shareId) => {
+  const share = await shareRepository.findById(shareId);
+  if (!share) {
+    throw new Error("Share link not found");
+  }
+
+  // Người tạo Share là Owner của Share Link
+  if (share.owner.toString() === userId.toString()) {
+    return await shareRepository.disable(shareId);
+  }
+
+  // Nếu không phải Owner của Share, kiểm tra quyền share trên Resource.
+  const permissions = await permissionService.resolvePermission(
+    userId,
+    share.resourceId,
+    share.resourceType,
+  );
+  if (!permissions.includes("share")) {
+    throw new Error("You do not have permission to disable this share link");
+  }
+  return await shareRepository.disable(shareId);
+};

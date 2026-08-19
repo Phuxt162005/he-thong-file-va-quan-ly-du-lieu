@@ -30,6 +30,7 @@ exports.access = async (req, res) => {
   }
 };
 
+// download
 exports.download = async (req, res) => {
   try {
     const share = await shareService.accessShare(
@@ -55,6 +56,7 @@ exports.download = async (req, res) => {
   }
 };
 
+// folder cha
 exports.folder = async (req, res) => {
   try {
     const share = await shareService.accessShare(
@@ -83,6 +85,7 @@ exports.folder = async (req, res) => {
   }
 };
 
+// folder con
 exports.folderChildren = async (req, res) => {
   try {
     const share = await shareService.accessShare(
@@ -104,6 +107,20 @@ exports.folderChildren = async (req, res) => {
       folder: result.folder,
       folders: result.folders,
       files: result.files,
+    });
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};
+
+// vô hiệu hóa Share Link
+exports.disable = async (req, res) => {
+  try {
+    const share = await shareService.disableShare(req.user.id, req.params.id);
+
+    return res.json({
+      message: "Share link disabled successfully",
+      share,
     });
   } catch (error) {
     return res.status(403).json({ message: error.message });
