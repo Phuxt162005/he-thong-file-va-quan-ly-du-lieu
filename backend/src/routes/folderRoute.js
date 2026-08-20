@@ -26,4 +26,7 @@ router.put("/:id/restore", auth, controller.restore);
 
 router.get("/trash", auth, controller.getTrash);
 
+// xóa vĩnh viễn
+router.delete("/:id/permanent", auth, controller.permanentDelete);
+
 module.exports = router;

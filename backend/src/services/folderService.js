@@ -1,6 +1,7 @@
 const repository = require("../repositories/folderRepository");
 const permissionService = require("./permissionService");
 const fileRepository = require("../repositories/fileRepository");
+const storageService = require("./storageService");
 
 // tạo thư mục
 exports.createFolder = async (userId, data) => {
@@ -255,4 +256,42 @@ exports.restoreFolder = async (userId, folderId) => {
 
 exports.getDeletedFolders = async (userId) => {
   return await repository.findDeletedByOwner(userId);
+};
+
+// xóa folder vĩnh viễn
+exports.permanentDeleteFolder = async (userId, folderId) => {
+  // Chỉ xử lý Folder đã bị soft delete.
+  const root = await Folder.findOne({
+    _id: folderId,
+    owner: userId,
+    isDeleted: true,
+  });
+  if (!root) {
+    throw new Error("Deleted folder not found");
+  }
+
+  // Lấy toàn bộ cây Folder.
+  const folders = await repository.findDeletedTree(folderId);
+  const folderIds = folders.map((folder) => folder._id);
+
+  // Lấy toàn bộ File trong cây.
+  const files = await fileRepository.findDeletedByFolders(folderIds);
+
+  // Xóa File vật lý khỏi Storage.
+  for (const file of files) {
+    if (file.storageName && storageService.fileExists(file.storageName)) {
+      storageService.deleteFile(file.storageName);
+    }
+  }
+  // Sau khi Storage đã được xử lý, xóa metadata File.
+  if (files.length > 0) {
+    await fileRepository.permanentDeleteMany(files.map((file) => file._id));
+  }
+  // Cuối cùng xóa toàn bộ Folder.
+  await repository.permanentDeleteMany(folderIds);
+  return {
+    folderId,
+    deletedFolders: folderIds.length,
+    deletedFiles: files.length,
+  };
 };

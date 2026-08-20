@@ -74,6 +74,10 @@ exports.findDeletedById = (fileId, ownerId) => {
   });
 };
 
+exports.findDeletedByFolders = (folderIds) => {
+  return File.find({ folder: { $in: folderIds }, isDeleted: true });
+};
+
 // xóa vĩnh viễn metadata
 exports.permanentDelete = (fileId, ownerId) => {
   return File.findOneAndDelete({
@@ -81,4 +85,9 @@ exports.permanentDelete = (fileId, ownerId) => {
     owner: ownerId,
     isDeleted: true,
   });
+};
+
+// xóa nhiều file vĩnh viễn
+exports.permanentDeleteMany = (fileIds) => {
+  return File.deleteMany({ _id: { $in: fileIds }, isDeleted: true });
 };

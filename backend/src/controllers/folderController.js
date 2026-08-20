@@ -111,3 +111,19 @@ exports.getTrash = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+exports.permanentDelete = async (req, res) => {
+  try {
+    const result = await folderService.permanentDeleteFolder(
+      req.user.id,
+      req.params.id,
+    );
+
+    return res.json({
+      message: "Folder permanently deleted",
+      result,
+    });
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};

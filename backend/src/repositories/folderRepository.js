@@ -156,3 +156,33 @@ exports.findDeletedRootsByOwner = async (ownerId) => {
     return !parent;
   });
 };
+
+exports.findDeletedTree = async (folderId) => {
+  const folderIds = [folderId];
+  let currentIds = [folderId];
+  while (currentIds.length > 0) {
+    const children = await Folder.find({
+      parentFolder: { $in: currentIds },
+      isDeleted: true,
+    }).select("_id");
+    if (children.length === 0) {
+      break;
+    }
+    const childIds = children.map((folder) => folder._id);
+    folderIds.push(...childIds);
+    currentIds = childIds;
+  }
+  return Folder.find({ _id: { $in: folderIds }, isDeleted: true });
+};
+
+exports.findDeletedByOwnerAndId = (folderId, ownerId) => {
+  return Folder.findOne({
+    _id: folderId,
+    owner: ownerId,
+    isDeleted: true,
+  });
+};
+
+exports.permanentDeleteMany = (folderIds) => {
+  return Folder.deleteMany({ _id: { $in: folderIds }, isDeleted: true });
+};
