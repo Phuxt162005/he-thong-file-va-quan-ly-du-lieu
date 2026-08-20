@@ -127,8 +127,17 @@ exports.restoreTree = async (folderId) => {
   return Folder.findOne({ _id: folderId });
 };
 
-exports.findDeletedByOwner = (ownerId) => {
-  return Folder.find({ owner: ownerId, isDeleted: true }).sort({
+exports.findDeletedByOwner = async (ownerId) => {
+  const folders = await Folder.find({ owner: ownerId, isDeleted: true }).sort({
     updatedAt: -1,
+  });
+  const deletedIds = new Set(folders.map((folder) => folder._id.toString()));
+
+  // Chỉ lấy Folder không có parentFolder đang nằm trong chính danh sách Folder đã xóa.
+  return folders.filter((folder) => {
+    if (!folder.parentFolder) {
+      return true;
+    }
+    return !deletedIds.has(folder.parentFolder.toString());
   });
 };

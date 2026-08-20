@@ -110,7 +110,6 @@ exports.getFolder = async (userId, folderId) => {
 
 exports.getChildren = async (userId, folderId) => {
   const folder = await repository.findById(folderId);
-  2;
   if (!folder) {
     return null;
   }
