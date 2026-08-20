@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-import MainLayout from "../../layouts/MainLayout/MainLayout";
 import Loading from "../../components/Loading/Loading";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 
@@ -11,7 +10,7 @@ import "./Trash.css";
 
 export default function Trash() {
   const [files, setFiles] = useState([]);
-  const [folders, setFolder] = useState([]);
+  const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [selectedFile, setSelectedFile] = useState(null);
@@ -24,6 +23,7 @@ export default function Trash() {
     setSelectedFolder(folder);
     setRestoreFolderModal(true);
   };
+
   const handleRestoreFolder = async () => {
     if (!selectedFolder?._id) {
       return;
@@ -46,10 +46,6 @@ export default function Trash() {
       setRestoring(false);
     }
   };
-
-  useEffect(() => {
-    loadDeletedFiles();
-  }, []);
 
   const loadTrash = async () => {
     try {
@@ -116,6 +112,33 @@ export default function Trash() {
 
   return (
     <div className="trash-page">
+      <ConfirmDialog
+        isOpen={restoreModal}
+        title="Khôi phục file"
+        message={`Bạn có chắc muốn khôi phục file "${selectedFile?.name || ""}"?`}
+        confirmText="Khôi phục"
+        cancelText="Hủy"
+        loading={restoring}
+        onConfirm={handleRestore}
+        onCancel={closeRestoreModal}
+      />
+
+      <ConfirmDialog
+        isOpen={restoreFolderModal}
+        title="Khôi phục thư mục"
+        message={`Bạn có chắc muốn khôi phục thư mục "${selectedFolder?.name || ""}"?`}
+        confirmText="Khôi phục"
+        cancelText="Hủy"
+        loading={restoring}
+        onConfirm={handleRestoreFolder}
+        onCancel={() => {
+          if (!restoring) {
+            setRestoreFolderModal(false);
+            setSelectedFolder(null);
+          }
+        }}
+      />
+
       {/* Header */}
       <div className="trash-page__header">
         <div>
@@ -132,11 +155,11 @@ export default function Trash() {
 
       {/* Trash list */}
       <div className="trash-card">
-        {files.length === 0 ? (
+        {files.length === 0 && folders.length === 0 ? (
           <div className="trash-empty">
             <div className="trash-empty__icon">🗑️</div>
             <h2>Thùng rác trống</h2>
-            <p>Không có file nào đã bị xóa.</p>
+            <p>Không có file hoặc thư mục nào đã bị xóa.</p>
           </div>
         ) : (
           <div className="trash-list">
@@ -148,9 +171,17 @@ export default function Trash() {
               <span>Thao tác</span>
             </div>
 
+            {folders.map((folder) => (
+              <TrashFolderItem
+                key={`folder-${folder._id}`}
+                folder={folder}
+                onRestore={openRestoreFolderModal}
+              />
+            ))}
+
             {files.map((file) => (
               <TrashItem
-                key={file._id}
+                key={`file-${file._id}`}
                 file={file}
                 onRestore={openRestoreModal}
               />
@@ -170,6 +201,7 @@ function TrashItem({ file, onRestore }) {
 
         <div className="trash-item__info">
           <strong title={file.name}>{file.name || "Không có tên"}</strong>
+
           <span>{file.mimeType || "File"}</span>
         </div>
       </div>
@@ -177,7 +209,10 @@ function TrashItem({ file, onRestore }) {
       <div className="trash-item__size">{formatStorage(file.size)}</div>
 
       <div className="trash-item__folder">
-        {file.folderName || file.parentFolderName || "Thư mục không tồn tại"}
+        {file.folder?.name ||
+          file.folderName ||
+          file.parentFolderName ||
+          "Thư mục không tồn tại"}
       </div>
 
       <div className="trash-item__date">{formatDate(file.deletedAt)}</div>
@@ -187,22 +222,6 @@ function TrashItem({ file, onRestore }) {
           Khôi phục
         </button>
       </div>
-
-      <ConfirmDialog
-        isOpen={restoreFolderModal}
-        title="Khôi phục thư mục"
-        message={`Bạn có chắc muốn khôi phục thư mục "${selectedFolder?.name || ""}"?`}
-        confirmText="Khôi phục"
-        cancelText="Hủy"
-        loading={restoring}
-        onConfirm={handleRestoreFolder}
-        onCancel={() => {
-          if (!restoring) {
-            setRestoreFolderModal(false);
-            setSelectedFolder(null);
-          }
-        }}
-      />
     </div>
   );
 }
