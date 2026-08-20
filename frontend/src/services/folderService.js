@@ -2,7 +2,7 @@ import api from "./api";
 
 const folderService = {
   // lấy folder cha
-  async getFolder(parentFolder = null) {
+  async getFolders(parentFolder = null) {
     const params = {};
 
     if (parentFolder) {
@@ -57,11 +57,6 @@ const folderService = {
   async restoreFolder(folderId) {
     const response = await api.put(`/folders/${folderId}/restore`);
     return response.data;
-  },
-
-  // lấy folder đã bị xóa
-  async getDeletedFolders() {
-    return api.get("/folders/trash");
   },
 
   // khôi phục folder bị xóa

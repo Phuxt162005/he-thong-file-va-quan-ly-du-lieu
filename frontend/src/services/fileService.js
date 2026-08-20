@@ -83,9 +83,9 @@ const fileService = {
     return response.data;
   },
 
-  // khôi phục lại file bị xóa
+  // lấy các file đã bị xóa
   async getDeletedFiles() {
-    const response = await api.get("/files/deleted");
+    const response = await api.get("/files/trash");
     return response.data;
   },
 
