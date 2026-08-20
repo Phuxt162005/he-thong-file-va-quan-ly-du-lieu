@@ -21,14 +21,10 @@ exports.softDelete = (id) => {
 
 // lấy các File đã xóa của User
 exports.findDeletedByOwner = (ownerId) => {
-  return File.find({
-    owner: ownerId,
-    isDeleted: true,
-  }).sort({
-    deletedAt: -1,
-  });
+  return File.find({ owner: ownerId, isDeleted: true })
+    .populate("folder", "name")
+    .sort({ deletedAt: -1 });
 };
-
 // khôi phục File
 exports.restore = (fileId) => {
   return File.findOneAndUpdate(
@@ -67,4 +63,19 @@ exports.findDeletedByIdWithFolder = (fileId, ownerId) => {
     owner: ownerId,
     isDeleted: true,
   }).populate("folder");
+};
+
+exports.findDeletedRootsByOwner = async (ownerId) => {
+  const folders = await Folder.find({ owner: ownerId, isDeleted: true }).sort({
+    updatedAt: -1,
+  });
+  return folders.filter((folder) => {
+    if (!folder.parentFolder) {
+      return true;
+    }
+    const parent = folders.find(
+      (item) => item._id.toString() === folder.parentFolder.toString(),
+    );
+    return !parent;
+  });
 };
