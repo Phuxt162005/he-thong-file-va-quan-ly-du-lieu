@@ -128,3 +128,17 @@ exports.getTrash = async (req, res) => {
     return res.status(500).json({ message: error.message });
   }
 };
+
+// xóa vĩnh viễn File
+exports.permanentDelete = async (req, res) => {
+  try {
+    const file = await fileService.permanentDeleteFile(
+      req.user.id,
+      req.params.id,
+    );
+
+    return res.json({ message: "File permanently deleted", file });
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};

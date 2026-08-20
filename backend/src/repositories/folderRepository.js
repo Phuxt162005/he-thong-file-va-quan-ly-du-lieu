@@ -141,3 +141,18 @@ exports.findDeletedByOwner = async (ownerId) => {
     return !deletedIds.has(folder.parentFolder.toString());
   });
 };
+
+exports.findDeletedRootsByOwner = async (ownerId) => {
+  const folders = await Folder.find({ owner: ownerId, isDeleted: true }).sort({
+    updatedAt: -1,
+  });
+  return folders.filter((folder) => {
+    if (!folder.parentFolder) {
+      return true;
+    }
+    const parent = folders.find(
+      (item) => item._id.toString() === folder.parentFolder.toString(),
+    );
+    return !parent;
+  });
+};

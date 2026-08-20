@@ -37,3 +37,6 @@ router.put("/:id/restore", auth, controller.restore);
 router.get("/trash", auth, controller.getTrash);
 
 router.delete("/:id", auth, controller.deleteFile);
+
+// xóa vĩnh viễn file
+router.delete("/:id/permanent", auth, controller.permanentDelete);

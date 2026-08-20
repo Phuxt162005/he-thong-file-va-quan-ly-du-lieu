@@ -173,3 +173,18 @@ exports.restoreFile = async (userId, fileId) => {
   }
   return await fileRepository.restore(fileId);
 };
+
+// xóa vĩnh viễn file
+exports.permanentDeleteFile = async (userId, fileId) => {
+  const file = await fileRepository.findDeletedById(fileId, userId);
+  if (!file) {
+    throw new Error("Deleted file not found");
+  }
+
+  // Xóa File vật lý trước.
+  if (file.storageName && storageService.fileExists(file.storageName)) {
+    storageService.deleteFile(file.storageName);
+  }
+  // Sau khi Storage xóa thành công mới xóa metadata.
+  return await fileRepository.permanentDelete(fileId, userId);
+};

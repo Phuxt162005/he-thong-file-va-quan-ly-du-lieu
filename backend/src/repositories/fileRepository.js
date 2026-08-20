@@ -65,17 +65,20 @@ exports.findDeletedByIdWithFolder = (fileId, ownerId) => {
   }).populate("folder");
 };
 
-exports.findDeletedRootsByOwner = async (ownerId) => {
-  const folders = await Folder.find({ owner: ownerId, isDeleted: true }).sort({
-    updatedAt: -1,
+// tìm File đã xóa của chính Owner
+exports.findDeletedById = (fileId, ownerId) => {
+  return File.findOne({
+    _id: fileId,
+    owner: ownerId,
+    isDeleted: true,
   });
-  return folders.filter((folder) => {
-    if (!folder.parentFolder) {
-      return true;
-    }
-    const parent = folders.find(
-      (item) => item._id.toString() === folder.parentFolder.toString(),
-    );
-    return !parent;
+};
+
+// xóa vĩnh viễn metadata
+exports.permanentDelete = (fileId, ownerId) => {
+  return File.findOneAndDelete({
+    _id: fileId,
+    owner: ownerId,
+    isDeleted: true,
   });
 };
