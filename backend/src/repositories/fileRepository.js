@@ -5,6 +5,11 @@ exports.create = (data) => {
   return File.create(data);
 };
 
+// tạo metadata cho File được copy
+exports.copy = (data) => {
+  return File.create(data);
+};
+
 // tìm file chưa bị xóa
 exports.findById = (id) => {
   return File.findOne({ _id: id, isDeleted: false });
@@ -32,14 +37,6 @@ exports.restore = (fileId) => {
     { isDeleted: false, deletedAt: null },
     { new: true },
   );
-};
-
-exports.findDeletedById = (fileId, ownerId) => {
-  return File.findOne({
-    _id: fileId,
-    owner: ownerId,
-    isDeleted: true,
-  });
 };
 
 exports.restoreByFolders = (folderIds) => {

@@ -57,6 +57,44 @@ exports.getFile = async (userId, fileId) => {
   return file;
 };
 
+exports.copyFile = async (userId, fileId, destinationFolderId) => {
+  // Lấy File gốc
+  const sourceFile = await fileRepository.findById(fileId);
+  if (!sourceFile) {
+    throw new Error("File not found");
+  }
+
+  // Kiểm tra File vật lý
+  if (
+    !sourceFile.storageName ||
+    !storageService.fileExists(sourceFile.storageName)
+  ) {
+    throw new Error("Physical file not found");
+  }
+
+  // Copy File vật lý
+  const copiedStorage = storageService.copyFile(
+    sourceFile.storageName,
+    sourceFile.name,
+  );
+
+  // Tạo metadata mới
+  const copiedFile = await fileRepository.copy({
+    name: sourceFile.name,
+    owner: userId,
+    folder: destinationFolderId || null,
+    storageName: copiedStorage.storageName,
+    mimeType: sourceFile.mimeType,
+    size: sourceFile.size,
+    isDeleted: false,
+    deletedAt: null,
+  });
+
+  // Activity Log
+  await activityLogService.log(userId, "File copy", "file", copiedFile._id);
+  return copiedFile;
+};
+
 exports.deleteFile = async (userId, fileId) => {
   const file = await fileRepository.findById(fileId);
   if (!file) {

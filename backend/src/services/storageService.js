@@ -71,3 +71,18 @@ exports.saveFile = (buffer, originalName) => {
 
   return { storageName, filePath };
 };
+
+// sao chép File vật lý
+exports.copyFile = (sourceStorageName, targetOriginalName) => {
+  const sourcePath = exports.getFilePath(sourceStorageName);
+  if (!fs.existsSync(sourcePath)) {
+    throw new Error("Physical file not found");
+  }
+
+  exports.ensureStorageDirectory();
+  const targetStorageName = exports.generateStorageName(targetOriginalName);
+  const targetPath = exports.getFilePath(targetStorageName);
+  fs.copyFileSync(sourcePath, targetPath);
+
+  return { storageName: targetStorageName, filePath: targetPath };
+};
