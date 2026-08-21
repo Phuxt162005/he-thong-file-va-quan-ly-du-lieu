@@ -169,8 +169,8 @@ export default function Trash() {
       setFiles((prev) =>
         prev.filter((file) => file._id !== selectedDeleteFile._id),
       );
-
-      closePermanentDeleteModal();
+      setPermanentDeleteModal(false);
+      setSelectedDeleteFile(null);
     } catch (err) {
       setError(err?.message || "Không thể xóa vĩnh viễn file.");
     } finally {
@@ -294,7 +294,7 @@ export default function Trash() {
   );
 }
 
-function TrashItem({ file, onRestore }) {
+function TrashItem({ file, onRestore, onPermanentDeletes }) {
   return (
     <div className="trash-item">
       <div className="trash-item__name">
@@ -385,11 +385,6 @@ function formatDate(date) {
 }
 
 function TrashFolderItem({ folder, onRestore, onPermanentDelete }) {
-  const openPermanentDeleteFolderModal = (folder) => {
-    setSelectedDeleteFolder(folder);
-    setPermanentDeleteFolderModal(true);
-  };
-
   return (
     <div className="trash-item">
       <div className="trash-item__name">
