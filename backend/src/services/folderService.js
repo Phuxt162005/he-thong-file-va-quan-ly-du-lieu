@@ -35,6 +35,11 @@ exports.createFolder = async (userId, data) => {
   return await repository.create(data);
 };
 
+// lấy folder theo folder parent
+exports.getFolders = async (userId, parentFolder = null) => {
+  return await repository.findByOwnerAndParent(userId, parentFolder);
+};
+
 // đổi tên Folder
 exports.renameFolder = async (userId, folderId, name) => {
   name = name.trim();

@@ -88,6 +88,17 @@ exports.get = async (req, res) => {
   }
 };
 
+exports.list = async (req, res) => {
+  try {
+    const parentFolder = req.query.parentFolder || null;
+    const folders = await service.getFolders(req.user.id, parentFolder);
+
+    return res.json(folders);
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
 exports.restore = async (req, res) => {
   try {
     const folder = await service.restoreFolder(req.user.id, req.params.id);
@@ -103,10 +114,8 @@ exports.restore = async (req, res) => {
 
 exports.getTrash = async (req, res) => {
   try {
-    const folders = await folderService.getDeletedFolders(req.user.id);
-    return res.json({
-      folders,
-    });
+    const folders = await service.getDeletedFolders(req.user.id);
+    return res.json({ folders });
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
@@ -114,15 +123,12 @@ exports.getTrash = async (req, res) => {
 
 exports.permanentDelete = async (req, res) => {
   try {
-    const result = await folderService.permanentDeleteFolder(
+    const result = await service.permanentDeleteFolder(
       req.user.id,
       req.params.id,
     );
 
-    return res.json({
-      message: "Folder permanently deleted",
-      result,
-    });
+    return res.json({ message: "Folder permanently deleted", result });
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }

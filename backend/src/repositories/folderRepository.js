@@ -183,6 +183,14 @@ exports.findDeletedByOwnerAndId = (folderId, ownerId) => {
   });
 };
 
+exports.findByOwnerAndParent = (ownerId, parentFolder = null) => {
+  return Folder.find({
+    owner: ownerId,
+    parentFolder,
+    isDeleted: false,
+  }).sort({ name: 1 });
+};
+
 exports.permanentDeleteMany = (folderIds) => {
   return Folder.deleteMany({ _id: { $in: folderIds }, isDeleted: true });
 };

@@ -14,6 +14,9 @@ router.get("/trash", auth, controller.getTrash);
 // Folder
 // ========================
 
+// folder con theo folder cha
+router.get("/", auth, controller.list);
+
 // tạo thư mục
 router.post("/", auth, controller.create);
 
