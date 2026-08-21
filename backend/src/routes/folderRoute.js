@@ -26,6 +26,9 @@ router.get("/:id/children", auth, controller.children);
 // di chuyển
 router.put("/:id/move", auth, controller.move);
 
+// copy
+router.post("/:id/copy", auth, controller.copy);
+
 // đổi tên
 router.put("/:id", auth, controller.rename);
 

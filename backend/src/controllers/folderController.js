@@ -133,3 +133,20 @@ exports.permanentDelete = async (req, res) => {
     return res.status(403).json({ message: error.message });
   }
 };
+
+exports.copy = async (req, res) => {
+  try {
+    const { destinationFolderId } = req.body;
+    const result = await service.copyFolder(
+      req.user.id,
+      req.params.id,
+      destinationFolderId || null,
+    );
+
+    return res
+      .status(201)
+      .json({ message: "Folder copied successfully", result });
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+};

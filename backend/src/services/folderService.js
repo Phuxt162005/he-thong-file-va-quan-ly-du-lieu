@@ -311,3 +311,100 @@ exports.permanentDeleteFolder = async (userId, folderId) => {
     deletedFiles: files.length,
   };
 };
+
+exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
+  // Folder nguồn
+  const sourceFolder = await repository.findByIdAndOwner(folderId, userId);
+
+  if (!sourceFolder) {
+    throw new Error("Folder not found");
+  }
+
+  // Kiểm tra Folder đích
+  if (destinationFolderId) {
+    const destinationFolder = await repository.findById(destinationFolderId);
+    if (!destinationFolder) {
+      throw new Error("Destination folder not found");
+    }
+    if (destinationFolder.owner.toString() !== userId.toString()) {
+      throw new Error("You do not have permission to copy into this folder");
+    }
+  }
+  // Lấy toàn bộ cây
+  const sourceFolders = await repository.findTreeForCopy(folderId, userId);
+  // Map Folder cũ → Folder mới
+  const folderMap = new Map();
+
+  // Tạo Folder mới theo thứ tự từ cha xuống con.
+  for (const source of sourceFolders) {
+    let newParent = destinationFolderId || null;
+    if (source._id.toString() !== folderId.toString()) {
+      const mappedParent = folderMap.get(source.parentFolder.toString());
+      newParent = mappedParent;
+    }
+
+    const newFolder = await repository.create({
+      name: source.name,
+      owner: userId,
+      parentFolder: newParent,
+      path: source.path,
+      isDeleted: false,
+    });
+
+    folderMap.set(source._id.toString(), newFolder._id);
+  }
+  // Copy toàn bộ File.
+  const sourceFolderIds = sourceFolders.map((folder) => folder._id);
+  const sourceFiles = await fileRepository.findByFoldersForCopy(
+    sourceFolderIds,
+    userId,
+  );
+  const copiedFiles = [];
+
+  try {
+    for (const sourceFile of sourceFiles) {
+      if (
+        !sourceFile.storageName ||
+        !storageService.fileExists(sourceFile.storageName)
+      ) {
+        throw new Error(`Physical file not found: ${sourceFile.name}`);
+      }
+
+      const copiedStorage = storageService.copyFile(
+        sourceFile.storageName,
+        sourceFile.name,
+      );
+      const newFolderId = folderMap.get(sourceFile.folder.toString());
+      const copiedFile = await fileRepository.copy({
+        name: sourceFile.name,
+        owner: userId,
+        folder: newFolderId,
+        storageName: copiedStorage.storageName,
+        mimeType: sourceFile.mimeType,
+        size: sourceFile.size,
+        isDeleted: false,
+        deletedAt: null,
+      });
+
+      copiedFiles.push({
+        metadata: copiedFile,
+        storageName: copiedStorage.storageName,
+      });
+    }
+  } catch (error) {
+    // Nếu copy File thất bại giữa chừng, dọn các File vật lý đã copy.
+    for (const copied of copiedFiles) {
+      if (storageService.fileExists(copied.storageName)) {
+        storageService.deleteFile(copied.storageName);
+      }
+    }
+    throw error;
+  }
+  await activityLogService.log(userId, "Folder copy", "folder", folderId);
+
+  return {
+    folderId: folderMap.get(folderId.toString()),
+    copiedFolders: sourceFolders.length,
+    copiedFiles: copiedFiles.length,
+  };
+};

@@ -183,6 +183,14 @@ exports.findDeletedByOwnerAndId = (folderId, ownerId) => {
   });
 };
 
+exports.findByIdAndOwner = (folderId, ownerId) => {
+  return Folder.findOne({
+    _id: folderId,
+    owner: ownerId,
+    isDeleted: false,
+  });
+};
+
 exports.findByOwnerAndParent = (ownerId, parentFolder = null) => {
   return Folder.find({
     owner: ownerId,
@@ -193,4 +201,37 @@ exports.findByOwnerAndParent = (ownerId, parentFolder = null) => {
 
 exports.permanentDeleteMany = (folderIds) => {
   return Folder.deleteMany({ _id: { $in: folderIds }, isDeleted: true });
+};
+
+exports.findTreeForCopy = async (rootFolderId, ownerId) => {
+  const folders = [];
+
+  const root = await Folder.findOne({
+    _id: rootFolderId,
+    owner: ownerId,
+    isDeleted: false,
+  });
+
+  if (!root) {
+    return [];
+  }
+
+  folders.push(root);
+
+  let currentIds = [root._id];
+
+  while (currentIds.length > 0) {
+    const children = await Folder.find({
+      owner: ownerId,
+      parentFolder: { $in: currentIds },
+      isDeleted: false,
+    });
+    if (children.length === 0) {
+      break;
+    }
+
+    folders.push(...children);
+    currentIds = children.map((folder) => folder._id);
+  }
+  return folders;
 };

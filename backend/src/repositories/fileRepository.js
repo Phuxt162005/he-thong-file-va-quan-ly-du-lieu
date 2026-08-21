@@ -30,6 +30,7 @@ exports.findDeletedByOwner = (ownerId) => {
     .populate("folder", "name")
     .sort({ deletedAt: -1 });
 };
+
 // khôi phục File
 exports.restore = (fileId) => {
   return File.findOneAndUpdate(
@@ -87,4 +88,12 @@ exports.permanentDelete = (fileId, ownerId) => {
 // xóa nhiều file vĩnh viễn
 exports.permanentDeleteMany = (fileIds) => {
   return File.deleteMany({ _id: { $in: fileIds }, isDeleted: true });
+};
+
+exports.findByFoldersForCopy = (folderIds, ownerId) => {
+  return File.find({
+    folder: { $in: folderIds },
+    owner: ownerId,
+    isDeleted: false,
+  });
 };
