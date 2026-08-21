@@ -31,6 +31,12 @@ const folderService = {
     return response.data;
   },
 
+  // xóa vĩnh viễn
+  async permanentDelete(folderId) {
+    const response = await api.delete(`/folders/${folderId}/permanent`);
+    return response.data;
+  },
+
   // di chuyển folder
   async moveFolder(folderId, destinationFolderId) {
     const response = await api.put(`/folders/${folderId}/move`, {

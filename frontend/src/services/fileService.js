@@ -77,6 +77,12 @@ const fileService = {
     return response.data;
   },
 
+  // xóa vĩnh viễn
+  async permanentDelete(fileId) {
+    const response = await api.delete(`/files/${fileId}/permanent`);
+    return response.data;
+  },
+
   // khôi phục file
   async restoreFile(fileId) {
     const response = await api.put(`/files/${fileId}/restore`);

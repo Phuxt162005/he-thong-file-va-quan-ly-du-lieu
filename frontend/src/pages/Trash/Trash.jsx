@@ -18,12 +18,36 @@ export default function Trash() {
   const [restoring, setRestoring] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [restoreFolderModal, setRestoreFolderModal] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [selectedDeleteFile, setSelectedDeleteFile] = useState(null);
+  const [permanentDeleteModal, setPermanentDeleteModal] = useState(false);
+  const [selectedDeleteFolder, setSelectedDeleteFolder] = useState(null);
+  const [permanentDeleteFolderModal, setPermanentDeleteFolderModal] =
+    useState(false);
 
+  // mở folder trong trash
   const openRestoreFolderModal = (folder) => {
     setSelectedFolder(folder);
     setRestoreFolderModal(true);
   };
 
+  // mở modal đã xóa
+  const openPermanentDeleteModal = (file) => {
+    setSelectedDeleteFile(file);
+    setPermanentDeleteModal(true);
+  };
+
+  // đóng model đã xóa
+  const closePermanentDeleteModal = () => {
+    if (deleting) {
+      return;
+    }
+
+    setPermanentDeleteModal(false);
+    setSelectedDeleteFile(null);
+  };
+
+  // lấy lại folder đã xóa
   const handleRestoreFolder = async () => {
     if (!selectedFolder?._id) {
       return;
@@ -47,6 +71,29 @@ export default function Trash() {
     }
   };
 
+  // xóa vĩnh viễn folder
+  const handlePermanentDeleteFolder = async () => {
+    if (!selectedDeleteFolder?._id) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError("");
+      await folderService.permanentDelete(selectedDeleteFolder._id);
+      setFolders((prev) =>
+        prev.filter((folder) => folder._id !== selectedDeleteFolder._id),
+      );
+      setPermanentDeleteFolderModal(false);
+      setSelectedDeleteFolder(null);
+    } catch (err) {
+      setError(err?.message || "Không thể xóa vĩnh viễn thư mục.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // tải thùng rác
   const loadTrash = async () => {
     try {
       setLoading(true);
@@ -74,11 +121,13 @@ export default function Trash() {
     loadTrash();
   }, []);
 
+  // mở restore modal
   const openRestoreModal = (file) => {
     setSelectedFile(file);
     setRestoreModal(true);
   };
 
+  // đóng restore modal
   const closeRestoreModal = () => {
     if (restoring) {
       return;
@@ -88,6 +137,7 @@ export default function Trash() {
     setSelectedFile(null);
   };
 
+  // khôi phục file
   const handleRestore = async () => {
     if (!selectedFile?._id) {
       return;
@@ -103,6 +153,28 @@ export default function Trash() {
       setError(err?.message || "Không thể khôi phục file.");
     } finally {
       setRestoring(false);
+    }
+  };
+
+  // xóa vĩnh viễn file
+  const handlePermanentDelete = async () => {
+    if (!selectedDeleteFile?._id) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError("");
+      await fileService.permanentDelete(selectedDeleteFile._id);
+      setFiles((prev) =>
+        prev.filter((file) => file._id !== selectedDeleteFile._id),
+      );
+
+      closePermanentDeleteModal();
+    } catch (err) {
+      setError(err?.message || "Không thể xóa vĩnh viễn file.");
+    } finally {
+      setDeleting(false);
     }
   };
 
@@ -137,6 +209,33 @@ export default function Trash() {
             setSelectedFolder(null);
           }
         }}
+      />
+
+      <ConfirmDialog
+        isOpen={permanentDeleteFolderModal}
+        title="Xóa vĩnh viễn thư mục"
+        message={`Bạn có chắc muốn xóa vĩnh viễn thư mục "${selectedDeleteFolder?.name || ""}" và toàn bộ dữ liệu bên trong? Hành động này không thể hoàn tác.`}
+        confirmText="Xóa vĩnh viễn"
+        cancelText="Hủy"
+        loading={deleting}
+        onConfirm={handlePermanentDeleteFolder}
+        onCancel={() => {
+          if (!deleting) {
+            setPermanentDeleteFolderModal(false);
+            setSelectedDeleteFolder(null);
+          }
+        }}
+      />
+
+      <ConfirmDialog
+        isOpen={permanentDeleteModal}
+        title="Xóa vĩnh viễn file"
+        message={`Bạn có chắc muốn xóa vĩnh viễn file "${selectedDeleteFile?.name || ""}"? Hành động này không thể hoàn tác.`}
+        confirmText="Xóa vĩnh viễn"
+        cancelText="Hủy"
+        loading={deleting}
+        onConfirm={handlePermanentDelete}
+        onCancel={closePermanentDeleteModal}
       />
 
       {/* Header */}
@@ -176,6 +275,7 @@ export default function Trash() {
                 key={`folder-${folder._id}`}
                 folder={folder}
                 onRestore={openRestoreFolderModal}
+                onPermanentDelete={openPermanentDeleteFolderModal}
               />
             ))}
 
@@ -184,6 +284,7 @@ export default function Trash() {
                 key={`file-${file._id}`}
                 file={file}
                 onRestore={openRestoreModal}
+                onPermanentDelete={openPermanentDeleteModal}
               />
             ))}
           </div>
@@ -220,6 +321,13 @@ function TrashItem({ file, onRestore }) {
       <div className="trash-item__actions">
         <button className="btn btn-primary" onClick={() => onRestore(file)}>
           Khôi phục
+        </button>
+
+        <button
+          className="btn btn-danger"
+          onClick={() => onPermanentDelete(file)}
+        >
+          Xóa vĩnh viễn
         </button>
       </div>
     </div>
@@ -276,7 +384,12 @@ function formatDate(date) {
   return new Date(date).toLocaleString("vi-VN");
 }
 
-function TrashFolderItem({ folder, onRestore }) {
+function TrashFolderItem({ folder, onRestore, onPermanentDelete }) {
+  const openPermanentDeleteFolderModal = (folder) => {
+    setSelectedDeleteFolder(folder);
+    setPermanentDeleteFolderModal(true);
+  };
+
   return (
     <div className="trash-item">
       <div className="trash-item__name">
@@ -297,6 +410,13 @@ function TrashFolderItem({ folder, onRestore }) {
       <div className="trash-item__actions">
         <button className="btn btn-primary" onClick={() => onRestore(folder)}>
           Khôi phục
+        </button>
+
+        <button
+          className="btn btn-danger"
+          onClick={() => onPermanentDelete(folder)}
+        >
+          Xóa vĩnh viễn
         </button>
       </div>
     </div>
