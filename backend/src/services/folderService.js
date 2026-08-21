@@ -1,5 +1,6 @@
 const repository = require("../repositories/folderRepository");
 const permissionService = require("./permissionService");
+const activityLogService = require("./activityLogService");
 const fileRepository = require("../repositories/fileRepository");
 const storageService = require("./storageService");
 
@@ -259,21 +260,6 @@ exports.restoreFolder = async (userId, folderId) => {
   return restored;
 };
 
-exports.findDeletedByOwner = async (ownerId) => {
-  const folders = await Folder.find({
-    owner: ownerId,
-    isDeleted: true,
-  }).sort({ updatedAt: -1 });
-
-  const deletedIds = new Set(folders.map((folder) => folder._id.toString()));
-  return folders.filter((folder) => {
-    if (!folder.parentFolder) {
-      return true;
-    }
-    return !deletedIds.has(folder.parentFolder.toString());
-  });
-};
-
 exports.getDeletedFolders = async (userId) => {
   return await repository.findDeletedByOwner(userId);
 };
@@ -322,12 +308,36 @@ exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
 
   // Kiểm tra Folder đích
   if (destinationFolderId) {
+    if (destinationFolderId.toString() === folderId.toString()) {
+      throw new Error("Cannot copy folder into itself");
+    }
+
+    const isDescendant = await repository.isDescendant(
+      folderId,
+      destinationFolderId,
+    );
+    if (isDescendant) {
+      throw new Error("Cannot copy folder into its own descendant");
+    }
+
     const destinationFolder = await repository.findById(destinationFolderId);
     if (!destinationFolder) {
       throw new Error("Destination folder not found");
     }
-    if (destinationFolder.owner.toString() !== userId.toString()) {
-      throw new Error("You do not have permission to copy into this folder");
+    const destinationOwner = await permissionService.isOwner(
+      userId,
+      destinationFolderId,
+      "folder",
+    );
+    if (!destinationOwner) {
+      const permissions = await permissionService.resolvePermission(
+        userId,
+        destinationFolderId,
+        "folder",
+      );
+      if (!permissions.includes("write")) {
+        throw new Error("You do not have permission to copy into this folder");
+      }
     }
   }
   // Lấy toàn bộ cây
@@ -407,4 +417,18 @@ exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
     copiedFolders: sourceFolders.length,
     copiedFiles: copiedFiles.length,
   };
+};
+
+exports.isDescendant = async (folderId, possibleParentId) => {
+  let current = await Folder.findById(possibleParentId);
+  while (current) {
+    if (current._id.toString() === folderId.toString()) {
+      return true;
+    }
+    if (!current.parentFolder) {
+      return false;
+    }
+    current = await Folder.findById(current.parentFolder);
+  }
+  return false;
 };
