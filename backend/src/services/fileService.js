@@ -2,6 +2,7 @@ const fileRepository = require("../repositories/fileRepository");
 const activityLogService = require("./activityLogService");
 const permissionService = require("./permissionService");
 const storageService = require("./storageService");
+const folderRepository = require("../repositories/folderRepository");
 
 exports.createFile = async (userId, folderId, fileData) => {
   // Nếu upload vào Root thì không cần kiểm tra Folder.
@@ -57,14 +58,26 @@ exports.getFile = async (userId, fileId) => {
   return file;
 };
 
-exports.copyFile = async (userId, fileId, destinationFolderId) => {
-  // Lấy File gốc
+exports.copyFile = async (userId, fileId, destinationFolderId = null) => {
+  // File nguồn phải thuộc User và chưa bị xóa.
   const sourceFile = await fileRepository.findById(fileId);
   if (!sourceFile) {
     throw new Error("File not found");
   }
 
-  // Kiểm tra File vật lý
+  // Nếu copy vào Folder thì Folder đích phải tồn tại, chưa bị xóa và thuộc User.
+  if (destinationFolderId) {
+    const destinationFolder =
+      await folderRepository.findById(destinationFolderId);
+    if (!destinationFolder) {
+      throw new Error("Destination folder not found");
+    }
+    if (destinationFolder.owner.toString() !== userId.toString()) {
+      throw new Error("You do not have permission to copy into this folder");
+    }
+  }
+
+  // File vật lý phải tồn tại.
   if (
     !sourceFile.storageName ||
     !storageService.fileExists(sourceFile.storageName)
@@ -72,27 +85,34 @@ exports.copyFile = async (userId, fileId, destinationFolderId) => {
     throw new Error("Physical file not found");
   }
 
-  // Copy File vật lý
+  // Copy File vật lý.
   const copiedStorage = storageService.copyFile(
     sourceFile.storageName,
     sourceFile.name,
   );
 
-  // Tạo metadata mới
-  const copiedFile = await fileRepository.copy({
-    name: sourceFile.name,
-    owner: userId,
-    folder: destinationFolderId || null,
-    storageName: copiedStorage.storageName,
-    mimeType: sourceFile.mimeType,
-    size: sourceFile.size,
-    isDeleted: false,
-    deletedAt: null,
-  });
+  try {
+    // Tạo metadata mới.
+    const copiedFile = await fileRepository.copy({
+      name: sourceFile.name,
+      owner: userId,
+      folder: destinationFolderId || null,
+      storageName: copiedStorage.storageName,
+      mimeType: sourceFile.mimeType,
+      size: sourceFile.size,
+      isDeleted: false,
+      deletedAt: null,
+    });
+    await activityLogService.log(userId, "File copy", "file", copiedFile._id);
 
-  // Activity Log
-  await activityLogService.log(userId, "File copy", "file", copiedFile._id);
-  return copiedFile;
+    return copiedFile;
+  } catch (error) {
+    // Nếu MongoDB tạo metadata thất bại phải xóa File vật lý vừa copy.
+    if (storageService.fileExists(copiedStorage.storageName)) {
+      storageService.deleteFile(copiedStorage.storageName);
+    }
+    throw error;
+  }
 };
 
 exports.deleteFile = async (userId, fileId) => {

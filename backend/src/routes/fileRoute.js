@@ -44,5 +44,8 @@ router.delete("/:id/permanent", auth, controller.permanentDelete);
 // delete
 router.delete("/:id", auth, controller.deleteFile);
 
+// copy
+router.post("/:id/copy", auth, controller.copy);
+
 // lấy thông tin file
 router.get("/:id", auth, controller.getFile);
