@@ -22,21 +22,27 @@ router.post("/upload/:uploadId/complete", auth, uploadController.complete);
 // upload file thường
 router.post("/upload", auth, upload.single("file"), controller.upload);
 
+// recycle Bin
+router.get("/trash", auth, controller.getTrash);
+
+// ========================
+// File
+// ========================
+
 // download
 router.get("/:id/download", auth, controller.download);
 
 // preview
 router.get("/:id/preview", auth, controller.preview);
 
-// lấy thông tin file
-router.get("/:id", auth, controller.getFile);
-
-// restore file bị soft delete
+// restore
 router.put("/:id/restore", auth, controller.restore);
 
-router.get("/trash", auth, controller.getTrash);
+// permanent delete
+router.delete("/:id/permanent", auth, controller.permanentDelete);
 
+// delete
 router.delete("/:id", auth, controller.deleteFile);
 
-// xóa vĩnh viễn file
-router.delete("/:id/permanent", auth, controller.permanentDelete);
+// lấy thông tin file
+router.get("/:id", auth, controller.getFile);

@@ -180,11 +180,13 @@ exports.permanentDeleteFile = async (userId, fileId) => {
   if (!file) {
     throw new Error("Deleted file not found");
   }
-
-  // Xóa File vật lý trước.
+  // Xóa file vật lý
   if (file.storageName && storageService.fileExists(file.storageName)) {
     storageService.deleteFile(file.storageName);
   }
-  // Sau khi Storage xóa thành công mới xóa metadata.
-  return await fileRepository.permanentDelete(fileId, userId);
+  // Xóa metadata
+  const deletedFile = await fileRepository.permanentDelete(fileId, userId);
+  // Ghi lịch sử
+  await activityLogService.log(userId, "File permanent delete", "file", fileId);
+  return deletedFile;
 };
