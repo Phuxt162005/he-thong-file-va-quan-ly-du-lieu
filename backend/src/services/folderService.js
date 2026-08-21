@@ -261,11 +261,7 @@ exports.getDeletedFolders = async (userId) => {
 // xóa folder vĩnh viễn
 exports.permanentDeleteFolder = async (userId, folderId) => {
   // Chỉ xử lý Folder đã bị soft delete.
-  const root = await Folder.findOne({
-    _id: folderId,
-    owner: userId,
-    isDeleted: true,
-  });
+  const root = await repository.findDeletedByOwnerAndId(folderId, userId);
   if (!root) {
     throw new Error("Deleted folder not found");
   }

@@ -59,15 +59,10 @@ const folderService = {
     return response.data;
   },
 
-  // lưu folder
+  // khôi phục folder
   async restoreFolder(folderId) {
     const response = await api.put(`/folders/${folderId}/restore`);
     return response.data;
-  },
-
-  // khôi phục folder bị xóa
-  async restoreFolder(folderId) {
-    return api.put(`/folders/${folderId}/restore`);
   },
 };
 
