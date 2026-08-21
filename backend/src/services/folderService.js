@@ -259,6 +259,21 @@ exports.restoreFolder = async (userId, folderId) => {
   return restored;
 };
 
+exports.findDeletedByOwner = async (ownerId) => {
+  const folders = await Folder.find({
+    owner: ownerId,
+    isDeleted: true,
+  }).sort({ updatedAt: -1 });
+
+  const deletedIds = new Set(folders.map((folder) => folder._id.toString()));
+  return folders.filter((folder) => {
+    if (!folder.parentFolder) {
+      return true;
+    }
+    return !deletedIds.has(folder.parentFolder.toString());
+  });
+};
+
 exports.getDeletedFolders = async (userId) => {
   return await repository.findDeletedByOwner(userId);
 };
