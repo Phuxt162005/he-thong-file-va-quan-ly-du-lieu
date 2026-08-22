@@ -17,7 +17,7 @@ exports.create = async (req, res) => {
 exports.access = async (req, res) => {
   try {
     const share = await shareService.accessShare(
-      req.params.id,
+      req.params.token,
       req.body.password,
     );
 
@@ -37,19 +37,24 @@ exports.download = async (req, res) => {
       req.params.token,
       req.body.password,
     );
-
-    let result;
-    if (share.resourceType === "file") {
-      result = await shareService.getSharedFile(share);
-    } else {
-      result = await shareService.getSharedFolderFile(share, req.params.fileId);
+    if (share.resourceType !== "file") {
+      return res
+        .status(400)
+        .json({ message: "This endpoint only supports shared files" });
     }
+
+    const result = await shareService.getSharedFile(share);
 
     res.download(result.filePath, result.file.name, async (error) => {
       if (error) {
         return;
       }
-      await shareService.completeSharedDownload(share._id);
+
+      try {
+        await shareService.completeSharedDownload(share._id);
+      } catch (downloadError) {
+        console.error("Failed to update download count:", downloadError);
+      }
     });
   } catch (error) {
     return res.status(403).json({ message: error.message });
@@ -161,6 +166,40 @@ exports.get = async (req, res) => {
     const share = await shareService.getShare(req.user.id, req.params.id);
 
     return res.json(share);
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};
+
+// download file bên trong Folder được share
+exports.folderDownload = async (req, res) => {
+  try {
+    const share = await shareService.accessShare(
+      req.params.token,
+      req.body.password,
+    );
+    if (share.resourceType !== "folder") {
+      return res
+        .status(400)
+        .json({ message: "Shared resource is not a folder" });
+    }
+
+    const result = await shareService.getSharedFolderFile(
+      share,
+      req.params.fileId,
+    );
+
+    res.download(result.filePath, result.file.name, async (error) => {
+      if (error) {
+        return;
+      }
+
+      try {
+        await shareService.completeSharedDownload(share._id);
+      } catch (downloadError) {
+        console.error("Failed to update download count:", downloadError);
+      }
+    });
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
