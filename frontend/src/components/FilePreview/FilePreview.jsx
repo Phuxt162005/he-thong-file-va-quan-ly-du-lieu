@@ -7,76 +7,126 @@ import fileService from "../../services/fileService";
 
 import "./FilePreview.css";
 
+const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"];
+const VIDEO_EXTENSIONS = ["mp4", "webm", "ogg", "mov"];
+const AUDIO_EXTENSIONS = ["mp3", "wav", "ogg", "m4a"];
+
 export default function FilePreview({ file, isOpen, onClose }) {
   const [url, setUrl] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (!isOpen || !file) {
-      return;
-    }
-    loadPreview();
-    return () => {
-      if (url) {
-        URL.revokeObjectURL(url);
+    let objectUrl = null;
+    let cancelled = false;
+    const loadPreview = async () => {
+      if (!isOpen || !file?._id) {
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError("");
+        setUrl(null);
+        const response = await fileService.previewFile(file._id);
+
+        if (cancelled) {
+          return;
+        }
+
+        const blob = response?.data;
+        if (!(blob instanceof Blob)) {
+          throw new Error("Dữ liệu preview không hợp lệ.");
+        }
+        objectUrl = URL.createObjectURL(blob);
+        setUrl(objectUrl);
+      } catch (err) {
+        if (cancelled) {
+          return;
+        }
+        setError(err?.message || "Không thể preview file.");
+      } finally {
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
-  }, [isOpen, file]);
-
-  const loadPreview = async () => {
-    try {
-      setLoading(true);
-      setError("");
-      const response = await fileService.previewFile(file._id);
-      const blob = response.data;
-      const objectUrl = URL.createObjectURL(blob);
-      setUrl(objectUrl);
-    } catch (err) {
-      setError(err?.message || "Không thể preview file.");
-    } finally {
-      setLoading(false);
-    }
-  };
+    loadPreview();
+    return () => {
+      cancelled = true;
+      if (objectUrl) {
+        URL.revokeObjectURL(objectUrl);
+      }
+    };
+  }, [isOpen, file?._id]);
 
   const extension = getExtension(file?.name);
-
   const renderContent = () => {
     if (loading) {
       return <Loading message="Đang tải preview..." />;
     }
 
     if (error) {
-      return <div className="error-message">{error}</div>;
+      return (
+        <div className="file-preview__error">
+          <div className="file-preview__error-icon">⚠️</div>
+
+          <p>{error}</p>
+
+          <button className="btn btn-secondary" onClick={onClose}>
+            Đóng
+          </button>
+        </div>
+      );
     }
 
     if (!url) {
       return null;
     }
 
-    if (["jpg", "jpeg", "png", "gif", "webp"].includes(extension)) {
-      return <img className="file-preview__image" src={url} alt={file?.name} />;
+    if (IMAGE_EXTENSIONS.includes(extension)) {
+      return (
+        <img
+          className="file-preview__image"
+          src={url}
+          alt={file?.name || "Preview"}
+        />
+      );
     }
 
     if (extension === "pdf") {
       return (
-        <iframe className="file-preview__frame" src={url} title={file?.name} />
+        <iframe
+          className="file-preview__frame"
+          src={url}
+          title={file?.name || "PDF Preview"}
+        />
       );
     }
 
-    if (["mp4", "webm", "ogg"].includes(extension)) {
-      return <video className="file-preview__video" src={url} controls />;
+    if (VIDEO_EXTENSIONS.includes(extension)) {
+      return (
+        <video className="file-preview__video" src={url} controls playsInline>
+          Trình duyệt không hỗ trợ phát video.
+        </video>
+      );
     }
 
-    if (["mp3", "wav", "ogg"].includes(extension)) {
-      return <audio className="file-preview__audio" src={url} controls />;
+    if (AUDIO_EXTENSIONS.includes(extension)) {
+      return (
+        <audio className="file-preview__audio" src={url} controls>
+          Trình duyệt không hỗ trợ phát audio.
+        </audio>
+      );
     }
 
     return (
       <div className="file-preview__unsupported">
-        <div>📄</div>
+        <div className="file-preview__unsupported-icon">📄</div>
 
-        <p>Định dạng file này không hỗ trợ Preview.</p>
+        <h3>Không hỗ trợ Preview</h3>
+
+        <p>Định dạng file này chưa hỗ trợ xem trực tiếp.</p>
 
         <button
           className="btn btn-primary"
@@ -96,11 +146,11 @@ export default function FilePreview({ file, isOpen, onClose }) {
 }
 
 function getExtension(name = "") {
-  const parts = name.split(".");
-  if (parts.length <= 1) {
+  const lastDot = name.lastIndexOf(".");
+  if (lastDot === -1 || lastDot === name.length - 1) {
     return "";
   }
-  return parts.pop().toLowerCase();
+  return name.substring(lastDot + 1).toLowerCase();
 }
 
 function downloadBlob(url, fileName) {
