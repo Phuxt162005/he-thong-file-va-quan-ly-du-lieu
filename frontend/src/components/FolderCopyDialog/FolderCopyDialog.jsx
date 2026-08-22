@@ -3,11 +3,15 @@ import { useState } from "react";
 import Modal from "../Modal/Modal";
 import FolderPicker from "../FolderPicker/FolderPicker";
 
-import fileService from "../../services/fileService";
+import folderService from "../../services/folderService";
 
-export default function FileCopyDialog({ file, isOpen, onClose, onCopied }) {
+export default function FolderCopyDialog({
+  folder,
+  isOpen,
+  onClose,
+  onCopied,
+}) {
   const [destinationFolderId, setDestinationFolderId] = useState(null);
-  const [copyFile, setCopyFile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
@@ -15,11 +19,11 @@ export default function FileCopyDialog({ file, isOpen, onClose, onCopied }) {
     try {
       setLoading(true);
       setError("");
-      await fileService.copyFile(file._id, destinationFolderId);
+      await folderService.copyFolder(folder._id, destinationFolderId);
       onCopied?.();
       onClose();
     } catch (err) {
-      setError(err?.message || "Không thể sao chép file.");
+      setError(err?.message || "Không thể sao chép thư mục.");
     } finally {
       setLoading(false);
     }
@@ -28,7 +32,7 @@ export default function FileCopyDialog({ file, isOpen, onClose, onCopied }) {
   return (
     <Modal
       isOpen={isOpen}
-      title="Sao chép file"
+      title="Sao chép thư mục"
       onClose={() => {
         if (!loading) {
           onClose();
@@ -54,15 +58,6 @@ export default function FileCopyDialog({ file, isOpen, onClose, onCopied }) {
         </>
       }
     >
-      <FileCopyDialog
-        file={copyFile}
-        isOpen={!!copyFile}
-        onClose={() => setCopyFile(null)}
-        onCopied={() => {
-          setCopyFile(null);
-          loadData();
-        }}
-      />
       {error && <div className="error-message">{error}</div>}
 
       <FolderPicker

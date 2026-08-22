@@ -1,0 +1,15 @@
+.folder-main {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.folder-actions {
+  margin-left: auto;
+}
+
+.folder-actions button {
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
