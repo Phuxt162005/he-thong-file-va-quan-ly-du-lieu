@@ -6,14 +6,19 @@ import "./FolderPicker.css";
 
 function FolderNode({
   folder,
+  level,
   selectedId,
   onSelect,
-  expanded,
+  expandedIds,
+  childrenMap,
+  loadingIds,
   onToggle,
   disabledIds,
 }) {
-  const isExpanded = expanded.has(folder._id);
-  const isDisabled = disabledIds?.has(folder._id);
+  const isExpanded = expandedIds.has(folder._id);
+  const isLoading = loadingIds.has(folder._id);
+  const children = childrenMap[folder._id] || [];
+  const isDisabled = disabledIds.has(folder._id);
 
   return (
     <div className="folder-node">
@@ -21,14 +26,15 @@ function FolderNode({
         className={`folder-node__row ${
           selectedId === folder._id ? "folder-node__row--selected" : ""
         } ${isDisabled ? "folder-node__row--disabled" : ""}`}
+        style={{ paddingLeft: `${level * 20}px` }}
       >
         <button
           type="button"
           className="folder-node__toggle"
           onClick={() => onToggle(folder)}
-          disabled={isDisabled}
+          disabled={isDisabled || isLoading}
         >
-          {isExpanded ? "▾" : "▸"}
+          {isLoading ? "..." : isExpanded ? "▾" : "▸"}
         </button>
 
         <button
@@ -46,17 +52,19 @@ function FolderNode({
       </div>
 
       {isExpanded &&
-        folder.children?.map((child) => (
-          <div className="folder-node__children" key={child._id}>
-            <FolderNode
-              folder={child}
-              selectedId={selectedId}
-              onSelect={onSelect}
-              expanded={expanded}
-              onToggle={onToggle}
-              disabledIds={disabledIds}
-            />
-          </div>
+        children.map((child) => (
+          <FolderNode
+            key={child._id}
+            folder={child}
+            level={level + 1}
+            selectedId={selectedId}
+            onSelect={onSelect}
+            expandedIds={expandedIds}
+            childrenMap={childrenMap}
+            loadingIds={loadingIds}
+            onToggle={onToggle}
+            disabledIds={disabledIds}
+          />
         ))}
     </div>
   );
@@ -67,8 +75,10 @@ export default function FolderPicker({
   onChange,
   disabledIds = [],
 }) {
-  const [folders, setFolders] = useState([]);
-  const [expanded, setExpanded] = useState(new Set());
+  const [rootFolders, setRootFolders] = useState([]);
+  const [childrenMap, setChildrenMap] = useState({});
+  const [expandedIds, setExpandedIds] = useState(new Set());
+  const [loadingIds, setLoadingIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const disabledSet = new Set(disabledIds);
@@ -81,9 +91,10 @@ export default function FolderPicker({
     try {
       setLoading(true);
       setError("");
+
       const response = await folderService.getFolders();
-      const rootFolders = response?.data || response || [];
-      setFolders(rootFolders.map((folder) => ({ ...folder, children: [] })));
+      const folders = response?.data || response || [];
+      setRootFolders(folders);
     } catch (err) {
       setError(err?.message || "Không thể tải danh sách thư mục.");
     } finally {
@@ -91,37 +102,53 @@ export default function FolderPicker({
     }
   };
 
-  const loadChildren = async (folder) => {
+  const loadChildren = async (folderId) => {
     try {
-      const response = await folderService.getChildren(folder._id);
+      setLoadingIds((prev) => {
+        const next = new Set(prev);
+        next.add(folderId);
+        return next;
+      });
+
+      const response = await folderService.getFolders(folderId);
       const children = response?.data || response || [];
-      return children.map((child) => ({ ...child, children: [] }));
+      setChildrenMap((prev) => ({ ...prev, [folderId]: children }));
     } catch (err) {
       setError(err?.message || "Không thể tải thư mục con.");
-      return [];
+    } finally {
+      setLoadingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(folderId);
+        return next;
+      });
     }
   };
 
   const handleToggle = async (folder) => {
-    if (disabledSet.has(folder._id)) {
+    const folderId = folder._id;
+    if (disabledSet.has(folderId)) {
       return;
     }
 
-    const nextExpanded = new Set(expanded);
-    if (nextExpanded.has(folder._id)) {
-      nextExpanded.delete(folder._id);
-      setExpanded(nextExpanded);
+    const isExpanded = expandedIds.has(folderId);
+    if (isExpanded) {
+      setExpandedIds((prev) => {
+        const next = new Set(prev);
+        next.delete(folderId);
+        return next;
+      });
       return;
     }
 
-    // Chưa tải children
-    if (!folder.children || folder.children.length === 0) {
-      const children = await loadChildren(folder);
-      folder.children = children;
-      setFolders([...folders]);
+    // Nếu chưa tải children thì tải
+    if (childrenMap[folderId] === undefined) {
+      await loadChildren(folderId);
     }
-    nextExpanded.add(folder._id);
-    setExpanded(nextExpanded);
+    setExpandedIds((prev) => {
+      const next = new Set(prev);
+      next.add(folderId);
+      return next;
+    });
   };
 
   if (loading) {
@@ -134,24 +161,27 @@ export default function FolderPicker({
 
   return (
     <div className="folder-picker">
+      {/* Root */}
       <button
         type="button"
-        className={`folder-picker__root ${
-          value === null ? "folder-picker__root--selected" : ""
-        }`}
+        className={`folder-picker__root ${value === null ? "folder-picker__root--selected" : ""}`}
         onClick={() => onChange(null)}
       >
         🏠 Thư mục gốc
       </button>
 
+      {/* Tree */}
       <div className="folder-picker__tree">
-        {folders.map((folder) => (
+        {rootFolders.map((folder) => (
           <FolderNode
             key={folder._id}
             folder={folder}
+            level={0}
             selectedId={value}
             onSelect={onChange}
-            expanded={expanded}
+            expandedIds={expandedIds}
+            childrenMap={childrenMap}
+            loadingIds={loadingIds}
             onToggle={handleToggle}
             disabledIds={disabledSet}
           />

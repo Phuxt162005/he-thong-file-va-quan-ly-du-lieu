@@ -63,6 +63,7 @@ export default function FolderCopyDialog({
       <FolderPicker
         value={destinationFolderId}
         onChange={setDestinationFolderId}
+        disabledIds={folder ? [folder._id] : []}
       />
     </Modal>
   );

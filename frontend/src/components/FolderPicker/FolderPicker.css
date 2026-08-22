@@ -1,8 +1,76 @@
 .folder-picker {
   width: 100%;
+  max-height: 400px;
+  overflow-y: auto;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 8px;
+  background: #fff;
+}
+
+.folder-picker__root {
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: transparent;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.folder-picker__root:hover {
+  background: #f3f4f6;
+}
+
+.folder-picker__root--selected {
+  background: #e8f0fe;
+  font-weight: 600;
+}
+
+.folder-node__row {
+  display: flex;
+  align-items: center;
+  min-height: 36px;
+  border-radius: 6px;
+}
+
+.folder-node__row:hover {
+  background: #f5f5f5;
+}
+
+.folder-node__row--selected {
+  background: #e8f0fe;
+}
+
+.folder-node__row--disabled {
+  opacity: 0.45;
+}
+
+.folder-node__toggle {
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+.folder-node__name {
+  flex: 1;
+  border: none;
+  background: transparent;
+  text-align: left;
+  padding: 7px 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.folder-node__name:disabled,
+.folder-node__toggle:disabled {
+  cursor: not-allowed;
 }
 
 .folder-picker--error {
-  color: var(--color-danger);
-  font-size: var(--font-size-sm);
+  color: #dc2626;
+  padding: 12px;
 }
