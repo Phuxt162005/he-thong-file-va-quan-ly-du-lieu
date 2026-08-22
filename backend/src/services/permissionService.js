@@ -166,57 +166,51 @@ exports.revokePermission = async (currentUserId, permissionId) => {
 
 // kiểm tra quyền thực tế của User trên Resource
 exports.resolvePermission = async (userId, resourceId, resourceType) => {
-  // 1. Kiểm tra Permission trực tiếp
+  if (!userId || !resourceId || !["file", "folder"].includes(resourceType)) {
+    return [];
+  }
+
+  const permissions = new Set();
+  // 1. Permission trực tiếp trên Resource
   const direct = await Permission.findOne({
     user: userId,
     resourceId,
     resourceType,
   });
   if (direct) {
-    return direct.permissions;
+    direct.permissions.forEach((permission) => permissions.add(permission));
   }
 
-  /*
-  // 2. Xác định Folder cần kiểm tra.
-   * File: File -> Folder chứa File
-   * Folder: Folder hiện tại
-   */
+  // 2. Xác định Folder cần bắt đầu
   let currentFolder = null;
-
   if (resourceType === "file") {
     const file = await File.findById(resourceId);
-
-    if (!file || !file.folder) {
-      return [];
+    if (!file) {
+      return [...permissions];
     }
-
-    currentFolder = await Folder.findById(file.folder);
-  } else if (resourceType === "folder") {
-    currentFolder = await Folder.findById(resourceId);
+    if (file.folder) {
+      currentFolder = await Folder.findById(file.folder);
+    }
   } else {
-    return [];
+    currentFolder = await Folder.findById(resourceId);
   }
 
-  // 3. Đi ngược lên cây Folder để tìm Permission được kế thừa.
+  // 3. Đi ngược cây Folder
   while (currentFolder) {
     const inherited = await Permission.findOne({
       user: userId,
       resourceId: currentFolder._id,
       resourceType: "folder",
     });
-
     if (inherited) {
-      return inherited.permissions;
+      inherited.permissions.forEach((permission) =>
+        permissions.add(permission),
+      );
     }
-
-    // Không còn Folder cha
     if (!currentFolder.parentFolder) {
       break;
     }
-
-    // Đi lên Folder cha
     currentFolder = await Folder.findById(currentFolder.parentFolder);
   }
-  // 4. Không tìm thấy quyền
-  return [];
+  return [...permissions];
 };
