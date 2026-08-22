@@ -81,6 +81,14 @@ exports.uploadChunk = async (
     throw new Error("Upload session is not active");
   }
   if (new Date() > session.expiresAt) {
+    await uploadRepository.markExpired(uploadId);
+    chunkStorage.deleteUploadDirectory(uploadId);
+    throw new Error("Upload session expired");
+  }
+  if (session.status !== "uploading") {
+    throw new Error("Upload session is not active");
+  }
+  if (new Date() > session.expiresAt) {
     await uploadRepository.markFailed(uploadId);
     throw new Error("Upload session expired");
   }
@@ -89,6 +97,14 @@ exports.uploadChunk = async (
   }
   if (!Buffer.isBuffer(buffer) || buffer.length === 0) {
     throw new Error("Chunk is empty");
+  }
+
+  const isLastChunk = chunkIndex === session.totalChunks - 1;
+  const maxChunkSize = isLastChunk
+    ? session.fileSize - session.chunkSize * (session.totalChunks - 1)
+    : session.chunkSize;
+  if (buffer.length !== maxChunkSize) {
+    throw new Error(`Invalid chunk size. Expected ${maxChunkSize} bytes`);
   }
 
   // kiểm tra checksum nếu Client gửi
