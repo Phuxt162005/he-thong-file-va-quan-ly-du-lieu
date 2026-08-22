@@ -239,3 +239,17 @@ exports.findTreeForCopy = async (rootFolderId, ownerId) => {
 exports.deleteByIds = (folderIds) => {
   return Folder.deleteMany({ _id: { $in: folderIds } });
 };
+
+exports.isDescendant = async (folderId, possibleParentId) => {
+  let current = await Folder.findById(possibleParentId);
+  while (current) {
+    if (current._id.toString() === folderId.toString()) {
+      return true;
+    }
+    if (!current.parentFolder) {
+      return false;
+    }
+    current = await Folder.findById(current.parentFolder);
+  }
+  return false;
+};
