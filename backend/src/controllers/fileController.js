@@ -22,9 +22,7 @@ exports.deleteFile = async (req, res) => {
   try {
     const file = await fileService.deleteFile(req.user.id, req.params.id);
     if (!file) {
-      return res.status(404).json({
-        message: "File not found",
-      });
+      return res.status(404).json({ message: "File not found" });
     }
 
     return res.json({

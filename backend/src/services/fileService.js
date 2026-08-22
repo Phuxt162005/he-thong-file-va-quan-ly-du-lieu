@@ -229,12 +229,16 @@ exports.restoreFile = async (userId, fileId) => {
   if (!file) {
     throw new Error("Deleted file not found");
   }
+
   if (file.folder && file.folder.isDeleted) {
     throw new Error(
       "Cannot restore this file because its parent folder is deleted",
     );
   }
-  return await fileRepository.restore(fileId);
+
+  const restoredFile = await fileRepository.restore(fileId);
+  await activityLogService.log(userId, "File restore", "file", fileId);
+  return restoredFile;
 };
 
 // xóa vĩnh viễn file
