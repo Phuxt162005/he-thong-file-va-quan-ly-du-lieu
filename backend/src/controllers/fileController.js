@@ -142,3 +142,17 @@ exports.permanentDelete = async (req, res) => {
     return res.status(403).json({ message: error.message });
   }
 };
+
+exports.rename = async (req, res) => {
+  try {
+    const file = await fileService.renameFile(
+      req.user.id,
+      req.params.id,
+      req.body.name,
+    );
+
+    return res.json({ message: "File renamed successfully", file });
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};

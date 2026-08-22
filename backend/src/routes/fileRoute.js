@@ -35,6 +35,9 @@ router.get("/:id/download", auth, controller.download);
 // preview
 router.get("/:id/preview", auth, controller.preview);
 
+// rename
+router.put("/:id", authMiddleware, fileController.rename);
+
 // restore
 router.put("/:id/restore", auth, controller.restore);
 

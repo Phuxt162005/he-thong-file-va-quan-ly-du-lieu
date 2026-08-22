@@ -253,3 +253,39 @@ exports.permanentDeleteFile = async (userId, fileId) => {
   await activityLogService.log(userId, "File permanent delete", "file", fileId);
   return deletedFile;
 };
+
+exports.renameFile = async (userId, fileId, newName) => {
+  const file = await fileRepository.findById(fileId);
+  if (!file) {
+    throw new Error("File not found");
+  }
+
+  const owner = await permissionService.isOwner(userId, fileId, "file");
+  if (!owner) {
+    const permissions = await permissionService.resolvePermission(
+      userId,
+      fileId,
+      "file",
+    );
+    if (!permissions.includes("write")) {
+      throw new Error("You do not have permission to rename this file");
+    }
+  }
+
+  if (typeof newName !== "string" || !newName.trim()) {
+    throw new Error("File name is required");
+  }
+
+  const name = newName.trim();
+  if (name.length > 255) {
+    throw new Error("File name must not exceed 255 characters");
+  }
+
+  if (/[<>:"/\\|?*\x00-\x1F]/.test(name)) {
+    throw new Error("File name contains invalid characters");
+  }
+
+  const renamedFile = await fileRepository.updateName(fileId, name);
+  await activityLogService.log(userId, "File rename", "file", fileId);
+  return renamedFile;
+};

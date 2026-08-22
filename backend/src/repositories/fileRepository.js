@@ -101,3 +101,11 @@ exports.findByFoldersForCopy = (folderIds, ownerId) => {
 exports.deleteByIds = (fileIds) => {
   return File.deleteMany({ _id: { $in: fileIds } });
 };
+
+exports.updateName = async (fileId, name) => {
+  return await File.findByIdAndUpdate(
+    fileId,
+    { $set: { name } },
+    { new: true },
+  );
+};
