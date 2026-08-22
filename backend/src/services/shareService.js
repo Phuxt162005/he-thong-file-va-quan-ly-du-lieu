@@ -312,3 +312,12 @@ exports.getShare = async (userId, shareId) => {
 
   return share;
 };
+
+exports.completeSharedDownload = async (shareId) => {
+  const share = await shareRepository.increaseDownloadCount(shareId);
+  if (!share) {
+    throw new Error("Download limit exceeded");
+  }
+
+  return share;
+};

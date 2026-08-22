@@ -17,8 +17,15 @@ exports.findById = (shareId) => {
 
 // tăng số lượt download
 exports.increaseDownloadCount = (id) => {
-  return ShareLink.findByIdAndUpdate(
-    id,
+  return ShareLink.findOneAndUpdate(
+    {
+      _id: id,
+      isActive: true,
+      $or: [
+        { maxDownloads: null },
+        { $expr: { $lt: ["$downloadCount", "$maxDownloads"] } },
+      ],
+    },
     { $inc: { downloadCount: 1 } },
     { new: true },
   );
@@ -31,7 +38,9 @@ exports.disable = (id) => {
 
 // lấy các Share Link của User
 exports.findByOwner = (ownerId, status) => {
-  const query = { owner: userId };
+  const query = {
+    owner: ownerId,
+  };
 
   if (status === "active") {
     query.isActive = true;
