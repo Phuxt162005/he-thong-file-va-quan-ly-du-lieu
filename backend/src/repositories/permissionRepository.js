@@ -1,8 +1,12 @@
 const Permission = require("../models/Permission");
 
 // tìm permission trực tiếp
-exports.findDirect = (userId, resourceId) => {
-  return Permission.findOne({ user: userId, resourceId: resourceId });
+exports.findDirect = (userId, resourceId, resourceType) => {
+  return Permission.findOne({
+    user: userId,
+    resourceId,
+    resourceType,
+  });
 };
 
 // lấy toàn bộ permission của resource

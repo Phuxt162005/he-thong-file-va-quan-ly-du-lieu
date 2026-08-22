@@ -2,14 +2,19 @@ const service = require("../services/permissionService");
 
 // cấp quyền
 exports.grant = async (req, res) => {
-  const permission = await service.grantPermission(
-    req.user.id,
-    req.body.userId,
-    req.body.resourceId,
-    req.body.resourceType,
-    req.body.permissions,
-  );
-  return res.status(201).json(permission);
+  try {
+    const permission = await service.grantPermission(
+      req.user.id,
+      req.body.userId,
+      req.body.resourceId,
+      req.body.resourceType,
+      req.body.permissions,
+    );
+
+    return res.status(201).json(permission);
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
 };
 
 // xem danh sách permission
@@ -28,17 +33,25 @@ exports.getByResource = async (req, res) => {
 
 // cập nhật quyền
 exports.update = async (req, res) => {
-  const permission = await service.updatePermission(
-    req.user.id,
-    req.params.id,
-    req.body.permissions,
-  );
-  return res.json(permission);
+  try {
+    const permission = await service.updatePermission(
+      req.user.id,
+      req.params.id,
+      req.body.permissions,
+    );
+
+    return res.json(permission);
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
 };
 
 // thu hồi quyền
 exports.revoke = async (req, res) => {
-  await service.revokePermission(req.user.id, req.params.id);
-
-  return res.json({ message: "Permission revoked successfully" });
+  try {
+    await service.revokePermission(req.user.id, req.params.id);
+    return res.json({ message: "Permission revoked successfully" });
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
 };

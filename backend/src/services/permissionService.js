@@ -85,9 +85,28 @@ exports.grantPermission = async (
   resourceType,
   permissions,
 ) => {
-  // không cho phép tạo permission rỗng
-  if (!permissions || permissions.length === 0) {
+  if (!userId || !resourceId || !resourceType) {
+    throw new Error("Permission information is required");
+  }
+
+  if (!Array.isArray(permissions) || permissions.length === 0) {
     throw new Error("Permission is required");
+  }
+
+  const validPermissions = [
+    "read",
+    "write",
+    "download",
+    "delete",
+    "share",
+    "permission_management",
+  ];
+  const uniquePermissions = [...new Set(permissions)];
+  const invalidPermission = uniquePermissions.find(
+    (permission) => !validPermissions.includes(permission),
+  );
+  if (invalidPermission) {
+    throw new Error(`Invalid permission: ${invalidPermission}`);
   }
 
   const canManage = await exports.canManagePermission(
@@ -99,11 +118,24 @@ exports.grantPermission = async (
     throw new Error("You do not have permission to manage this resource!");
   }
 
+  const existing = await Permission.findOne({
+    user: userId,
+    resourceId,
+    resourceType,
+  });
+
+  if (existing) {
+    const mergedPermissions = [
+      ...new Set([...existing.permissions, ...uniquePermissions]),
+    ];
+    return await permissionRepository.update(existing._id, mergedPermissions);
+  }
+
   return await permissionRepository.create({
     user: userId,
     resourceId,
     resourceType,
-    permissions,
+    permissions: uniquePermissions,
     inherited: false,
   });
 };
@@ -140,6 +172,28 @@ exports.updatePermission = async (currentUserId, permissionId, permissions) => {
   if (!permissions || permissions.length === 0) {
     throw new Error("Permission is required.");
   }
+
+  const validPermissions = [
+    "read",
+    "write",
+    "download",
+    "delete",
+    "share",
+    "permission_management",
+  ];
+  if (!Array.isArray(permissions) || permissions.length === 0) {
+    throw new Error("Permission is required.");
+  }
+
+  const uniquePermissions = [...new Set(permissions)];
+  const invalidPermission = uniquePermissions.find(
+    (permission) => !validPermissions.includes(permission),
+  );
+  if (invalidPermission) {
+    throw new Error(`Invalid permission: ${invalidPermission}`);
+  }
+
+  return await permissionRepository.update(permissionId, uniquePermissions);
   // cập nhật quyền mới cho các request tiếp theo
   return await permissionRepository.update(permissionId, permissions);
 };
