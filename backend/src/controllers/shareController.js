@@ -24,6 +24,10 @@ exports.access = async (req, res) => {
     return res.json({
       resourceId: share.resourceId,
       resourceType: share.resourceType,
+      expiresAt: share.expiresAt,
+      maxDownloads: share.maxDownloads,
+      downloadCount: share.downloadCount,
+      isActive: share.isActive,
     });
   } catch (err) {
     return res.status(403).json({ message: err.message });

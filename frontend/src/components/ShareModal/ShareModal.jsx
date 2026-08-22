@@ -19,7 +19,6 @@ export default function ShareModal({
     expiresAt: "",
     password: "",
     maxDownloads: "",
-    permission: "view",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -65,19 +64,17 @@ export default function ShareModal({
       if (formData.expiresAt) {
         payload.expiresAt = formData.expiresAt;
       }
-
       if (formData.password) {
         payload.password = formData.password;
       }
-
       if (formData.maxDownloads) {
         payload.maxDownloads = Number(formData.maxDownloads);
       }
 
       const response = await shareService.createShare(payload);
-      const data = response?.data || response;
+      const data =
+        response?.share || response?.data?.share || response?.data || response;
       setShareResult(data);
-
       if (onCreated) {
         onCreated(data);
       }
@@ -96,7 +93,12 @@ export default function ShareModal({
   };
 
   const shareUrl =
-    shareResult?.url || shareResult?.shareUrl || shareResult?.link || "";
+    shareResult?.url ||
+    shareResult?.shareUrl ||
+    shareResult?.link ||
+    (shareResult?.token
+      ? `${window.location.origin}/share/${shareResult.token}`
+      : "");
 
   return (
     <Modal
@@ -136,22 +138,6 @@ export default function ShareModal({
           <div className="share-resource">
             <span>Tài nguyên</span>
             <strong>{resourceName || "Không xác định"}</strong>
-          </div>
-
-          <div className="share-form__field">
-            <label>Quyền truy cập</label>
-
-            <select
-              className="input"
-              name="permission"
-              value={formData.permission}
-              onChange={handleChange}
-              disabled={loading}
-            >
-              <option value="view">Chỉ xem</option>
-              <option value="download">Xem và tải xuống</option>
-              <option value="edit">Chỉnh sửa</option>
-            </select>
           </div>
 
           <FormInput

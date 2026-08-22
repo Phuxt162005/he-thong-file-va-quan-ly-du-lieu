@@ -12,8 +12,6 @@ export default function ShareDialog({ resource, isOpen, onClose, onCreated }) {
     expiresAt: "",
     password: "",
     maxDownloads: "",
-    accessType: "public",
-    permission: "view",
   });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -43,12 +41,10 @@ export default function ShareDialog({ resource, isOpen, onClose, onCreated }) {
         maxDownloads: formData.maxDownloads
           ? Number(formData.maxDownloads)
           : null,
-        accessType: formData.accessType,
-        permission: formData.permission,
       };
       const response = await shareService.createShare(data);
-      const share = response?.data || response;
-
+      const share =
+        response?.share || response?.data?.share || response?.data || response;
       setCreatedShare(share);
 
       if (onCreated) {
