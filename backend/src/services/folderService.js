@@ -299,19 +299,20 @@ exports.permanentDeleteFolder = async (userId, folderId) => {
 };
 
 exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
-  // Folder nguồn
+  // 1. Kiểm tra Folder nguồn
   const sourceFolder = await repository.findByIdAndOwner(folderId, userId);
-
   if (!sourceFolder) {
     throw new Error("Folder not found");
   }
 
-  // Kiểm tra Folder đích
+  // 2. Kiểm tra Folder đích
   if (destinationFolderId) {
+    // Không copy vào chính nó
     if (destinationFolderId.toString() === folderId.toString()) {
       throw new Error("Cannot copy folder into itself");
     }
 
+    // Không copy vào Folder con của chính nó
     const isDescendant = await repository.isDescendant(
       folderId,
       destinationFolderId,
@@ -324,6 +325,8 @@ exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
     if (!destinationFolder) {
       throw new Error("Destination folder not found");
     }
+
+    // Kiểm tra quyền write
     const destinationOwner = await permissionService.isOwner(
       userId,
       destinationFolderId,
@@ -340,39 +343,54 @@ exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
       }
     }
   }
-  // Lấy toàn bộ cây
+
+  // 3. Lấy toàn bộ cây Folder nguồn
   const sourceFolders = await repository.findTreeForCopy(folderId, userId);
-  // Map Folder cũ → Folder mới
-  const folderMap = new Map();
-
-  // Tạo Folder mới theo thứ tự từ cha xuống con.
-  for (const source of sourceFolders) {
-    let newParent = destinationFolderId || null;
-    if (source._id.toString() !== folderId.toString()) {
-      const mappedParent = folderMap.get(source.parentFolder.toString());
-      newParent = mappedParent;
-    }
-
-    const newFolder = await repository.create({
-      name: source.name,
-      owner: userId,
-      parentFolder: newParent,
-      path: source.path,
-      isDeleted: false,
-    });
-
-    folderMap.set(source._id.toString(), newFolder._id);
+  if (sourceFolders.length === 0) {
+    throw new Error("Folder tree not found");
   }
-  // Copy toàn bộ File.
-  const sourceFolderIds = sourceFolders.map((folder) => folder._id);
-  const sourceFiles = await fileRepository.findByFoldersForCopy(
-    sourceFolderIds,
-    userId,
-  );
-  const copiedFiles = [];
+
+  // 4. Chuẩn bị rollback
+  const createdFolderIds = [];
+  const copiedFileIds = [];
+  const copiedStorageNames = [];
 
   try {
+    // 5. Tạo cây Folder mới
+    const folderMap = new Map();
+    for (const source of sourceFolders) {
+      let newParent = destinationFolderId || null;
+
+      // Nếu không phải Root Folder thì Parent mới là Folder mới tương ứng với Parent cũ.
+      if (source._id.toString() !== folderId.toString()) {
+        const mappedParent = folderMap.get(source.parentFolder.toString());
+        if (!mappedParent) {
+          throw new Error(`Parent folder mapping not found: ${source.name}`);
+        }
+        newParent = mappedParent;
+      }
+
+      const newFolder = await repository.create({
+        name: source.name,
+        owner: userId,
+        parentFolder: newParent,
+        path: source.path,
+        isDeleted: false,
+      });
+      createdFolderIds.push(newFolder._id);
+      folderMap.set(source._id.toString(), newFolder._id);
+    }
+
+    // 6. Lấy File nguồn
+    const sourceFolderIds = sourceFolders.map((folder) => folder._id);
+    const sourceFiles = await fileRepository.findByFoldersForCopy(
+      sourceFolderIds,
+      userId,
+    );
+
+    // 7. Copy từng File
     for (const sourceFile of sourceFiles) {
+      // File vật lý phải tồn tại
       if (
         !sourceFile.storageName ||
         !storageService.fileExists(sourceFile.storageName)
@@ -380,11 +398,24 @@ exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
         throw new Error(`Physical file not found: ${sourceFile.name}`);
       }
 
+      // Xác định Folder mới
+      const newFolderId = folderMap.get(sourceFile.folder.toString());
+      if (!newFolderId) {
+        throw new Error(
+          `Destination folder mapping not found for file: ${sourceFile.name}`,
+        );
+      }
+
+      // Copy vật lý
       const copiedStorage = storageService.copyFile(
         sourceFile.storageName,
         sourceFile.name,
       );
-      const newFolderId = folderMap.get(sourceFile.folder.toString());
+
+      // Ghi ngay vào danh sách rollback
+      copiedStorageNames.push(copiedStorage.storageName);
+
+      // Tạo metadata mới
       const copiedFile = await fileRepository.copy({
         name: sourceFile.name,
         owner: userId,
@@ -395,28 +426,45 @@ exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
         isDeleted: false,
         deletedAt: null,
       });
-
-      copiedFiles.push({
-        metadata: copiedFile,
-        storageName: copiedStorage.storageName,
-      });
+      copiedFileIds.push(copiedFile._id);
     }
+
+    // 8. Activity Log
+    await activityLogService.log(userId, "Folder copy", "folder", folderId);
+
+    // 9. Thành công
+    return {
+      folderId: createdFolderIds[0],
+      copiedFolders: createdFolderIds.length,
+      copiedFiles: copiedFileIds.length,
+    };
   } catch (error) {
-    // Nếu copy File thất bại giữa chừng, dọn các File vật lý đã copy.
-    for (const copied of copiedFiles) {
-      if (storageService.fileExists(copied.storageName)) {
-        storageService.deleteFile(copied.storageName);
+    // ROLLBACK FILE METADATA
+    if (copiedFileIds.length > 0) {
+      await fileRepository.deleteByIds(copiedFileIds);
+    }
+
+    // ROLLBACK FILE STORAGE
+    for (const storageName of copiedStorageNames) {
+      try {
+        if (storageService.fileExists(storageName)) {
+          storageService.deleteFile(storageName);
+        }
+      } catch (cleanupError) {
+        console.error(
+          "Failed to cleanup copied file:",
+          storageName,
+          cleanupError,
+        );
       }
+    }
+
+    // ROLLBACK FOLDER METADATA
+    if (createdFolderIds.length > 0) {
+      await repository.deleteByIds(createdFolderIds);
     }
     throw error;
   }
-  await activityLogService.log(userId, "Folder copy", "folder", folderId);
-
-  return {
-    folderId: folderMap.get(folderId.toString()),
-    copiedFolders: sourceFolders.length,
-    copiedFiles: copiedFiles.length,
-  };
 };
 
 exports.isDescendant = async (folderId, possibleParentId) => {

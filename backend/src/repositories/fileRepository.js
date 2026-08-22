@@ -97,3 +97,7 @@ exports.findByFoldersForCopy = (folderIds, ownerId) => {
     isDeleted: false,
   });
 };
+
+exports.deleteByIds = (fileIds) => {
+  return File.deleteMany({ _id: { $in: fileIds } });
+};

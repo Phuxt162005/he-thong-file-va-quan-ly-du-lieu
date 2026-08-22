@@ -235,3 +235,7 @@ exports.findTreeForCopy = async (rootFolderId, ownerId) => {
   }
   return folders;
 };
+
+exports.deleteByIds = (folderIds) => {
+  return Folder.deleteMany({ _id: { $in: folderIds } });
+};
