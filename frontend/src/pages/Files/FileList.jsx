@@ -23,6 +23,7 @@ export default function FileList() {
   const [copyFile, setCopyFile] = useState(null);
   const [deleteFile, setDeleteFile] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [downloadingId, setDownloadingId] = useState(null);
   const [permissionFile, setPermissionFile] = useState(null);
 
   useEffect(() => {
@@ -53,18 +54,42 @@ export default function FileList() {
   };
 
   const handleDownload = async (file) => {
+    if (!file?._id || downloadingId) {
+      return;
+    }
+
+    let objectUrl = null;
+
     try {
+      setDownloadingId(file._id);
+      setError("");
+
       const response = await fileService.downloadFile(file._id);
-      const url = URL.createObjectURL(response.data);
+      const blob = response.data;
+
+      if (!(blob instanceof Blob)) {
+        throw new Error("Dữ liệu download không hợp lệ.");
+      }
+
+      objectUrl = URL.createObjectURL(blob);
+
       const link = document.createElement("a");
-      link.href = url;
-      link.download = file.name;
+      link.href = objectUrl;
+      link.download = file.name || "download";
+      link.style.display = "none";
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-      URL.revokeObjectURL(url);
     } catch (err) {
-      setError(err?.message || "Không thể download file.");
+      const message = await getDownloadErrorMessage(err);
+      setError(message);
+    } finally {
+      if (objectUrl) {
+        // Chờ browser hoàn tất thao tác click trước khi giải phóng Blob URL.
+        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+      }
+      setDownloadingId(null);
     }
   };
 
@@ -77,7 +102,9 @@ export default function FileList() {
       setDeleting(true);
       setError("");
       await fileService.deleteFile(deleteFile._id);
-      setFiles((prev) => prev.filter((file) => file._id !== deleteFile._id));
+      setFiles((prev) =>
+        prev.filter((file) => file._id !== deleteFile._id),
+      );
       setDeleteFile(null);
     } catch (err) {
       setError(err?.message || "Không thể xóa file.");
@@ -119,6 +146,7 @@ export default function FileList() {
               onCopy={setCopyFile}
               onDelete={setDeleteFile}
               onPermission={setPermissionFile}
+              downloading={downloadingId === file._id}
             />
           ))
         )}
@@ -168,4 +196,22 @@ export default function FileList() {
       />
     </>
   );
+}
+
+async function getDownloadErrorMessage(error) {
+  const response = error?.response;
+
+  if (response?.data instanceof Blob) {
+    try {
+      const text = await response.data.text();
+      const data = JSON.parse(text);
+      if (data?.message) {
+        return data.message;
+      }
+    } catch {
+      // Response không phải JSON, dùng message mặc định bên dưới.
+    }
+  }
+
+  return error?.message || "Không thể download file.";
 }

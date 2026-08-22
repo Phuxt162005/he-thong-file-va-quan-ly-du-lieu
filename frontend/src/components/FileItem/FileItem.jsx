@@ -12,6 +12,7 @@ function FileItem({
   onCopy,
   onDelete,
   onPermission,
+  downloading = false,
 }) {
   const handleSelect = () => {
     if (onSelect) {
@@ -52,25 +53,53 @@ function FileItem({
       </div>
 
       <div className="file-item__actions">
-        <button onClick={() => onPreview?.(file)} title="Preview">
+        <button
+          onClick={() => onPreview?.(file)}
+          title="Preview"
+          disabled={downloading}
+        >
           👁
         </button>
-        <button onClick={() => onDownload?.(file)} title="Download">
-          ⬇
+        <button
+          onClick={() => onDownload?.(file)}
+          title="Download"
+          disabled={downloading}
+        >
+          {downloading ? "⏳" : "⬇"}
         </button>
-        <button onClick={() => onRename?.(file)} title="Đổi tên">
+        <button
+          onClick={() => onRename?.(file)}
+          title="Đổi tên"
+          disabled={downloading}
+        >
           ✏️
         </button>
-        <button onClick={() => onMove?.(file)} title="Di chuyển">
+        <button
+          onClick={() => onMove?.(file)}
+          title="Di chuyển"
+          disabled={downloading}
+        >
           📂
         </button>
-        <button onClick={() => onCopy?.(file)} title="Sao chép">
+        <button
+          onClick={() => onCopy?.(file)}
+          title="Sao chép"
+          disabled={downloading}
+        >
           📋
         </button>
-        <button onClick={() => onPermission?.(file)} title="Quản lý quyền">
+        <button
+          onClick={() => onPermission?.(file)}
+          title="Quản lý quyền"
+          disabled={downloading}
+        >
           🔐
         </button>
-        <button onClick={() => onDelete?.(file)} title="Xóa">
+        <button
+          onClick={() => onDelete?.(file)}
+          title="Xóa"
+          disabled={downloading}
+        >
           🗑️
         </button>
       </div>

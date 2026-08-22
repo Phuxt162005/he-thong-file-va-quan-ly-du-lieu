@@ -160,7 +160,12 @@ exports.downloadFile = async (userId, fileId) => {
     }
   }
 
+  // Chỉ trả về khi File vật lý thực sự tồn tại.
   const filePath = storageService.getDownloadPath(file.storageName);
+
+  // Ghi Activity Log sau khi đã xác thực quyền và Storage tồn tại.
+  await activityLogService.log(userId, "File download", "file", fileId);
+
   return { file, filePath };
 };
 
