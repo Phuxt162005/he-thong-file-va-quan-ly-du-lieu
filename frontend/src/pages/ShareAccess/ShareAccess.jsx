@@ -21,6 +21,10 @@ export default function ShareAccess() {
 
   // Kiểm tra Share Link
   const loadShare = async (enteredPassword = null) => {
+    if (enteredPassword !== null) {
+      setPassword(enteredPassword);
+    }
+
     try {
       setLoading(true);
       setError("");
@@ -30,7 +34,12 @@ export default function ShareAccess() {
 
       // Nếu là Folder thì load nội dung Folder gốc.
       if (response.resourceType === "folder") {
-        await loadFolder(response.resourceId, enteredPassword);
+        const folderResponse = await shareService.getSharedFolder(
+          token,
+          enteredPassword || null,
+        );
+        setFolderData(folderResponse);
+        setCurrentFolderId(response.resourceId);
       }
     } catch (err) {
       const message = err?.response?.data?.message || err?.message || "";
@@ -53,29 +62,11 @@ export default function ShareAccess() {
       setLoading(true);
       setError("");
 
-      let response;
-      if (folderId === share?.resourceId) {
-        response = await shareService.getSharedFolder(
-          token,
-          currentPassword || null,
-        );
-      } else {
-        response = await shareService.getSharedFolderChildren(
-          token,
-          folderId,
-          currentPassword || null,
-        );
-
-        /*
-         * Backend getSharedFolderChildren trả children, còn root API trả folders.
-         * Chuẩn hóa về cùng format.
-         */
-        response = {
-          ...response,
-          folders: response.folders || response.children || [],
-          files: response.files || [],
-        };
-      }
+      const response = await shareService.getSharedFolderChildren(
+        token,
+        folderId,
+        currentPassword || null,
+      );
 
       setFolderData(response);
       setCurrentFolderId(folderId);
@@ -243,6 +234,8 @@ export default function ShareAccess() {
           {error && <div className="error-message">{error}</div>}
 
           <div className="share-folder-content">
+            {loading && <Loading message="Đang tải thư mục..." />}
+
             <h2>Thư mục</h2>
 
             {folders.length === 0 && <p>Không có thư mục con.</p>}
