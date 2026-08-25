@@ -129,12 +129,19 @@ exports.getSharedFolderChildren = async (share, folderId) => {
   let current = requestedFolder;
   while (current) {
     if (current._id.toString() === sharedFolder._id.toString()) {
+      const folders = await Folder.find({
+        parentFolder: requestedFolder._id,
+        isDeleted: false,
+      });
+      const files = await File.find({
+        folder: requestedFolder._id,
+        isDeleted: false,
+      });
+
       return {
         folder: requestedFolder,
-        children: await Folder.find({
-          parentFolder: requestedFolder._id,
-          isDeleted: false,
-        }),
+        folders,
+        files,
       };
     }
     if (!current.parentFolder) {

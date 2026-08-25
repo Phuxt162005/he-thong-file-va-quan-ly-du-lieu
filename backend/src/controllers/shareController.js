@@ -1,4 +1,6 @@
 const shareService = require("../services/shareService");
+const File = require("../models/File");
+const Folder = require("../models/Folder");
 
 // tạo liên kết chia sẻ
 exports.create = async (req, res) => {
@@ -21,9 +23,22 @@ exports.access = async (req, res) => {
       req.body.password,
     );
 
+    let resource;
+
+    if (share.resourceType === "file") {
+      resource = await File.findById(share.resourceId);
+    } else {
+      resource = await Folder.findById(share.resourceId);
+    }
+
+    if (!resource) {
+      return res.status(404).json({ message: "Shared resource not found" });
+    }
+
     return res.json({
       resourceId: share.resourceId,
       resourceType: share.resourceType,
+      name: resource.name || resource.fileName || "Tài nguyên được chia sẻ",
       expiresAt: share.expiresAt,
       maxDownloads: share.maxDownloads,
       downloadCount: share.downloadCount,
