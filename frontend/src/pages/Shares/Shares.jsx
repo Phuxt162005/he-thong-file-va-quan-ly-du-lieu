@@ -23,8 +23,6 @@ export default function Shares() {
     expiresAt: "",
     password: "",
     maxDownloads: "",
-    accessType: "public",
-    permission: "view",
   });
 
   useEffect(() => {
@@ -53,8 +51,6 @@ export default function Shares() {
       expiresAt: formatDateTime(share.expiresAt),
       password: "",
       maxDownloads: share.maxDownloads ?? "",
-      accessType: share.accessType || "public",
-      permission: share.permission || "view",
     });
     setEditModal(true);
   };
@@ -72,6 +68,11 @@ export default function Shares() {
     try {
       setSaving(true);
       setError("");
+
+      if (formData.maxDownloads !== "" && Number(formData.maxDownloads) < 1) {
+        setError("Giới hạn Download phải lớn hơn 0.");
+        return;
+      }
 
       const data = {
         expiresAt: formData.expiresAt || null,
@@ -115,7 +116,7 @@ export default function Shares() {
       setShares((prev) =>
         prev.map((share) =>
           share._id === selectedShare._id
-            ? { ...share, status: "revoked" }
+            ? { ...share, isActive: false }
             : share,
         ),
       );
@@ -235,38 +236,6 @@ export default function Shares() {
         }
       >
         <div className="share-edit-form">
-          <div className="share-edit-form__group">
-            <label>Loại truy cập</label>
-
-            <select
-              className="input"
-              name="accessType"
-              value={formData.accessType}
-              onChange={handleChange}
-              disabled={saving}
-            >
-              <option value="public">Public</option>
-
-              <option value="private">Private</option>
-            </select>
-          </div>
-
-          <div className="share-edit-form__group">
-            <label>Quyền truy cập</label>
-
-            <select
-              className="input"
-              name="permission"
-              value={formData.permission}
-              onChange={handleChange}
-              disabled={saving}
-            >
-              <option value="view">View only</option>
-
-              <option value="edit">Edit</option>
-            </select>
-          </div>
-
           <FormInput
             label="Ngày hết hạn"
             name="expiresAt"
@@ -344,8 +313,10 @@ function ShareItem({ share, onEdit, onRevoke, onCopy }) {
 
       <div className="share-item__downloads">
         {share.downloadCount || 0}
-
-        {share.maxDownloads ? ` / ${share.maxDownloads}` : " / ∞"}
+        {" / "}
+        {share.maxDownloads !== null && share.maxDownloads !== undefined
+          ? share.maxDownloads
+          : "∞"}
       </div>
 
       <div>
@@ -380,13 +351,19 @@ function ShareItem({ share, onEdit, onRevoke, onCopy }) {
 }
 
 function getStatus(share) {
-  if (share.status) {
-    return share.status;
-  }
-  if (share.revoked) {
+  if (share.isActive === false) {
     return "revoked";
   }
-  if (share.expiresAt && new Date(share.expiresAt) < new Date()) {
+
+  if (share.expiresAt && new Date(share.expiresAt) <= new Date()) {
+    return "expired";
+  }
+
+  if (
+    share.maxDownloads !== null &&
+    share.maxDownloads !== undefined &&
+    share.downloadCount >= share.maxDownloads
+  ) {
     return "expired";
   }
   return "active";
