@@ -12,7 +12,7 @@ exports.findByToken = (token) => {
 
 // tìm Share theo ID
 exports.findById = (shareId) => {
-  return ShareLink.findById(shareId);
+  return ShareLink.findById(shareId).select("-password");
 };
 
 // tăng số lượt download

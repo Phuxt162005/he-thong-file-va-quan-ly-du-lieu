@@ -66,14 +66,6 @@ exports.accessShare = async (token, password) => {
     throw new Error("Share link has expired");
   }
 
-  // Kiểm tra giới hạn download
-  if (
-    share.maxDownloads !== null &&
-    share.downloadCount >= share.maxDownloads
-  ) {
-    throw new Error("Download limit exceeded");
-  }
-
   // Kiểm tra password
   if (share.password) {
     if (!password) {
@@ -339,15 +331,6 @@ exports.getShare = async (userId, shareId) => {
   }
   if (share.owner.toString() !== userId.toString()) {
     throw new Error("You do not own this share link");
-  }
-
-  return share;
-};
-
-exports.completeSharedDownload = async (shareId) => {
-  const share = await shareRepository.increaseDownloadCount(shareId);
-  if (!share) {
-    throw new Error("Download limit exceeded");
   }
 
   return share;

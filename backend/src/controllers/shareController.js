@@ -26,9 +26,15 @@ exports.access = async (req, res) => {
     let resource;
 
     if (share.resourceType === "file") {
-      resource = await File.findById(share.resourceId);
+      resource = await File.findOne({
+        _id: share.resourceId,
+        isDeleted: false,
+      });
     } else {
-      resource = await Folder.findById(share.resourceId);
+      resource = await Folder.findOne({
+        _id: share.resourceId,
+        isDeleted: false,
+      });
     }
 
     if (!resource) {
@@ -64,17 +70,12 @@ exports.download = async (req, res) => {
 
     const result = await shareService.getSharedFile(share);
 
-    res.download(result.filePath, result.file.name, async (error) => {
-      if (error) {
-        return;
-      }
-
-      try {
-        await shareService.completeSharedDownload(share._id);
-      } catch (downloadError) {
-        console.error("Failed to update download count:", downloadError);
-      }
-    });
+    try {
+      await shareService.completeSharedDownload(share._id);
+    } catch (downloadError) {
+      return res.status(403).json({ message: downloadError.message });
+    }
+    return res.download(result.filePath, result.file.name);
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
@@ -208,17 +209,13 @@ exports.folderDownload = async (req, res) => {
       req.params.fileId,
     );
 
-    res.download(result.filePath, result.file.name, async (error) => {
-      if (error) {
-        return;
-      }
+    try {
+      await shareService.completeSharedDownload(share._id);
+    } catch (downloadError) {
+      return res.status(403).json({ message: downloadError.message });
+    }
 
-      try {
-        await shareService.completeSharedDownload(share._id);
-      } catch (downloadError) {
-        console.error("Failed to update download count:", downloadError);
-      }
-    });
+    return res.download(result.filePath, result.file.name);
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
