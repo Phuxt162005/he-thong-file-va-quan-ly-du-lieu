@@ -23,6 +23,7 @@ export default function Shares() {
     expiresAt: "",
     password: "",
     maxDownloads: "",
+    removePassword: false,
   });
 
   useEffect(() => {
@@ -46,13 +47,12 @@ export default function Shares() {
   };
 
   const openEdit = (share) => {
-    setSelectedShare(share);
     setFormData({
       expiresAt: formatDateTime(share.expiresAt),
       password: "",
       maxDownloads: share.maxDownloads ?? "",
+      removePassword: false,
     });
-    setEditModal(true);
   };
 
   const handleChange = (event) => {
@@ -74,17 +74,21 @@ export default function Shares() {
         return;
       }
 
-      const data = {
-        expiresAt: formData.expiresAt || null,
-        maxDownloads: formData.maxDownloads
-          ? Number(formData.maxDownloads)
-          : null,
-      };
-
-      if (formData.password) {
+      const data = {};
+      if (formData.expiresAt !== formatDateTime(selectedShare.expiresAt)) {
+        data.expiresAt = formData.expiresAt || null;
+      }
+      if (formData.maxDownloads !== String(selectedShare.maxDownloads ?? "")) {
+        data.maxDownloads =
+          formData.maxDownloads === "" ? null : Number(formData.maxDownloads);
+      }
+      if (formData.removePassword) {
+        data.password = "";
+      } else if (formData.password) {
         data.password = formData.password;
       }
 
+      await shareService.updateShare(selectedShare._id, data);
       const response = await shareService.updateShare(selectedShare._id, data);
       const updated = response?.data || response;
 
@@ -173,6 +177,19 @@ export default function Shares() {
         </div>
 
         {error && <div className="error-message">{error}</div>}
+
+        <div className="share-edit-form__group">
+          <label>
+            <input
+              type="checkbox"
+              name="removePassword"
+              checked={formData.removePassword}
+              onChange={handleChange}
+              disabled={saving}
+            />
+            Xóa mật khẩu hiện tại
+          </label>
+        </div>
 
         <div className="shares-list">
           <div className="shares-list__header">

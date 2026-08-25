@@ -159,15 +159,11 @@ exports.getSharedFolderChildren = async (share, folderId) => {
 // lấy các file của folder share
 exports.getSharedFolderFiles = async (share, folderId) => {
   const result = await exports.getSharedFolderChildren(share, folderId);
-  const files = await File.find({
-    folder: result.folder._id,
-    isDeleted: false,
-  });
 
   return {
     folder: result.folder,
-    folders: result.children,
-    files,
+    folders: result.folders,
+    files: result.files,
   };
 };
 
@@ -234,7 +230,11 @@ exports.getSharedFile = async (share) => {
 };
 
 exports.completeSharedDownload = async (shareId) => {
-  return await shareRepository.increaseDownloadCount(shareId);
+  const share = await shareRepository.increaseDownloadCount(shareId);
+  if (!share) {
+    throw new Error("Download limit exceeded");
+  }
+  return share;
 };
 
 // vô hiệu hóa Share Link
@@ -275,35 +275,59 @@ exports.updateShare = async (userId, shareId, data) => {
     throw new Error("You do not own this share link");
   }
 
-  if (data.maxDownloads !== null && data.maxDownloads !== undefined) {
-    if (Number(data.maxDownloads) < 1) {
-      throw new Error("maxDownloads must be greater than 0");
+  // Validate maxDownloads
+  if (
+    data.maxDownloads !== null &&
+    data.maxDownloads !== undefined &&
+    data.maxDownloads !== ""
+  ) {
+    const maxDownloads = Number(data.maxDownloads);
+    if (!Number.isInteger(maxDownloads) || maxDownloads < 1) {
+      throw new Error("maxDownloads must be a positive integer");
     }
-
-    // Không cho giảm giới hạn xuống thấp hơn số lượt đã sử dụng.
-    if (Number(data.maxDownloads) < share.downloadCount) {
+    // Không được đặt giới hạn thấp hơn số lượt Download đã sử dụng.
+    if (maxDownloads < share.downloadCount) {
       throw new Error(
         "maxDownloads cannot be lower than current download count",
       );
     }
   }
 
-  if (data.expiresAt) {
+  // Validate expiresAt
+  if (
+    data.expiresAt !== null &&
+    data.expiresAt !== undefined &&
+    data.expiresAt !== ""
+  ) {
     const expiresAt = new Date(data.expiresAt);
+    if (Number.isNaN(expiresAt.getTime())) {
+      throw new Error("Invalid expiration date");
+    }
     if (expiresAt <= new Date()) {
       throw new Error("Expiration date must be in the future");
     }
   }
 
-  const updateData = {
-    expiresAt: data.expiresAt ?? share.expiresAt,
-    maxDownloads: data.maxDownloads ?? share.maxDownloads,
-  };
+  // Dùng hasOwnProperty để phân biệt
+  const updateData = {};
 
-  // Password mới
-  if (data.password) {
-    updateData.password = await bcrypt.hash(data.password, 10);
+  if (Object.prototype.hasOwnProperty.call(data, "expiresAt")) {
+    updateData.expiresAt = data.expiresAt || null;
   }
+  if (Object.prototype.hasOwnProperty.call(data, "maxDownloads")) {
+    updateData.maxDownloads =
+      data.maxDownloads === null ? null : Number(data.maxDownloads);
+  }
+
+  // password === undefined => giữ nguyên, password === "" => xóa password, password !== "" => đổi password
+  if (Object.prototype.hasOwnProperty.call(data, "password")) {
+    if (data.password === null || data.password === "") {
+      updateData.password = null;
+    } else {
+      updateData.password = await bcrypt.hash(data.password, 10);
+    }
+  }
+
   return await shareRepository.update(shareId, updateData);
 };
 
