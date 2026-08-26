@@ -21,6 +21,7 @@ exports.grant = async (req, res) => {
 exports.getByResource = async (req, res) => {
   try {
     const permissions = await service.getPermissions(
+      req.user.id,
       req.params.resourceId,
       req.params.resourceType,
     );
