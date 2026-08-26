@@ -194,8 +194,6 @@ exports.updatePermission = async (currentUserId, permissionId, permissions) => {
   }
 
   return await permissionRepository.update(permissionId, uniquePermissions);
-  // cập nhật quyền mới cho các request tiếp theo
-  return await permissionRepository.update(permissionId, permissions);
 };
 
 // thu hồi quyền
