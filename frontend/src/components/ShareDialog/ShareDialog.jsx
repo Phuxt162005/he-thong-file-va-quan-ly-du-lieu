@@ -30,6 +30,18 @@ export default function ShareDialog({ resource, isOpen, onClose, onCreated }) {
       return;
     }
 
+    if (formData.maxDownloads !== "" && Number(formData.maxDownloads) < 1) {
+      setError("Giới hạn Download phải lớn hơn 0.");
+      return;
+    }
+    if (formData.expiresAt) {
+      const expiresAt = new Date(formData.expiresAt);
+      if (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
+        setError("Ngày hết hạn phải lớn hơn thời gian hiện tại.");
+        return;
+      }
+    }
+
     try {
       setLoading(true);
       setError("");
@@ -67,8 +79,6 @@ export default function ShareDialog({ resource, isOpen, onClose, onCreated }) {
       expiresAt: "",
       password: "",
       maxDownloads: "",
-      accessType: "public",
-      permission: "view",
     });
     setError("");
     onClose();
@@ -135,38 +145,6 @@ export default function ShareDialog({ resource, isOpen, onClose, onCreated }) {
             <span>Tài nguyên:</span>
 
             <strong>{resource?.name}</strong>
-          </div>
-
-          <div className="share-form__group">
-            <label>Loại truy cập</label>
-
-            <select
-              className="input"
-              name="accessType"
-              value={formData.accessType}
-              onChange={handleChange}
-              disabled={loading}
-            >
-              <option value="public">Public</option>
-
-              <option value="private">Private</option>
-            </select>
-          </div>
-
-          <div className="share-form__group">
-            <label>Quyền truy cập</label>
-
-            <select
-              className="input"
-              name="permission"
-              value={formData.permission}
-              onChange={handleChange}
-              disabled={loading}
-            >
-              <option value="view">View only</option>
-
-              <option value="edit">Edit</option>
-            </select>
           </div>
 
           <FormInput
