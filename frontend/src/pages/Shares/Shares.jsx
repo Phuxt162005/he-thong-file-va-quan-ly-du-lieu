@@ -34,9 +34,13 @@ export default function Shares() {
     try {
       setLoading(true);
       setError("");
-
-      const params = filter === "all" ? {} : { status: filter };
-      const response = await shareService.getShares(params);
+      const response = await shareService.getShares();
+      const allShares = response?.data || response || [];
+      if (filter === "all") {
+        setShares(allShares);
+      } else {
+        setShares(allShares.filter((share) => getStatus(share) === filter));
+      }
 
       setShares(response?.data || response || []);
     } catch (err) {
@@ -47,12 +51,14 @@ export default function Shares() {
   };
 
   const openEdit = (share) => {
+    setSelectedShare(share);
     setFormData({
       expiresAt: formatDateTime(share.expiresAt),
       password: "",
       maxDownloads: share.maxDownloads ?? "",
       removePassword: false,
     });
+    setEditModal(true);
   };
 
   const handleChange = (event) => {
@@ -88,7 +94,6 @@ export default function Shares() {
         data.password = formData.password;
       }
 
-      await shareService.updateShare(selectedShare._id, data);
       const response = await shareService.updateShare(selectedShare._id, data);
       const updated = response?.data || response;
 
@@ -178,23 +183,9 @@ export default function Shares() {
 
         {error && <div className="error-message">{error}</div>}
 
-        <div className="share-edit-form__group">
-          <label>
-            <input
-              type="checkbox"
-              name="removePassword"
-              checked={formData.removePassword}
-              onChange={handleChange}
-              disabled={saving}
-            />
-            Xóa mật khẩu hiện tại
-          </label>
-        </div>
-
         <div className="shares-list">
           <div className="shares-list__header">
             <span>Tài nguyên</span>
-            <span>Loại</span>
             <span>Hết hạn</span>
             <span>Download</span>
             <span>Trạng thái</span>
@@ -272,6 +263,19 @@ export default function Shares() {
             disabled={saving}
           />
 
+          <div className="share-edit-form__group">
+            <label>
+              <input
+                type="checkbox"
+                name="removePassword"
+                checked={formData.removePassword}
+                onChange={handleChange}
+                disabled={saving}
+              />
+              Xóa mật khẩu hiện tại
+            </label>
+          </div>
+
           <FormInput
             label="Giới hạn Download"
             name="maxDownloads"
@@ -316,10 +320,6 @@ function ShareItem({ share, onEdit, onRevoke, onCopy }) {
 
           <span>{share.resourceType === "folder" ? "Folder" : "File"}</span>
         </div>
-      </div>
-
-      <div className="share-item__type">
-        {share.accessType === "private" ? "Private" : "Public"}
       </div>
 
       <div className="share-item__expiry">
