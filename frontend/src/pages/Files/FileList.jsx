@@ -8,6 +8,7 @@ import FileCopyDialog from "../../components/FileCopyDialog/FileCopyDialog";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import PermissionModal from "../../components/PermissionModal/PermissionModal";
 import Loading from "../../components/Loading/Loading";
+import ShareDialog from "../../components/ShareDialog/ShareDialog";
 
 import fileService from "../../services/fileService";
 
@@ -25,6 +26,7 @@ export default function FileList() {
   const [deleting, setDeleting] = useState(false);
   const [downloadingId, setDownloadingId] = useState(null);
   const [permissionFile, setPermissionFile] = useState(null);
+  const [shareFile, setShareFile] = useState(null);
 
   useEffect(() => {
     loadFiles();
@@ -102,9 +104,7 @@ export default function FileList() {
       setDeleting(true);
       setError("");
       await fileService.deleteFile(deleteFile._id);
-      setFiles((prev) =>
-        prev.filter((file) => file._id !== deleteFile._id),
-      );
+      setFiles((prev) => prev.filter((file) => file._id !== deleteFile._id));
       setDeleteFile(null);
     } catch (err) {
       setError(err?.message || "Không thể xóa file.");
@@ -146,6 +146,7 @@ export default function FileList() {
               onCopy={setCopyFile}
               onDelete={setDeleteFile}
               onPermission={setPermissionFile}
+              onShare={setShareFile}
               downloading={downloadingId === file._id}
             />
           ))
@@ -177,6 +178,12 @@ export default function FileList() {
         resourceId={permissionFile?._id}
         resourceType="file"
         onClose={() => setPermissionFile(null)}
+      />
+
+      <ShareDialog
+        resource={shareFile}
+        isOpen={Boolean(shareFile)}
+        onClose={() => setShareFile(null)}
       />
 
       <ConfirmDialog

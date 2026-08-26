@@ -8,6 +8,7 @@ import Loading from "../../components/Loading/Loading";
 import Modal from "../../components/Modal/Modal";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import FormInput from "../../components/FormInput/FormInput";
+import ShareDialog from "../../components/ShareDialog/ShareDialog";
 
 import folderService from "../../services/folderService";
 
@@ -27,6 +28,7 @@ export default function Files() {
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [folderName, setFolderName] = useState("");
   const [saving, setSaving] = useState(false);
+  const [shareFolder, setShareFolder] = useState(null);
 
   useEffect(() => {
     loadFolders();
@@ -167,6 +169,9 @@ export default function Files() {
                   onOpen={handleOpenFolder}
                   onRename={openRenameModal}
                   onDelete={openDeleteModal}
+                  onShare={(folder) =>
+                    setShareFolder({ ...folder, type: "folder" })
+                  }
                 />
               ))
             )}
@@ -285,6 +290,12 @@ export default function Files() {
           }
         }}
       />
+
+      <ShareDialog
+        resource={shareFolder}
+        isOpen={Boolean(shareFolder)}
+        onClose={() => setShareFolder(null)}
+      />
     </MainLayout>
   );
 }
@@ -308,6 +319,14 @@ function FolderItem({ folder, onOpen, onRename, onDelete }) {
           title="Đổi tên"
         >
           ✏️
+        </button>
+
+        <button
+          className="folder-item__action"
+          onClick={() => onShare(folder)}
+          title="Chia sẻ"
+        >
+          🔗
         </button>
 
         <button
