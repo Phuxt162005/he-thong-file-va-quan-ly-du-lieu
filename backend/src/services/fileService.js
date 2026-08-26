@@ -65,6 +65,18 @@ exports.copyFile = async (userId, fileId, destinationFolderId = null) => {
     throw new Error("File not found");
   }
 
+  const owner = await permissionService.isOwner(userId, fileId, "file");
+  if (!owner) {
+    const permissions = await permissionService.resolvePermission(
+      userId,
+      fileId,
+      "file",
+    );
+    if (!permissions.includes("read")) {
+      throw new Error("You do not have permission to copy this file");
+    }
+  }
+
   // Nếu copy vào Folder thì Folder đích phải tồn tại, chưa bị xóa và thuộc User.
   if (destinationFolderId) {
     const destinationFolder =
