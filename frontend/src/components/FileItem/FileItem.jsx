@@ -12,6 +12,7 @@ function FileItem({
   onCopy,
   onDelete,
   onPermission,
+  onShare,
   downloading = false,
 }) {
   const handleSelect = () => {
@@ -94,6 +95,13 @@ function FileItem({
           disabled={downloading}
         >
           🔐
+        </button>
+        <button
+          onClick={() => onShare?.(file)}
+          title="Chia sẻ"
+          disabled={downloading}
+        >
+          🔗
         </button>
         <button
           onClick={() => onDelete?.(file)}
