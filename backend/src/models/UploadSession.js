@@ -24,4 +24,6 @@ const uploadSessionSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+uploadSessionSchema.index({ expiresAt: 1, status: 1 });
+
 module.exports = mongoose.model("UploadSession", uploadSessionSchema);
