@@ -178,10 +178,6 @@ exports.updatePermission = async (currentUserId, permissionId, permissions) => {
     throw new Error("You do not have permission to manage this resource!");
   }
 
-  if (!permissions || permissions.length === 0) {
-    throw new Error("Permission is required.");
-  }
-
   const validPermissions = [
     "read",
     "write",
