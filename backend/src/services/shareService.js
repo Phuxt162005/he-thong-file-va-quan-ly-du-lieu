@@ -264,7 +264,14 @@ exports.updateShare = async (userId, shareId, data) => {
     throw new Error("Share link not found");
   }
   if (share.owner.toString() !== userId.toString()) {
-    throw new Error("You do not own this share link");
+    const permissions = await permissionService.resolvePermission(
+      userId,
+      share.resourceId,
+      share.resourceType,
+    );
+    if (!permissions.includes("share")) {
+      throw new Error("You do not have permission to update this share link");
+    }
   }
 
   // Validate maxDownloads
