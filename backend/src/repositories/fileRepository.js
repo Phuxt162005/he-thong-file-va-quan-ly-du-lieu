@@ -103,8 +103,8 @@ exports.deleteByIds = (fileIds) => {
 };
 
 exports.updateName = async (fileId, name) => {
-  return await File.findByIdAndUpdate(
-    fileId,
+  return await File.findOneAndUpdate(
+    { _id: fileId, isDeleted: false },
     { $set: { name } },
     { new: true },
   );

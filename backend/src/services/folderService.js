@@ -300,9 +300,26 @@ exports.permanentDeleteFolder = async (userId, folderId) => {
 
 exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
   // 1. Kiểm tra Folder nguồn
-  const sourceFolder = await repository.findByIdAndOwner(folderId, userId);
+  const sourceFolder = await repository.findById(folderId);
+
   if (!sourceFolder) {
     throw new Error("Folder not found");
+  }
+
+  const sourceOwner = await permissionService.isOwner(
+    userId,
+    folderId,
+    "folder",
+  );
+  if (!sourceOwner) {
+    const sourcePermissions = await permissionService.resolvePermission(
+      userId,
+      folderId,
+      "folder",
+    );
+    if (!sourcePermissions.includes("read")) {
+      throw new Error("You do not have permission to copy this folder");
+    }
   }
 
   // 2. Kiểm tra Folder đích
