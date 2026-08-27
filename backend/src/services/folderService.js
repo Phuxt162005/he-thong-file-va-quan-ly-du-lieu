@@ -301,7 +301,6 @@ exports.permanentDeleteFolder = async (userId, folderId) => {
 exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
   // 1. Kiểm tra Folder nguồn
   const sourceFolder = await repository.findById(folderId);
-
   if (!sourceFolder) {
     throw new Error("Folder not found");
   }
@@ -362,7 +361,7 @@ exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
   }
 
   // 3. Lấy toàn bộ cây Folder nguồn
-  const sourceFolders = await repository.findTreeForCopy(folderId, userId);
+  const sourceFolders = await repository.findTreeForCopy(folderId);
   if (sourceFolders.length === 0) {
     throw new Error("Folder tree not found");
   }

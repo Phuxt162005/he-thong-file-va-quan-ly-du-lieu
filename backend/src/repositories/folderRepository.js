@@ -203,33 +203,23 @@ exports.permanentDeleteMany = (folderIds) => {
   return Folder.deleteMany({ _id: { $in: folderIds }, isDeleted: true });
 };
 
-exports.findTreeForCopy = async (rootFolderId, ownerId) => {
+exports.findTreeForCopy = async (rootFolderId) => {
   const folders = [];
-
-  const root = await Folder.findOne({
-    _id: rootFolderId,
-    owner: ownerId,
-    isDeleted: false,
-  });
-
+  const root = await Folder.findOne({ _id: rootFolderId, isDeleted: false });
   if (!root) {
     return [];
   }
 
   folders.push(root);
-
   let currentIds = [root._id];
-
   while (currentIds.length > 0) {
     const children = await Folder.find({
-      owner: ownerId,
       parentFolder: { $in: currentIds },
       isDeleted: false,
     });
     if (children.length === 0) {
       break;
     }
-
     folders.push(...children);
     currentIds = children.map((folder) => folder._id);
   }
