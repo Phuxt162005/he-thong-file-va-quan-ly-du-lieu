@@ -84,8 +84,21 @@ exports.copyFile = async (userId, fileId, destinationFolderId = null) => {
     if (!destinationFolder) {
       throw new Error("Destination folder not found");
     }
-    if (destinationFolder.owner.toString() !== userId.toString()) {
-      throw new Error("You do not have permission to copy into this folder");
+
+    const destinationOwner = await permissionService.isOwner(
+      userId,
+      destinationFolderId,
+      "folder",
+    );
+    if (!destinationOwner) {
+      const destinationPermissions = await permissionService.resolvePermission(
+        userId,
+        destinationFolderId,
+        "folder",
+      );
+      if (!destinationPermissions.includes("write")) {
+        throw new Error("You do not have permission to copy into this folder");
+      }
     }
   }
 
