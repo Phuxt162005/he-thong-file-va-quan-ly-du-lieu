@@ -85,13 +85,6 @@ exports.uploadChunk = async (
     chunkStorage.deleteUploadDirectory(uploadId);
     throw new Error("Upload session expired");
   }
-  if (session.status !== "uploading") {
-    throw new Error("Upload session is not active");
-  }
-  if (new Date() > session.expiresAt) {
-    await uploadRepository.markFailed(uploadId);
-    throw new Error("Upload session expired");
-  }
   if (chunkIndex < 0 || chunkIndex >= session.totalChunks) {
     throw new Error("Invalid chunk index");
   }
