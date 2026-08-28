@@ -20,7 +20,16 @@ exports.getFilePath = (storageName) => {
   if (!storageName) {
     throw new Error("Storage name is required");
   }
-  return path.join(STORAGE_ROOT, storageName);
+
+  const filePath = path.resolve(STORAGE_ROOT, storageName);
+  const storageRoot = path.resolve(STORAGE_ROOT);
+  if (
+    filePath !== storageRoot &&
+    !filePath.startsWith(storageRoot + path.sep)
+  ) {
+    throw new Error("Invalid storage path");
+  }
+  return filePath;
 };
 
 // kiểm tra File tồn tại
