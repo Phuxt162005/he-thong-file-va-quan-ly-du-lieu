@@ -51,7 +51,12 @@ exports.createShare = async (userId, data) => {
     token,
     password,
     expiresAt: data.expiresAt || null,
-    maxDownloads: data.maxDownloads || null,
+    maxDownloads:
+      data.maxDownloads === null ||
+      data.maxDownloads === undefined ||
+      data.maxDownloads === ""
+        ? null
+        : Number(data.maxDownloads),
   });
 };
 
@@ -326,7 +331,6 @@ exports.updateShare = async (userId, shareId, data) => {
       updateData.password = await bcrypt.hash(data.password, 10);
     }
   }
-
   return await shareRepository.update(shareId, updateData);
 };
 
