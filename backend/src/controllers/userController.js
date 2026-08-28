@@ -12,7 +12,7 @@ exports.getProfile = async (req, res) => {
 // tìm người dùng theo tên đăng nhập
 exports.findByLoginName = async (req, res) => {
   try {
-    const user = await userService.findByLoginName(req.query.login_name);
+    const user = await userService.findByLoginName(req.query.username);
     if (!user) {
       return res.status(404).json({ message: "Không tìm thấy người dùng." });
     }
