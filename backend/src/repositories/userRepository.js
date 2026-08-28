@@ -6,10 +6,11 @@ exports.findById = (id) => {
 };
 
 // tìm người dùng theo tên đăng nhập
-exports.findByLoginName = (loginName) => {
-  return User.findOne({ login_name: loginName }).select(
-    "_id login_name first_name last_name",
-  );
+exports.findByLoginName = async (username) => {
+  if (!username) {
+    throw new Error("Username is required");
+  }
+  return await userRepository.findByLoginName(username.trim());
 };
 
 // cập nhật thông tin người dùng

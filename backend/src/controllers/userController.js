@@ -2,9 +2,13 @@ const userService = require("../services/userService");
 
 // lấy thông tin cá nhân
 exports.getProfile = async (req, res) => {
-  const user = await userService.getProfile(req.user.id);
+  try {
+    const user = await userService.getProfile(req.user.id);
+    return res.json(user);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
 };
-
 // tìm người dùng theo tên đăng nhập
 exports.findByLoginName = async (req, res) => {
   try {
