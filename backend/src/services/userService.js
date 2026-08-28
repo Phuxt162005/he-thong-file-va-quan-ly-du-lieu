@@ -1,16 +1,21 @@
 const userRepository = require("../repositories/userRepository");
 
 // lấy hồ sơ người dùng
-exports.getProfile = async (id) => {
-  return await userRepository.findById(id);
+exports.getProfile = async (req, res) => {
+  try {
+    const user = await userService.getProfile(req.user.id);
+    return res.json(user);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
 };
 
 // tìm người dùng theo tên đăng nhập
-exports.findByLoginName = async (loginName) => {
-  if (!loginName) {
-    throw new Error("Login name is required");
+exports.findByLoginName = async (username) => {
+  if (!username) {
+    throw new Error("Username is required");
   }
-  return await userRepository.findByLoginName(loginName.trim());
+  return await userRepository.findByLoginName(username.trim());
 };
 
 // cập nhật hồ sơ
