@@ -27,6 +27,16 @@ exports.findByLoginName = async (req, res) => {
 
 // cập nhật hồ sơ
 exports.updateProfile = async (req, res) => {
-  const user = await userService.updateProfile(req.user.id, req.body);
-  return res.json(user);
+  try {
+    const { username, email, avatar } = req.body;
+    const user = await userService.updateProfile(req.user.id, {
+      username,
+      email,
+      avatar,
+    });
+
+    return res.json(user);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
 };
