@@ -7,7 +7,10 @@ module.exports = (req, res, next) => {
     return res.status(401).json({ message: "Unauthorized" });
   }
 
-  const token = authHeader.split(" ")[1];
+  const [scheme, token] = authHeader.split(" ");
+  if (scheme !== "Bearer" || !token) {
+    return res.status(401).json({ message: "Invalid authorization header" });
+  }
 
   try {
     // xác thực JWT
