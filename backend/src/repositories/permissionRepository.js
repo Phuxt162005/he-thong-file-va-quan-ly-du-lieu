@@ -12,7 +12,7 @@ exports.findDirect = (userId, resourceId, resourceType) => {
 // lấy toàn bộ permission của resource
 exports.findByResource = (resourceId, resourceType) => {
   return Permission.find({ resourceId, resourceType })
-    .populate("user", "login_name first_name last_name")
+    .populate("user", "username email avatar")
     .sort({ createdAt: -1 });
 };
 
