@@ -11,7 +11,7 @@ const auditLogSchema = new mongoose.Schema(
       enum: ["SUCCESS", "DENIED", "FAILED"],
       required: true,
     },
-    details: { type: mongoose.Schema.Types.mixed, default: {} },
+    details: { type: mongoose.Schema.Types.Mixed, default: {} },
     ipAddress: { type: String, default: null },
   },
   { timestamps: true },

@@ -1,8 +1,8 @@
 const User = require("../models/User");
 
 // lấy thông tin người dùng theo ID
-exports.findById = (id) => {
-  return User.findById(id);
+exports.findById = async (userId) => {
+  return await User.findById(userId).select("-password");
 };
 
 // tìm người dùng theo tên đăng nhập
@@ -10,7 +10,8 @@ exports.findByLoginName = async (username) => {
   if (!username) {
     throw new Error("Username is required");
   }
-  return await userRepository.findByLoginName(username.trim());
+
+  return await User.findOne({ username: username.trim() }).select("-password");
 };
 
 // cập nhật thông tin người dùng

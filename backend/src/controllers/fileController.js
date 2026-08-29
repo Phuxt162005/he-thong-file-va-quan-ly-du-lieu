@@ -154,3 +154,18 @@ exports.rename = async (req, res) => {
     return res.status(403).json({ message: error.message });
   }
 };
+
+// copy file
+exports.copy = async (req, res) => {
+  try {
+    const file = await fileService.copyFile(
+      req.user.id,
+      req.params.id,
+      req.body.destinationFolderId || null,
+    );
+
+    return res.status(201).json({ message: "File copied successfully", file });
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};

@@ -1,13 +1,16 @@
 const userRepository = require("../repositories/userRepository");
 
 // lấy hồ sơ người dùng
-exports.getProfile = async (req, res) => {
-  try {
-    const user = await userService.getProfile(req.user.id);
-    return res.json(user);
-  } catch (error) {
-    return res.status(400).json({ message: error.message });
+exports.getProfile = async (userId) => {
+  if (!userId) {
+    throw new Error("User ID is required");
   }
+
+  const user = await userRepository.findById(userId);
+  if (!user) {
+    throw new Error("User not found");
+  }
+  return user;
 };
 
 // tìm người dùng theo tên đăng nhập
