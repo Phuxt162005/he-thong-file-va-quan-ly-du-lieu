@@ -89,6 +89,10 @@ exports.grantPermission = async (
     throw new Error("Permission information is required");
   }
 
+  if (!["file", "folder"].includes(resourceType)) {
+    throw new Error("Invalid resource type");
+  }
+
   if (!Array.isArray(permissions) || permissions.length === 0) {
     throw new Error("Permission is required");
   }
