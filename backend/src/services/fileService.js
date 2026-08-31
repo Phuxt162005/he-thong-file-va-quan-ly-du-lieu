@@ -60,35 +60,59 @@ exports.getFile = async (userId, fileId) => {
 
 exports.copyFile = async (userId, fileId, destinationFolderId = null) => {
   const sourceFile = await fileRepository.findById(fileId);
+
   if (!sourceFile || sourceFile.isDeleted) {
     throw new Error("File not found");
   }
 
-  const hasPermission = await permissionService.resolvePermission(
-    userId,
-    sourceFile._id,
-    "file",
-  );
-  if (!hasPermission.includes("read")) {
-    throw new Error("You do not have permission to copy this file");
+  // Owner luôn được phép copy
+  const owner = await permissionService.isOwner(userId, fileId, "file");
+
+  if (!owner) {
+    const permissions = await permissionService.resolvePermission(
+      userId,
+      fileId,
+      "file",
+    );
+
+    if (!permissions.includes("read")) {
+      throw new Error("You do not have permission to copy this file");
+    }
   }
 
+  // Kiểm tra quyền ghi tại Folder đích
   await exports.checkUploadPermission(userId, destinationFolderId);
+
   let copied = null;
 
   try {
+    // File nguồn phải tồn tại trong Storage
+    if (
+      !sourceFile.storageName ||
+      !storageService.fileExists(sourceFile.storageName)
+    ) {
+      throw new Error("Physical file not found");
+    }
+
+    // Copy File vật lý
     copied = storageService.copyFile(sourceFile.storageName, sourceFile.name);
-    const newFile = await fileRepository.create({
+
+    // Tạo metadata File mới
+    const newFile = await fileRepository.copy({
       owner: userId,
       folder: destinationFolderId,
       name: sourceFile.name,
       storageName: copied.storageName,
       mimeType: sourceFile.mimeType,
       size: sourceFile.size,
+      isDeleted: false,
+      deletedAt: null,
     });
 
     return newFile;
   } catch (error) {
+    // Nếu Database tạo metadata thất bại,
+    // xóa File vật lý vừa copy để tránh File rác.
     if (copied?.storageName) {
       try {
         if (storageService.fileExists(copied.storageName)) {
@@ -98,6 +122,7 @@ exports.copyFile = async (userId, fileId, destinationFolderId = null) => {
         console.error("Failed to cleanup copied file:", cleanupError);
       }
     }
+
     throw error;
   }
 };

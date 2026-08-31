@@ -266,50 +266,53 @@ exports.getDeletedFolders = async (userId) => {
 
 // xóa folder vĩnh viễn
 exports.permanentDeleteFolder = async (userId, folderId) => {
-  const folder = await folderRepository.findDeletedById(folderId, userId);
+  const folder = await repository.findDeletedByOwnerAndId(folderId, userId);
   if (!folder) {
     throw new Error("Deleted folder not found");
   }
 
-  const files = await fileRepository.findDeletedByFolder(folderId, userId);
-  const deletedFiles = [];
-
-  // Xóa metadata File trước
-  for (const file of files) {
-    const deletedFile = await fileRepository.permanentDelete(file._id, userId);
-    deletedFiles.push({
-      file: deletedFile,
-      storageName: file.storageName,
-    });
+  // Lấy toàn bộ cây Folder đã xóa
+  const folders = await repository.findDeletedTree(folderId);
+  if (!folders || folders.length === 0) {
+    throw new Error("Deleted folder tree not found");
   }
 
-  // Xóa metadata Folder
-  const deletedFolder = await folderRepository.permanentDelete(
-    folderId,
-    userId,
-  );
+  const folderIds = folders.map((item) => item._id);
 
-  // DB đã xóa thành công → xóa Storage
-  for (const item of deletedFiles) {
+  // Lấy toàn bộ File đã xóa trong toàn bộ cây Folder
+  const files = await fileRepository.findDeletedByFolders(folderIds);
+
+  // Lưu storageName trước khi xóa metadata
+  const storageNames = files.map((file) => file.storageName).filter(Boolean);
+
+  // 1. XÓA FILE METADATA
+  if (files.length > 0) {
+    await fileRepository.permanentDeleteMany(files.map((file) => file._id));
+  }
+
+  // 2. XÓA FOLDER METADATA
+  await repository.permanentDeleteMany(folderIds);
+
+  // 3. XÓA FILE VẬT LÝ
+  for (const storageName of storageNames) {
     try {
-      if (item.storageName && storageService.fileExists(item.storageName)) {
-        storageService.deleteFile(item.storageName);
+      if (storageService.fileExists(storageName)) {
+        storageService.deleteFile(storageName);
       }
     } catch (error) {
-      console.error(
-        `Failed to delete physical file ${item.storageName}:`,
-        error,
-      );
+      console.error(`Failed to delete physical file ${storageName}:`, error);
     }
   }
 
+  // 4. ACTIVITY LOG
   await activityLogService.log(
     userId,
     "Folder permanent delete",
     "folder",
     folderId,
   );
-  return deletedFolder;
+
+  return folder;
 };
 
 exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
