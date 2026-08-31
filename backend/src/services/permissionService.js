@@ -222,6 +222,7 @@ exports.updatePermission = async (currentUserId, permissionId, permissions) => {
   }
 
   const uniquePermissions = [...new Set(permissions)];
+
   const invalidPermission = uniquePermissions.find(
     (permission) => !validPermissions.includes(permission),
   );
@@ -229,6 +230,19 @@ exports.updatePermission = async (currentUserId, permissionId, permissions) => {
     throw new Error(`Invalid permission: ${invalidPermission}`);
   }
 
+  // Chỉ Owner mới được cấp permission_management
+  const currentUserIsOwner = await exports.isOwner(
+    currentUserId,
+    permission.resourceId,
+    permission.resourceType,
+  );
+
+  if (
+    uniquePermissions.includes("permission_management") &&
+    !currentUserIsOwner
+  ) {
+    throw new Error("Only the resource owner can grant permission_management");
+  }
   return await permissionRepository.update(permissionId, uniquePermissions);
 };
 
