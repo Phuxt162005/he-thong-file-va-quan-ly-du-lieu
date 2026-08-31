@@ -6,7 +6,7 @@ const auditLogService = require("./auditLogService");
 
 exports.login = async (username, password, ipAddress) => {
   // tìm tài khoản theo username
-  const user = await User.findOne({ username });
+  const user = await User.findOne({ username }).select("+password");
   if (!user) {
     // ghi nhận đăng nhập thất bại
     await auditLogService.log({
@@ -37,5 +37,8 @@ exports.login = async (username, password, ipAddress) => {
     process.env.JWT_SECRET,
     { expiresIn: "1h" },
   );
-  return { token, user };
+  const userData = user.toObject();
+  delete userData.password;
+
+  return { token, user: userData };
 };
