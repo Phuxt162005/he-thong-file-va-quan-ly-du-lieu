@@ -44,19 +44,45 @@ exports.createShare = async (userId, data) => {
     password = await bcrypt.hash(data.password, 10);
   }
 
+  // Validate expiresAt
+  let expiresAt = null;
+
+  if (
+    data.expiresAt !== null &&
+    data.expiresAt !== undefined &&
+    data.expiresAt !== ""
+  ) {
+    expiresAt = new Date(data.expiresAt);
+    if (Number.isNaN(expiresAt.getTime())) {
+      throw new Error("Invalid expiration date");
+    }
+    if (expiresAt <= new Date()) {
+      throw new Error("Expiration date must be in the future");
+    }
+  }
+
+  // Validate maxDownloads
+  let maxDownloads = null;
+
+  if (
+    data.maxDownloads !== null &&
+    data.maxDownloads !== undefined &&
+    data.maxDownloads !== ""
+  ) {
+    maxDownloads = Number(data.maxDownloads);
+    if (!Number.isInteger(maxDownloads) || maxDownloads < 1) {
+      throw new Error("maxDownloads must be a positive integer");
+    }
+  }
+
   return await shareRepository.create({
     resourceId: data.resourceId,
     resourceType: data.resourceType,
     owner: userId,
     token,
     password,
-    expiresAt: data.expiresAt || null,
-    maxDownloads:
-      data.maxDownloads === null ||
-      data.maxDownloads === undefined ||
-      data.maxDownloads === ""
-        ? null
-        : Number(data.maxDownloads),
+    expiresAt,
+    maxDownloads,
   });
 };
 
@@ -195,8 +221,10 @@ exports.getSharedFolderFile = async (share, fileId) => {
   while (currentFolder) {
     // Đã tìm thấy Folder gốc của Share.
     if (currentFolder._id.toString() === sharedFolder._id.toString()) {
+      if (!file.storageName || !storageService.fileExists(file.storageName)) {
+        throw new Error("Physical file not found");
+      }
       const filePath = storageService.getDownloadPath(file.storageName);
-
       return { file, filePath };
     }
     // Đi lên Folder cha.
@@ -220,6 +248,9 @@ exports.getSharedFile = async (share) => {
   const file = await File.findOne({ _id: share.resourceId, isDeleted: false });
   if (!file) {
     throw new Error("Shared file not found");
+  }
+  if (!file.storageName || !storageService.fileExists(file.storageName)) {
+    throw new Error("Physical file not found");
   }
 
   const filePath = storageService.getDownloadPath(file.storageName);

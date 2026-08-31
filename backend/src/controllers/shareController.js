@@ -57,28 +57,25 @@ exports.access = async (req, res) => {
 
 // download
 exports.download = async (req, res) => {
-  try {
-    const share = await shareService.accessShare(
-      req.params.token,
-      req.body.password,
-    );
-    if (share.resourceType !== "file") {
-      return res
-        .status(400)
-        .json({ message: "This endpoint only supports shared files" });
-    }
-
-    const result = await shareService.getSharedFile(share);
-
-    try {
-      await shareService.completeSharedDownload(share._id);
-    } catch (downloadError) {
-      return res.status(403).json({ message: downloadError.message });
-    }
-    return res.download(result.filePath, result.file.name);
-  } catch (error) {
-    return res.status(403).json({ message: error.message });
+  const share = await shareService.accessShare(
+    req.params.token,
+    req.body.password,
+  );
+  if (share.resourceType !== "file") {
+    return res
+      .status(400)
+      .json({ message: "This endpoint only supports shared files" });
   }
+
+  const result = await shareService.getSharedFile(share);
+  const updatedShare = await shareService.completeSharedDownload(share._id);
+
+  return res.download(result.filePath, result.file.name, (error) => {
+    if (error) {
+      console.error("Shared file download error:", error);
+    }
+  });
+  return res.download(result.filePath, result.file.name);
 };
 
 // folder cha
@@ -193,30 +190,23 @@ exports.get = async (req, res) => {
 
 // download file bên trong Folder được share
 exports.folderDownload = async (req, res) => {
-  try {
-    const share = await shareService.accessShare(
-      req.params.token,
-      req.body.password,
-    );
-    if (share.resourceType !== "folder") {
-      return res
-        .status(400)
-        .json({ message: "Shared resource is not a folder" });
-    }
-
-    const result = await shareService.getSharedFolderFile(
-      share,
-      req.params.fileId,
-    );
-
-    try {
-      await shareService.completeSharedDownload(share._id);
-    } catch (downloadError) {
-      return res.status(403).json({ message: downloadError.message });
-    }
-
-    return res.download(result.filePath, result.file.name);
-  } catch (error) {
-    return res.status(403).json({ message: error.message });
+  const share = await shareService.accessShare(
+    req.params.token,
+    req.body.password,
+  );
+  if (share.resourceType !== "folder") {
+    return res.status(400).json({ message: "Shared resource is not a folder" });
   }
+
+  const result = await shareService.getSharedFolderFile(
+    share,
+    req.params.fileId,
+  );
+
+  await shareService.completeSharedDownload(share._id);
+  return res.download(result.filePath, result.file.name, (error) => {
+    if (error) {
+      console.error("Shared file download error:", error);
+    }
+  });
 };
