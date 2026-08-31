@@ -97,6 +97,11 @@ exports.grantPermission = async (
     throw new Error("Permission is required");
   }
 
+  const isTargetOwner = await exports.isOwner(userId, resourceId, resourceType);
+  if (isTargetOwner) {
+    throw new Error("Cannot grant permission to the resource owner");
+  }
+
   const validPermissions = [
     "read",
     "write",
@@ -120,6 +125,19 @@ exports.grantPermission = async (
   );
   if (!canManage) {
     throw new Error("You do not have permission to manage this resource!");
+  }
+
+  const currentUserIsOwner = await exports.isOwner(
+    currentUserId,
+    resourceId,
+    resourceType,
+  );
+
+  if (
+    uniquePermissions.includes("permission_management") &&
+    !currentUserIsOwner
+  ) {
+    throw new Error("Only the resource owner can grant permission_management");
   }
 
   const existing = await Permission.findOne({
@@ -173,6 +191,15 @@ exports.updatePermission = async (currentUserId, permissionId, permissions) => {
     throw new Error("Permission not found.");
   }
 
+  const isOwner = await exports.isOwner(
+    permission.user,
+    permission.resourceId,
+    permission.resourceType,
+  );
+  if (isOwner) {
+    throw new Error("Cannot modify owner's permission");
+  }
+
   const canManage = await exports.canManagePermission(
     currentUserId,
     permission.resourceId,
@@ -208,9 +235,17 @@ exports.updatePermission = async (currentUserId, permissionId, permissions) => {
 // thu hồi quyền
 exports.revokePermission = async (currentUserId, permissionId) => {
   const permission = await Permission.findById(permissionId);
-
   if (!permission) {
     throw new Error("Permission not found");
+  }
+
+  const isOwner = await exports.isOwner(
+    permission.user,
+    permission.resourceId,
+    permission.resourceType,
+  );
+  if (isOwner) {
+    throw new Error("Cannot revoke owner's permission");
   }
 
   const canManage = await exports.canManagePermission(
