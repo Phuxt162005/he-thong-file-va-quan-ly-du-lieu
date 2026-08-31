@@ -36,22 +36,16 @@ exports.deleteFile = async (req, res) => {
 
 // upload file
 exports.upload = async (req, res) => {
+  let stored = null;
+
   try {
     if (!req.file) {
-      return res.status(400).json({
-        message: "File is required",
-      });
+      return res.status(400).json({ message: "File is required" });
     }
 
     const folderId = req.body.folderId || null;
-
-    // Kiểm tra quyền trước khi lưu Storage
     await fileService.checkUploadPermission(req.user.id, folderId);
-
-    const stored = storageService.saveFile(
-      req.file.buffer,
-      req.file.originalname,
-    );
+    stored = storageService.saveFile(req.file.buffer, req.file.originalname);
 
     const file = await fileService.createFile(req.user.id, folderId, {
       originalname: req.file.originalname,
@@ -59,8 +53,19 @@ exports.upload = async (req, res) => {
       mimeType: req.file.mimetype,
       size: req.file.size,
     });
+
     return res.status(201).json({ message: "Upload successfully", file });
   } catch (error) {
+    if (stored?.storageName) {
+      try {
+        if (storageService.fileExists(stored.storageName)) {
+          storageService.deleteFile(stored.storageName);
+        }
+      } catch (cleanupError) {
+        console.error("Failed to cleanup uploaded file:", cleanupError);
+      }
+    }
+
     return res.status(500).json({ message: error.message });
   }
 };

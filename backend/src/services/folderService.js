@@ -266,36 +266,50 @@ exports.getDeletedFolders = async (userId) => {
 
 // xóa folder vĩnh viễn
 exports.permanentDeleteFolder = async (userId, folderId) => {
-  // Chỉ xử lý Folder đã bị soft delete.
-  const root = await repository.findDeletedByOwnerAndId(folderId, userId);
-  if (!root) {
+  const folder = await folderRepository.findDeletedById(folderId, userId);
+  if (!folder) {
     throw new Error("Deleted folder not found");
   }
 
-  // Lấy toàn bộ cây Folder.
-  const folders = await repository.findDeletedTree(folderId);
-  const folderIds = folders.map((folder) => folder._id);
+  const files = await fileRepository.findDeletedByFolder(folderId, userId);
+  const deletedFiles = [];
 
-  // Lấy toàn bộ File trong cây.
-  const files = await fileRepository.findDeletedByFolders(folderIds);
-
-  // Xóa File vật lý khỏi Storage.
+  // Xóa metadata File trước
   for (const file of files) {
-    if (file.storageName && storageService.fileExists(file.storageName)) {
-      storageService.deleteFile(file.storageName);
+    const deletedFile = await fileRepository.permanentDelete(file._id, userId);
+    deletedFiles.push({
+      file: deletedFile,
+      storageName: file.storageName,
+    });
+  }
+
+  // Xóa metadata Folder
+  const deletedFolder = await folderRepository.permanentDelete(
+    folderId,
+    userId,
+  );
+
+  // DB đã xóa thành công → xóa Storage
+  for (const item of deletedFiles) {
+    try {
+      if (item.storageName && storageService.fileExists(item.storageName)) {
+        storageService.deleteFile(item.storageName);
+      }
+    } catch (error) {
+      console.error(
+        `Failed to delete physical file ${item.storageName}:`,
+        error,
+      );
     }
   }
-  // Sau khi Storage đã được xử lý, xóa metadata File.
-  if (files.length > 0) {
-    await fileRepository.permanentDeleteMany(files.map((file) => file._id));
-  }
-  // Cuối cùng xóa toàn bộ Folder.
-  await repository.permanentDeleteMany(folderIds);
-  return {
+
+  await activityLogService.log(
+    userId,
+    "Folder permanent delete",
+    "folder",
     folderId,
-    deletedFolders: folderIds.length,
-    deletedFiles: files.length,
-  };
+  );
+  return deletedFolder;
 };
 
 exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {

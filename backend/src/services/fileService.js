@@ -59,82 +59,44 @@ exports.getFile = async (userId, fileId) => {
 };
 
 exports.copyFile = async (userId, fileId, destinationFolderId = null) => {
-  // File nguồn phải thuộc User và chưa bị xóa.
   const sourceFile = await fileRepository.findById(fileId);
-  if (!sourceFile) {
+  if (!sourceFile || sourceFile.isDeleted) {
     throw new Error("File not found");
   }
 
-  const owner = await permissionService.isOwner(userId, fileId, "file");
-  if (!owner) {
-    const permissions = await permissionService.resolvePermission(
-      userId,
-      fileId,
-      "file",
-    );
-    if (!permissions.includes("read")) {
-      throw new Error("You do not have permission to copy this file");
-    }
-  }
-
-  // Nếu copy vào Folder thì Folder đích phải tồn tại, chưa bị xóa và thuộc User.
-  if (destinationFolderId) {
-    const destinationFolder =
-      await folderRepository.findById(destinationFolderId);
-    if (!destinationFolder) {
-      throw new Error("Destination folder not found");
-    }
-
-    const destinationOwner = await permissionService.isOwner(
-      userId,
-      destinationFolderId,
-      "folder",
-    );
-    if (!destinationOwner) {
-      const destinationPermissions = await permissionService.resolvePermission(
-        userId,
-        destinationFolderId,
-        "folder",
-      );
-      if (!destinationPermissions.includes("write")) {
-        throw new Error("You do not have permission to copy into this folder");
-      }
-    }
-  }
-
-  // File vật lý phải tồn tại.
-  if (
-    !sourceFile.storageName ||
-    !storageService.fileExists(sourceFile.storageName)
-  ) {
-    throw new Error("Physical file not found");
-  }
-
-  // Copy File vật lý.
-  const copiedStorage = storageService.copyFile(
-    sourceFile.storageName,
-    sourceFile.name,
+  const hasPermission = await permissionService.resolvePermission(
+    userId,
+    sourceFile._id,
+    "file",
   );
+  if (!hasPermission.includes("read")) {
+    throw new Error("You do not have permission to copy this file");
+  }
+
+  await exports.checkUploadPermission(userId, destinationFolderId);
+  let copied = null;
 
   try {
-    // Tạo metadata mới.
-    const copiedFile = await fileRepository.copy({
-      name: sourceFile.name,
+    copied = storageService.copyFile(sourceFile.storageName, sourceFile.name);
+    const newFile = await fileRepository.create({
       owner: userId,
-      folder: destinationFolderId || null,
-      storageName: copiedStorage.storageName,
+      folder: destinationFolderId,
+      name: sourceFile.name,
+      storageName: copied.storageName,
       mimeType: sourceFile.mimeType,
       size: sourceFile.size,
-      isDeleted: false,
-      deletedAt: null,
     });
-    await activityLogService.log(userId, "File copy", "file", copiedFile._id);
 
-    return copiedFile;
+    return newFile;
   } catch (error) {
-    // Nếu MongoDB tạo metadata thất bại phải xóa File vật lý vừa copy.
-    if (storageService.fileExists(copiedStorage.storageName)) {
-      storageService.deleteFile(copiedStorage.storageName);
+    if (copied?.storageName) {
+      try {
+        if (storageService.fileExists(copied.storageName)) {
+          storageService.deleteFile(copied.storageName);
+        }
+      } catch (cleanupError) {
+        console.error("Failed to cleanup copied file:", cleanupError);
+      }
     }
     throw error;
   }
@@ -250,18 +212,20 @@ exports.getDeletedFiles = async (userId) => {
 
 // khôi phục File
 exports.restoreFile = async (userId, fileId) => {
-  const file = await fileRepository.findDeletedByIdWithFolder(fileId, userId);
+  const file = await fileRepository.findDeletedById(fileId, userId);
   if (!file) {
     throw new Error("Deleted file not found");
   }
-
-  if (file.folder && file.folder.isDeleted) {
-    throw new Error(
-      "Cannot restore this file because its parent folder is deleted",
-    );
+  if (!file.storageName) {
+    throw new Error("File storage information is missing");
   }
 
-  const restoredFile = await fileRepository.restore(fileId);
+  if (!storageService.fileExists(file.storageName)) {
+    throw new Error("Physical file no longer exists and cannot be restored");
+  }
+
+  const restoredFile = await fileRepository.restore(fileId, userId);
+
   await activityLogService.log(userId, "File restore", "file", fileId);
   return restoredFile;
 };
@@ -272,13 +236,20 @@ exports.permanentDeleteFile = async (userId, fileId) => {
   if (!file) {
     throw new Error("Deleted file not found");
   }
-  // Xóa file vật lý
-  if (file.storageName && storageService.fileExists(file.storageName)) {
-    storageService.deleteFile(file.storageName);
-  }
-  // Xóa metadata
+
+  // Xóa metadata trong Database trước.
   const deletedFile = await fileRepository.permanentDelete(fileId, userId);
-  // Ghi lịch sử
+
+  // Sau khi Database đã xóa thành công, mới xóa File vật lý.
+  try {
+    if (file.storageName && storageService.fileExists(file.storageName)) {
+      storageService.deleteFile(file.storageName);
+    }
+  } catch (error) {
+    console.error("Failed to delete physical file:", error);
+
+    // Không rollback Database ở đây vì metadata đã bị xóa thành công. Có thể xử lý orphan storage bằng cleanup job.
+  }
   await activityLogService.log(userId, "File permanent delete", "file", fileId);
   return deletedFile;
 };
