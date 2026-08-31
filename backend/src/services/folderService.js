@@ -6,9 +6,14 @@ const storageService = require("./storageService");
 
 // tạo thư mục
 exports.createFolder = async (userId, data) => {
+  if (!data || typeof data.name !== "string" || !data.name.trim()) {
+    throw new Error("Folder name is required");
+  }
+
   data.name = data.name.trim();
   data.owner = userId;
 
+  // phần code còn lại giữ nguyên
   // Nếu tạo Folder bên trong một Folder khác thì phải có quyền write trên Folder cha.
   if (data.parentFolder) {
     const parent = await repository.findById(data.parentFolder);
@@ -43,7 +48,13 @@ exports.getFolders = async (userId, parentFolder = null) => {
 
 // đổi tên Folder
 exports.renameFolder = async (userId, folderId, name) => {
+  if (typeof name !== "string" || !name.trim()) {
+    throw new Error("Folder name is required");
+  }
+
   name = name.trim();
+
+  // phần code còn lại giữ nguyên
   if (!name) {
     throw new Error("Folder name is required");
   }

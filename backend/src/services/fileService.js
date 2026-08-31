@@ -166,10 +166,13 @@ exports.downloadFile = async (userId, fileId) => {
       fileId,
       "file",
     );
-
     if (!permissions.includes("download")) {
       throw new Error("You do not have permission to download this file");
     }
+  }
+
+  if (!file.storageName || !storageService.fileExists(file.storageName)) {
+    throw new Error("Physical file not found");
   }
 
   // Chỉ trả về khi File vật lý thực sự tồn tại.
@@ -177,7 +180,6 @@ exports.downloadFile = async (userId, fileId) => {
 
   // Ghi Activity Log sau khi đã xác thực quyền và Storage tồn tại.
   await activityLogService.log(userId, "File download", "file", fileId);
-
   return { file, filePath };
 };
 
@@ -201,6 +203,10 @@ exports.previewFile = async (userId, fileId) => {
     if (!permissions.includes("read")) {
       throw new Error("You do not have permission to preview this file");
     }
+  }
+
+  if (!file.storageName || !storageService.fileExists(file.storageName)) {
+    throw new Error("Physical file not found");
   }
 
   const filePath = storageService.getDownloadPath(file.storageName);
