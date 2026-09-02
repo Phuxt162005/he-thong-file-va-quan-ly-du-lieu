@@ -10,11 +10,19 @@ exports.findByLoginName = async (username) => {
   if (!username) {
     throw new Error("Username is required");
   }
-
   return await User.findOne({ username: username.trim() }).select("-password");
 };
 
 // cập nhật thông tin người dùng
 exports.updateProfile = (id, data) => {
-  return User.findByIdAndUpdate(id, data, { new: true });
+  const allowedData = {
+    username: data.username,
+    email: data.email,
+    avatar: data.avatar,
+  };
+
+  return User.findByIdAndUpdate(id, allowedData, {
+    new: true,
+    runValidators: true,
+  }).select("-password");
 };
