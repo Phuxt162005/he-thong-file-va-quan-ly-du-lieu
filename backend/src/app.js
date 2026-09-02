@@ -12,6 +12,7 @@ app.use("/api/files", require("./routes/fileRoute.js"));
 app.use("/api/shares", require("./routes/shareRoute.js"));
 app.use("/api/permissions", require("./routes/permissionRoute.js"));
 app.use("/api/activities", require("./routes/activityLogRoute.js"));
+app.use("/api/audit-logs", require("./routes/auditLogRoute.js"));
 
 app.use(errorHandler);
 
