@@ -9,7 +9,6 @@ exports.log = async ({
   details = {},
   ipAddress = null,
 }) => {
-  // ghi nhận sự kiện
   return await repository.create({
     user: userId,
     action,
@@ -19,4 +18,8 @@ exports.log = async ({
     details,
     ipAddress,
   });
+};
+
+exports.getDeniedLogs = async () => {
+  return await repository.findDenied();
 };
