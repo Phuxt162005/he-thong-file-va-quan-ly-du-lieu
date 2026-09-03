@@ -23,10 +23,21 @@ exports.create = (data) => {
 
 // cập nhật permission
 exports.update = (id, permissions) => {
-  return Permission.findByIdAndUpdate(id, { permissions }, { new: true });
+  return Permission.findByIdAndUpdate(
+    id,
+    { $set: { permissions } },
+    { new: true, runValidators: true },
+  );
 };
 
 // thu hồi permission
 exports.remove = (id) => {
   return Permission.findByIdAndDelete(id);
+};
+
+exports.removeByResource = (resourceId, resourceType) => {
+  return Permission.deleteMany({
+    resourceId,
+    resourceType,
+  });
 };

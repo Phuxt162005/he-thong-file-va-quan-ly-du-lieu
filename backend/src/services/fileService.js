@@ -2,6 +2,7 @@ const fileRepository = require("../repositories/fileRepository");
 const activityLogService = require("./activityLogService");
 const permissionService = require("./permissionService");
 const storageService = require("./storageService");
+const permissionRepository = require("../repositories/permissionRepository");
 const folderRepository = require("../repositories/folderRepository");
 
 exports.createFile = async (userId, folderId, fileData) => {

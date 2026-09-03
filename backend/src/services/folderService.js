@@ -322,9 +322,15 @@ exports.permanentDeleteFolder = async (userId, folderId) => {
   }
 
   const folderIds = folders.map((item) => item._id);
+  for (const id of folderIds) {
+    await permissionRepository.removeByResource(id, "folder");
+  }
 
   // Lấy toàn bộ File đã xóa trong toàn bộ cây Folder
   const files = await fileRepository.findDeletedByFolders(folderIds);
+  for (const file of files) {
+    await permissionRepository.removeByResource(file._id, "file");
+  }
 
   // Lưu storageName trước khi xóa metadata
   const storageNames = files.map((file) => file.storageName).filter(Boolean);

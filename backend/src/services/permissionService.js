@@ -2,6 +2,7 @@ const permissionRepository = require("../repositories/permissionRepository");
 const Permission = require("../models/Permission");
 const Folder = require("../models/Folder");
 const File = require("../models/File");
+const User = require("../models/User");
 
 // kiểm tra người dùng có quyền quản lý Permission hay không
 exports.canManagePermission = async (userId, resourceId, resourceType) => {
@@ -97,6 +98,16 @@ exports.grantPermission = async (
     throw new Error("Permission is required");
   }
 
+  const getResource = async (resourceId, resourceType) => {
+    if (resourceType === "file") {
+      return await File.findById(resourceId);
+    }
+    if (resourceType === "folder") {
+      return await Folder.findById(resourceId);
+    }
+    return null;
+  };
+
   const isTargetOwner = await exports.isOwner(userId, resourceId, resourceType);
   if (isTargetOwner) {
     throw new Error("Cannot grant permission to the resource owner");
@@ -145,12 +156,21 @@ exports.grantPermission = async (
     resourceId,
     resourceType,
   });
-
   if (existing) {
     const mergedPermissions = [
       ...new Set([...existing.permissions, ...uniquePermissions]),
     ];
     return await permissionRepository.update(existing._id, mergedPermissions);
+  }
+
+  const resource = await getResource(resourceId, resourceType);
+  if (!resource) {
+    throw new Error("Resource not found");
+  }
+
+  const targetUser = await User.findById(userId);
+  if (!targetUser) {
+    throw new Error("Target user not found");
   }
 
   return await permissionRepository.create({
