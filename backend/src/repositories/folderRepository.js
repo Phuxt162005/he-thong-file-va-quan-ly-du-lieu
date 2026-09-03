@@ -25,8 +25,8 @@ exports.findById = (folderId) => {
 exports.rename = (folderId, name) => {
   return Folder.findOneAndUpdate(
     { _id: folderId, isDeleted: false },
-    { name },
-    { new: true },
+    { $set: { name } },
+    { new: true, runValidators: true },
   );
 };
 
@@ -43,8 +43,8 @@ exports.softDelete = (folderId) => {
 exports.move = (folderId, parentFolder) => {
   return Folder.findOneAndUpdate(
     { _id: folderId, isDeleted: false },
-    { parentFolder },
-    { new: true },
+    { $set: { parentFolder } },
+    { new: true, runValidators: true },
   );
 };
 
@@ -197,6 +197,24 @@ exports.findByOwnerAndParent = (ownerId, parentFolder = null) => {
     parentFolder,
     isDeleted: false,
   }).sort({ name: 1 });
+};
+
+exports.findDuplicateName = async (
+  ownerId,
+  parentFolder,
+  name,
+  excludeFolderId = null,
+) => {
+  const query = {
+    owner: ownerId,
+    parentFolder,
+    name,
+    isDeleted: false,
+  };
+  if (excludeFolderId) {
+    query._id = { $ne: excludeFolderId };
+  }
+  return await Folder.findOne(query);
 };
 
 exports.permanentDeleteMany = (folderIds) => {

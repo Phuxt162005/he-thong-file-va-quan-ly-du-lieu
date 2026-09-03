@@ -6,39 +6,59 @@ const storageService = require("./storageService");
 
 // tạo thư mục
 exports.createFolder = async (userId, data) => {
-  if (!data || typeof data.name !== "string" || !data.name.trim()) {
+  if (!data || typeof data.name !== "string") {
     throw new Error("Folder name is required");
   }
 
-  data.name = data.name.trim();
-  data.owner = userId;
+  const name = data.name.trim();
+  if (!name) {
+    throw new Error("Folder name is required");
+  }
+  if (name.length > 255) {
+    throw new Error("Folder name must not exceed 255 characters");
+  }
+  if (/[\/\\:*?"<>|]/.test(name)) {
+    throw new Error("Folder name contains invalid characters");
+  }
 
-  // phần code còn lại giữ nguyên
-  // Nếu tạo Folder bên trong một Folder khác thì phải có quyền write trên Folder cha.
-  if (data.parentFolder) {
-    const parent = await repository.findById(data.parentFolder);
+  const parentFolder = data.parentFolder || null;
+  const duplicate = await repository.findDuplicateName(
+    userId,
+    parentFolder,
+    name,
+  );
+  if (duplicate) {
+    throw new Error("A folder with the same name already exists");
+  }
+
+  const folderData = {
+    ...data,
+    name,
+    owner: userId,
+    parentFolder,
+  };
+  if (parentFolder) {
+    const parent = await repository.findById(parentFolder);
     if (!parent) {
       throw new Error("Parent folder not found");
     }
-
     const isOwner = await permissionService.isOwner(
       userId,
-      data.parentFolder,
+      parentFolder,
       "folder",
     );
     if (!isOwner) {
       const permissions = await permissionService.resolvePermission(
         userId,
-        data.parentFolder,
+        parentFolder,
         "folder",
       );
-
       if (!permissions.includes("write")) {
         throw new Error("You do not have permission to create a folder here");
       }
     }
   }
-  return await repository.create(data);
+  return await repository.create(folderData);
 };
 
 // lấy folder theo folder parent
@@ -48,15 +68,19 @@ exports.getFolders = async (userId, parentFolder = null) => {
 
 // đổi tên Folder
 exports.renameFolder = async (userId, folderId, name) => {
-  if (typeof name !== "string" || !name.trim()) {
+  if (typeof name !== "string") {
     throw new Error("Folder name is required");
   }
 
   name = name.trim();
-
-  // phần code còn lại giữ nguyên
   if (!name) {
     throw new Error("Folder name is required");
+  }
+  if (name.length > 255) {
+    throw new Error("Folder name must not exceed 255 characters");
+  }
+  if (/[\/\\:*?"<>|]/.test(name)) {
+    throw new Error("Folder name contains invalid characters");
   }
 
   const folder = await repository.findById(folderId);
@@ -71,10 +95,19 @@ exports.renameFolder = async (userId, folderId, name) => {
       folderId,
       "folder",
     );
-
     if (!permissions.includes("write")) {
       throw new Error("You do not have permission to rename this folder");
     }
+  }
+
+  const duplicate = await repository.findDuplicateName(
+    folder.owner,
+    folder.parentFolder,
+    name,
+    folderId,
+  );
+  if (duplicate) {
+    throw new Error("A folder with the same name already exists");
   }
   return await repository.rename(folderId, name);
 };
