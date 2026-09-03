@@ -60,6 +60,25 @@ exports.getFile = async (userId, fileId) => {
 };
 
 exports.getFilesByFolder = async (userId, folderId = null) => {
+  if (folderId) {
+    const folder = await folderRepository.findById(folderId);
+    if (!folder) {
+      return null;
+    }
+
+    const owner = await permissionService.isOwner(userId, folderId, "folder");
+    if (!owner) {
+      const permissions = await permissionService.resolvePermission(
+        userId,
+        folderId,
+        "folder",
+      );
+      if (!permissions.includes("read")) {
+        throw new Error("You do not have permission to read this folder");
+      }
+    }
+  }
+
   const files = await fileRepository.findByFolder(folderId);
   const visibleFiles = [];
   for (const file of files) {
@@ -278,7 +297,10 @@ exports.restoreFile = async (userId, fileId) => {
     throw new Error("Physical file no longer exists and cannot be restored");
   }
 
-  const restoredFile = await fileRepository.restore(fileId, userId);
+  const restoredFile = await fileRepository.restore(fileId);
+  if (!restoredFile) {
+    throw new Error("File could not be restored");
+  }
 
   await activityLogService.log(userId, "File restore", "file", fileId);
   return restoredFile;
@@ -340,6 +362,10 @@ exports.renameFile = async (userId, fileId, newName) => {
   }
 
   const renamedFile = await fileRepository.updateName(fileId, name);
+  if (!renamedFile) {
+    throw new Error("File could not be renamed");
+  }
+
   await activityLogService.log(userId, "File rename", "file", fileId);
   return renamedFile;
 };

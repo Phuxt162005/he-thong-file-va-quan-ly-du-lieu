@@ -113,6 +113,6 @@ exports.updateName = async (fileId, name) => {
   return await File.findOneAndUpdate(
     { _id: fileId, isDeleted: false },
     { $set: { name } },
-    { new: true },
+    { new: true, runValidators: true },
   );
 };
