@@ -173,6 +173,10 @@ exports.grantPermission = async (
     throw new Error("Target user not found");
   }
 
+  if (currentUserId.toString() === userId.toString()) {
+    throw new Error("Cannot grant permission to yourself");
+  }
+
   return await permissionRepository.create({
     user: userId,
     resourceId,
