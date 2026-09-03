@@ -29,6 +29,8 @@ router.get("/trash", auth, controller.getTrash);
 // File
 // ========================
 
+router.get("/", auth, controller.getFilesByFolder);
+
 // download
 router.get("/:id/download", auth, controller.download);
 

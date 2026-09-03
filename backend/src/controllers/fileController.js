@@ -174,3 +174,14 @@ exports.copy = async (req, res) => {
     return res.status(403).json({ message: error.message });
   }
 };
+
+exports.getFilesByFolder = async (req, res) => {
+  try {
+    const folderId = req.query.folderId || null;
+    const files = await fileService.getFilesByFolder(req.user.id, folderId);
+
+    return res.json({ files });
+  } catch (error) {
+    return res.status(403).json({ message: error.message });
+  }
+};

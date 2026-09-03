@@ -59,6 +59,28 @@ exports.getFile = async (userId, fileId) => {
   return file;
 };
 
+exports.getFilesByFolder = async (userId, folderId = null) => {
+  const files = await fileRepository.findByFolder(folderId);
+  const visibleFiles = [];
+  for (const file of files) {
+    const owner = await permissionService.isOwner(userId, file._id, "file");
+    if (owner) {
+      visibleFiles.push(file);
+      continue;
+    }
+
+    const permissions = await permissionService.resolvePermission(
+      userId,
+      file._id,
+      "file",
+    );
+    if (permissions.includes("read")) {
+      visibleFiles.push(file);
+    }
+  }
+  return visibleFiles;
+};
+
 exports.copyFile = async (userId, fileId, destinationFolderId = null) => {
   const sourceFile = await fileRepository.findById(fileId);
 

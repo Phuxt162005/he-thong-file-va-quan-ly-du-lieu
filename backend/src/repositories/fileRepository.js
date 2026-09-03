@@ -15,6 +15,13 @@ exports.findById = (id) => {
   return File.findOne({ _id: id, isDeleted: false });
 };
 
+exports.findByFolder = (folderId) => {
+  return File.find({
+    folder: folderId,
+    isDeleted: false,
+  }).sort({ name: 1 });
+};
+
 // đánh dấu file đã xóa
 exports.softDelete = (id) => {
   return File.findByIdAndUpdate(

@@ -85,7 +85,27 @@ exports.getFolders = async (userId, parentFolder = null) => {
       }
     }
   }
-  return await repository.findVisibleByParent(userId, parentFolder);
+
+  const folders = await repository.findByOwnerAndParent(userId, parentFolder);
+
+  const visibleFolders = [];
+  for (const folder of folders) {
+    const owner = await permissionService.isOwner(userId, folder._id, "folder");
+    if (owner) {
+      visibleFolders.push(folder);
+      continue;
+    }
+
+    const permissions = await permissionService.resolvePermission(
+      userId,
+      folder._id,
+      "folder",
+    );
+    if (permissions.includes("read")) {
+      visibleFolders.push(folder);
+    }
+  }
+  return visibleFolders;
 };
 
 // đổi tên Folder
