@@ -23,6 +23,14 @@ exports.initiateUpload = async (
     throw new Error("File size is invalid");
   }
 
+  if (
+    !Number.isInteger(chunkSize) ||
+    chunkSize <= 0 ||
+    chunkSize > 10 * 1024 * 1024
+  ) {
+    throw new Error("Chunk size is invalid");
+  }
+
   // Kiểm tra quyền write trước khi tạo Upload Session.
   if (folderId) {
     const owner = await permissionService.isOwner(userId, folderId, "folder");
