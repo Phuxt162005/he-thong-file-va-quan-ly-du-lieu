@@ -3,6 +3,7 @@ const permissionService = require("./permissionService");
 const activityLogService = require("./activityLogService");
 const fileRepository = require("../repositories/fileRepository");
 const storageService = require("./storageService");
+const permissionRepository = require("../repositories/permissionRepository");
 
 // tạo thư mục
 exports.createFolder = async (userId, data) => {

@@ -22,6 +22,12 @@ exports.findById = (folderId) => {
   });
 };
 
+exports.findChildrenByIds = (parentIds) => {
+  return Folder.find({
+    parentFolder: { $in: parentIds },
+  }).select("_id parentFolder");
+};
+
 // đổi tên Folder
 exports.rename = (folderId, name) => {
   return Folder.findOneAndUpdate(
