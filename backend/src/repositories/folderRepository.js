@@ -1,4 +1,5 @@
 const Folder = require("../models/Folder");
+const Permission = require("../models/Permission");
 
 // tạo thư mục mới
 exports.create = (data) => {
@@ -260,4 +261,32 @@ exports.isDescendant = async (folderId, possibleParentId) => {
     current = await Folder.findById(current.parentFolder);
   }
   return false;
+};
+
+exports.findVisibleByParent = async (userId, parentFolder = null) => {
+  const ownedFolders = await Folder.find({
+    owner: userId,
+    parentFolder,
+    isDeleted: false,
+  }).sort({ name: 1 });
+  const permissions = await Permission.find({
+    user: userId,
+    resourceType: "folder",
+    permissions: "read",
+  });
+  const permittedFolderIds = permissions.map((permission) =>
+    permission.resourceId.toString(),
+  );
+  const sharedFolders = await Folder.find({
+    _id: { $in: permittedFolderIds },
+    parentFolder,
+    isDeleted: false,
+    owner: { $ne: userId },
+  }).sort({ name: 1 });
+  const folderMap = new Map();
+
+  [...ownedFolders, ...sharedFolders].forEach((folder) => {
+    folderMap.set(folder._id.toString(), folder);
+  });
+  return [...folderMap.values()].sort((a, b) => a.name.localeCompare(b.name));
 };

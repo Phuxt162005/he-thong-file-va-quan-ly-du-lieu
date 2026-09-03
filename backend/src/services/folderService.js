@@ -63,7 +63,29 @@ exports.createFolder = async (userId, data) => {
 
 // lấy folder theo folder parent
 exports.getFolders = async (userId, parentFolder = null) => {
-  return await repository.findByOwnerAndParent(userId, parentFolder);
+  if (parentFolder) {
+    const folder = await repository.findById(parentFolder);
+    if (!folder) {
+      return null;
+    }
+
+    const owner = await permissionService.isOwner(
+      userId,
+      parentFolder,
+      "folder",
+    );
+    if (!owner) {
+      const permissions = await permissionService.resolvePermission(
+        userId,
+        parentFolder,
+        "folder",
+      );
+      if (!permissions.includes("read")) {
+        throw new Error("You do not have permission to read this folder");
+      }
+    }
+  }
+  return await repository.findVisibleByParent(userId, parentFolder);
 };
 
 // đổi tên Folder
@@ -173,12 +195,30 @@ exports.getChildren = async (userId, folderId) => {
       folderId,
       "folder",
     );
-
     if (!permissions.includes("read")) {
       throw new Error("You do not have permission to read this folder");
     }
   }
-  return await repository.findChildren(folderId);
+
+  const children = await repository.findChildren(folderId);
+  const visibleChildren = [];
+  for (const child of children) {
+    const owner = await permissionService.isOwner(userId, child._id, "folder");
+    if (owner) {
+      visibleChildren.push(child);
+      continue;
+    }
+
+    const permissions = await permissionService.resolvePermission(
+      userId,
+      child._id,
+      "folder",
+    );
+    if (permissions.includes("read")) {
+      visibleChildren.push(child);
+    }
+  }
+  return visibleChildren;
 };
 
 // di chuyển Folder
