@@ -1,7 +1,8 @@
 const service = require("../services/permissionService");
+const asyncHandler = require("../middleware/asyncHandler");
 
 // cấp quyền
-exports.grant = async (req, res) => {
+exports.grant = asyncHandler(async (req, res) => {
   try {
     const permission = await service.grantPermission(
       req.user.id,
@@ -15,10 +16,10 @@ exports.grant = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
 // xem danh sách permission
-exports.getByResource = async (req, res) => {
+exports.getByResource = asyncHandler(async (req, res) => {
   try {
     const permissions = await service.getPermissions(
       req.user.id,
@@ -30,10 +31,10 @@ exports.getByResource = async (req, res) => {
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
-};
+});
 
 // cập nhật quyền
-exports.update = async (req, res) => {
+exports.update = asyncHandler(async (req, res) => {
   try {
     const permission = await service.updatePermission(
       req.user.id,
@@ -45,14 +46,14 @@ exports.update = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
 // thu hồi quyền
-exports.revoke = async (req, res) => {
+exports.revoke = asyncHandler(async (req, res) => {
   try {
     await service.revokePermission(req.user.id, req.params.id);
     return res.json({ message: "Permission revoked successfully" });
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});

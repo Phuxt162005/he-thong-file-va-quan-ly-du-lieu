@@ -1,9 +1,10 @@
 const shareService = require("../services/shareService");
 const File = require("../models/File");
 const Folder = require("../models/Folder");
+const asyncHandler = require("../middleware/asyncHandler");
 
 // tạo liên kết chia sẻ
-exports.create = async (req, res) => {
+exports.create = asyncHandler(async (req, res) => {
   try {
     const share = await shareService.createShare(req.user.id, req.body);
 
@@ -13,10 +14,10 @@ exports.create = async (req, res) => {
   } catch (err) {
     return res.status(400).json({ message: err.message });
   }
-};
+});
 
 // truy cập liên kết chia sẻ
-exports.access = async (req, res) => {
+exports.access = asyncHandler(async (req, res) => {
   try {
     const share = await shareService.accessShare(
       req.params.token,
@@ -53,11 +54,10 @@ exports.access = async (req, res) => {
   } catch (err) {
     return res.status(403).json({ message: err.message });
   }
-};
+});
 
 // download
-// download
-exports.download = async (req, res) => {
+exports.download = asyncHandler(async (req, res) => {
   try {
     const share = await shareService.accessShare(
       req.params.token,
@@ -81,10 +81,10 @@ exports.download = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
 // folder cha
-exports.folder = async (req, res) => {
+exports.folder = asyncHandler(async (req, res) => {
   try {
     const share = await shareService.accessShare(
       req.params.token,
@@ -110,10 +110,10 @@ exports.folder = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
 // folder con
-exports.folderChildren = async (req, res) => {
+exports.folderChildren = asyncHandler(async (req, res) => {
   try {
     const share = await shareService.accessShare(
       req.params.token,
@@ -138,10 +138,10 @@ exports.folderChildren = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
 // vô hiệu hóa Share Link
-exports.disable = async (req, res) => {
+exports.disable = asyncHandler(async (req, res) => {
   try {
     const share = await shareService.disableShare(req.user.id, req.params.id);
 
@@ -152,10 +152,10 @@ exports.disable = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
 // danh sách Share Link của User
-exports.list = async (req, res) => {
+exports.list = asyncHandler(async (req, res) => {
   try {
     const shares = await shareService.getMyShares(
       req.user.id,
@@ -166,10 +166,10 @@ exports.list = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
-};
+});
 
 // update share link
-exports.update = async (req, res) => {
+exports.update = asyncHandler(async (req, res) => {
   try {
     const share = await shareService.updateShare(
       req.user.id,
@@ -181,9 +181,9 @@ exports.update = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
-exports.get = async (req, res) => {
+exports.get = asyncHandler(async (req, res) => {
   try {
     const share = await shareService.getShare(req.user.id, req.params.id);
 
@@ -191,10 +191,10 @@ exports.get = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
 // download file bên trong Folder được share
-exports.folderDownload = async (req, res) => {
+exports.folderDownload = asyncHandler(async (req, res) => {
   try {
     const share = await shareService.accessShare(
       req.params.token,
@@ -221,4 +221,4 @@ exports.folderDownload = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});

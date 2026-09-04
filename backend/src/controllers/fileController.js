@@ -1,8 +1,9 @@
 const fileService = require("../services/fileService");
 const storageService = require("../services/storageService");
+const asyncHandler = require("../middleware/asyncHandler");
 
 // lấy file
-exports.getFile = async (req, res) => {
+exports.getFile = asyncHandler(async (req, res) => {
   try {
     const file = await fileService.getFile(req.user.id, req.params.id);
     if (!file) {
@@ -15,10 +16,10 @@ exports.getFile = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
 // xóa file
-exports.deleteFile = async (req, res) => {
+exports.deleteFile = asyncHandler(async (req, res) => {
   try {
     const file = await fileService.deleteFile(req.user.id, req.params.id);
     if (!file) {
@@ -32,10 +33,10 @@ exports.deleteFile = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
 // upload file
-exports.upload = async (req, res) => {
+exports.upload = asyncHandler(async (req, res) => {
   let stored = null;
 
   try {
@@ -68,10 +69,10 @@ exports.upload = async (req, res) => {
 
     return res.status(500).json({ message: error.message });
   }
-};
+});
 
 // download
-exports.download = async (req, res) => {
+exports.download = asyncHandler(async (req, res) => {
   try {
     const result = await fileService.downloadFile(req.user.id, req.params.id);
     if (!result) {
@@ -82,10 +83,10 @@ exports.download = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
 // preview
-exports.preview = async (req, res) => {
+exports.preview = asyncHandler(async (req, res) => {
   try {
     const result = await fileService.previewFile(req.user.id, req.params.id);
     if (!result) {
@@ -105,10 +106,10 @@ exports.preview = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
 // restore
-exports.restore = async (req, res) => {
+exports.restore = asyncHandler(async (req, res) => {
   try {
     const file = await fileService.restoreFile(req.user.id, req.params.id);
 
@@ -119,9 +120,9 @@ exports.restore = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
-exports.getTrash = async (req, res) => {
+exports.getTrash = asyncHandler(async (req, res) => {
   try {
     const files = await fileService.getDeletedFiles(req.user.id);
     return res.json({
@@ -130,10 +131,10 @@ exports.getTrash = async (req, res) => {
   } catch (error) {
     return res.status(500).json({ message: error.message });
   }
-};
+});
 
 // xóa vĩnh viễn File
-exports.permanentDelete = async (req, res) => {
+exports.permanentDelete = asyncHandler(async (req, res) => {
   try {
     const file = await fileService.permanentDeleteFile(
       req.user.id,
@@ -144,9 +145,9 @@ exports.permanentDelete = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
-exports.rename = async (req, res) => {
+exports.rename = asyncHandler(async (req, res) => {
   try {
     const file = await fileService.renameFile(
       req.user.id,
@@ -158,10 +159,10 @@ exports.rename = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
 // copy file
-exports.copy = async (req, res) => {
+exports.copy = asyncHandler(async (req, res) => {
   try {
     const file = await fileService.copyFile(
       req.user.id,
@@ -173,9 +174,9 @@ exports.copy = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});
 
-exports.getFilesByFolder = async (req, res) => {
+exports.getFilesByFolder = asyncHandler(async (req, res) => {
   try {
     const folderId = req.query.folderId || null;
     const files = await fileService.getFilesByFolder(req.user.id, folderId);
@@ -184,4 +185,4 @@ exports.getFilesByFolder = async (req, res) => {
   } catch (error) {
     return res.status(403).json({ message: error.message });
   }
-};
+});

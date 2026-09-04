@@ -1,16 +1,18 @@
 const userService = require("../services/userService");
+const asyncHandler = require("../middleware/asyncHandler");
 
 // lấy thông tin cá nhân
-exports.getProfile = async (req, res) => {
+exports.getProfile = asyncHandler(async (req, res) => {
   try {
     const user = await userService.getProfile(req.user.id);
     return res.json(user);
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
-};
+});
+
 // tìm người dùng theo tên đăng nhập
-exports.findByLoginName = async (req, res) => {
+exports.findByLoginName = asyncHandler(async (req, res) => {
   try {
     const user = await userService.findByLoginName(req.query.username);
     if (!user) {
@@ -19,14 +21,12 @@ exports.findByLoginName = async (req, res) => {
 
     return res.json(user);
   } catch (error) {
-    return res.status(400).json({
-      message: error.message,
-    });
+    return res.status(400).json({ message: error.message });
   }
-};
+});
 
 // cập nhật hồ sơ
-exports.updateProfile = async (req, res) => {
+exports.updateProfile = asyncHandler(async (req, res) => {
   try {
     const { username, email, avatar } = req.body;
     const user = await userService.updateProfile(req.user.id, {
@@ -39,4 +39,4 @@ exports.updateProfile = async (req, res) => {
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
-};
+});
