@@ -1,6 +1,8 @@
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const crypto = require("crypto");
+const RefreshToken = require("../models/RefreshToken");
 
 const auditLogService = require("./auditLogService");
 const httpError = require("../utils/httpError");
@@ -41,8 +43,17 @@ exports.login = async (username, password, ipAddress) => {
     process.env.JWT_SECRET,
     { expiresIn: "1h" },
   );
+
+  const refreshToken = crypto.randomBytes(64).toString("hex");
+
+  await RefreshToken.create({
+    user: user._id,
+    token: refreshToken,
+    expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
+  });
+
   const userData = user.toObject();
   delete userData.password;
 
-  return { token, user: userData };
+  return { token, refreshToken, user: userData };
 };
