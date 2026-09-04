@@ -4,6 +4,7 @@ const permissionService = require("./permissionService");
 const storageService = require("./storageService");
 const permissionRepository = require("../repositories/permissionRepository");
 const folderRepository = require("../repositories/folderRepository");
+const httpError = require("../utils/httpError");
 
 exports.createFile = async (userId, folderId, fileData) => {
   // Nếu upload vào Root thì không cần kiểm tra Folder.
@@ -19,6 +20,7 @@ exports.createFile = async (userId, folderId, fileData) => {
       if (!permissions.includes("write")) {
         throw new Error(
           "You do not have permission to upload files to this folder",
+          403,
         );
       }
     }
@@ -74,7 +76,7 @@ exports.getFilesByFolder = async (userId, folderId = null) => {
         "folder",
       );
       if (!permissions.includes("read")) {
-        throw new Error("You do not have permission to read this folder");
+        throw new Error("You do not have permission to read this folder", 403);
       }
     }
   }
@@ -104,7 +106,7 @@ exports.copyFile = async (userId, fileId, destinationFolderId = null) => {
   const sourceFile = await fileRepository.findById(fileId);
 
   if (!sourceFile || sourceFile.isDeleted) {
-    throw new Error("File not found");
+    throw new Error("File not found", 404);
   }
 
   // Owner luôn được phép copy
@@ -118,7 +120,7 @@ exports.copyFile = async (userId, fileId, destinationFolderId = null) => {
     );
 
     if (!permissions.includes("read")) {
-      throw new Error("You do not have permission to copy this file");
+      throw new Error("You do not have permission to copy this file", 403);
     }
   }
 
@@ -133,7 +135,7 @@ exports.copyFile = async (userId, fileId, destinationFolderId = null) => {
       !sourceFile.storageName ||
       !storageService.fileExists(sourceFile.storageName)
     ) {
-      throw new Error("Physical file not found");
+      throw new Error("Physical file not found, 404");
     }
 
     // Copy File vật lý
@@ -185,7 +187,7 @@ exports.deleteFile = async (userId, fileId) => {
     );
 
     if (!permissions.includes("delete")) {
-      throw new Error("You do not have permission to delete this file");
+      throw new Error("You do not have permission to delete this file", 403);
     }
   }
 
@@ -209,12 +211,12 @@ exports.downloadFile = async (userId, fileId) => {
       "file",
     );
     if (!permissions.includes("download")) {
-      throw new Error("You do not have permission to download this file");
+      throw new Error("You do not have permission to download this file", 403);
     }
   }
 
   if (!file.storageName || !storageService.fileExists(file.storageName)) {
-    throw new Error("Physical file not found");
+    throw new Error("Physical file not found", 404);
   }
 
   // Chỉ trả về khi File vật lý thực sự tồn tại.
@@ -243,12 +245,12 @@ exports.previewFile = async (userId, fileId) => {
 
     // Preview cần quyền read.
     if (!permissions.includes("read")) {
-      throw new Error("You do not have permission to preview this file");
+      throw new Error("You do not have permission to preview this file", 403);
     }
   }
 
   if (!file.storageName || !storageService.fileExists(file.storageName)) {
-    throw new Error("Physical file not found");
+    throw new Error("Physical file not found", 404);
   }
 
   const filePath = storageService.getDownloadPath(file.storageName);
@@ -273,6 +275,7 @@ exports.checkUploadPermission = async (userId, folderId) => {
   if (!permissions.includes("write")) {
     throw new Error(
       "You do not have permission to upload files to this folder",
+      403,
     );
   }
   return true;
@@ -287,19 +290,22 @@ exports.getDeletedFiles = async (userId) => {
 exports.restoreFile = async (userId, fileId) => {
   const file = await fileRepository.findDeletedById(fileId, userId);
   if (!file) {
-    throw new Error("Deleted file not found");
+    throw new Error("Deleted file not found", 404);
   }
   if (!file.storageName) {
-    throw new Error("File storage information is missing");
+    throw new Error("File storage information is missing", 404);
   }
 
   if (!storageService.fileExists(file.storageName)) {
-    throw new Error("Physical file no longer exists and cannot be restored");
+    throw new Error(
+      "Physical file no longer exists and cannot be restored",
+      404,
+    );
   }
 
   const restoredFile = await fileRepository.restore(fileId);
   if (!restoredFile) {
-    throw new Error("File could not be restored");
+    throw new Error("File could not be restored", 500);
   }
 
   await activityLogService.log(userId, "File restore", "file", fileId);
@@ -310,10 +316,10 @@ exports.restoreFile = async (userId, fileId) => {
 exports.permanentDeleteFile = async (userId, fileId) => {
   const file = await fileRepository.findDeletedById(fileId, userId);
   if (!file) {
-    throw new Error("Deleted file not found");
+    throw new Error("Deleted file not found", 404);
   }
   if (!file.storageName) {
-    throw new Error("File storage information is missing");
+    throw new Error("File storage information is missing", 404);
   }
 
   // Xóa File vật lý trước.
@@ -323,13 +329,13 @@ exports.permanentDeleteFile = async (userId, fileId) => {
     }
   } catch (error) {
     console.error("Failed to delete physical file:", error);
-    throw new Error("Physical file could not be deleted");
+    throw new Error("Physical file could not be deleted", 500);
   }
 
   // Sau khi File vật lý đã được xử lý thành công mới xóa metadata trong Database.
   const deletedFile = await fileRepository.permanentDelete(fileId, userId);
   if (!deletedFile) {
-    throw new Error("File metadata could not be deleted");
+    throw new Error("File metadata could not be deleted", 500);
   }
 
   await activityLogService.log(userId, "File permanent delete", "file", fileId);
@@ -339,7 +345,7 @@ exports.permanentDeleteFile = async (userId, fileId) => {
 exports.renameFile = async (userId, fileId, newName) => {
   const file = await fileRepository.findById(fileId);
   if (!file) {
-    throw new Error("File not found");
+    throw new Error("File not found", 404);
   }
 
   const owner = await permissionService.isOwner(userId, fileId, "file");
@@ -350,26 +356,26 @@ exports.renameFile = async (userId, fileId, newName) => {
       "file",
     );
     if (!permissions.includes("write")) {
-      throw new Error("You do not have permission to rename this file");
+      throw new Error("You do not have permission to rename this file", 403);
     }
   }
 
   if (typeof newName !== "string" || !newName.trim()) {
-    throw new Error("File name is required");
+    throw new Error("File name is required", 400);
   }
 
   const name = newName.trim();
   if (name.length > 255) {
-    throw new Error("File name must not exceed 255 characters");
+    throw new Error("File name must not exceed 255 characters", 400);
   }
 
   if (/[<>:"/\\|?*\x00-\x1F]/.test(name)) {
-    throw new Error("File name contains invalid characters");
+    throw new Error("File name contains invalid characters", 400);
   }
 
   const renamedFile = await fileRepository.updateName(fileId, name);
   if (!renamedFile) {
-    throw new Error("File could not be renamed");
+    throw new Error("File could not be renamed", 500);
   }
 
   await activityLogService.log(userId, "File rename", "file", fileId);
