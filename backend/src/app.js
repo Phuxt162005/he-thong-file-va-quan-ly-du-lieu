@@ -1,5 +1,6 @@
 const express = require("express");
 const errorHandler = require("./middleware/errorHandler.js");
+const logoutRoutes = require("./routes/logoutRoutes");
 
 const app = express();
 
@@ -13,6 +14,8 @@ app.use("/api/shares", require("./routes/shareRoute.js"));
 app.use("/api/permissions", require("./routes/permissionRoute.js"));
 app.use("/api/activities", require("./routes/activityLogRoute.js"));
 app.use("/api/audit-logs", require("./routes/auditLogRoute.js"));
+
+app.use("/api/auth/logout", logoutRoutes);
 
 app.use(errorHandler);
 
