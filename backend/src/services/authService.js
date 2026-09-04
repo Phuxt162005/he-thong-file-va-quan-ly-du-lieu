@@ -16,7 +16,7 @@ exports.login = async (username, password, ipAddress) => {
       ipAddress,
       details: { username },
     });
-    throw new httpError("Invalid username or password", 401);
+    throw httpError("Invalid username or password", 401);
   }
 
   //   so sánh mật khẩu đã mã hóa
