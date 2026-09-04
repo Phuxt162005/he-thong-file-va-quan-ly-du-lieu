@@ -135,7 +135,7 @@ exports.copyFile = async (userId, fileId, destinationFolderId = null) => {
       !sourceFile.storageName ||
       !storageService.fileExists(sourceFile.storageName)
     ) {
-      throw httpError("Physical file not found, 404");
+      throw httpError("Physical file not found", 404);
     }
 
     // Copy File vật lý

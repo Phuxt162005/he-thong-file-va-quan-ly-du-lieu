@@ -30,7 +30,7 @@ exports.createFolder = async (userId, data) => {
     name,
   );
   if (duplicate) {
-    throw Error("A folder with the same name already exists");
+    throw Error("A folder with the same name already exists", 409);
   }
 
   const folderData = {
