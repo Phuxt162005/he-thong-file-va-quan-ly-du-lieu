@@ -24,10 +24,10 @@ exports.findByFolder = (folderId) => {
 
 // đánh dấu file đã xóa
 exports.softDelete = (id) => {
-  return File.findByIdAndUpdate(
-    id,
-    { isDeleted: true, deletedAt: new Date() },
-    { new: true },
+  return File.findOneAndUpdate(
+    { _id: id, isDeleted: false },
+    { $set: { isDeleted: true, deletedAt: new Date() } },
+    { new: true, runValidators: true },
   );
 };
 
@@ -42,8 +42,8 @@ exports.findDeletedByOwner = (ownerId) => {
 exports.restore = (fileId) => {
   return File.findOneAndUpdate(
     { _id: fileId, isDeleted: true },
-    { isDeleted: false, deletedAt: null },
-    { new: true },
+    { $set: { isDeleted: false, deletedAt: null } },
+    { new: true, runValidators: true },
   );
 };
 

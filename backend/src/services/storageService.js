@@ -12,7 +12,17 @@ exports.ensureStorageDirectory = () => {
 
 // tạo tên Storage duy nhất
 exports.generateStorageName = (fileName) => {
-  return `${crypto.randomUUID()}-${fileName}`;
+  if (typeof fileName !== "string" || !fileName.trim()) {
+    throw new Error("File name is required");
+  }
+
+  const originalName = path.basename(fileName.trim());
+  const extension = path.extname(originalName);
+  if (extension.length > 20) {
+    throw new Error("Invalid file extension");
+  }
+
+  return `${crypto.randomUUID()}${extension}`;
 };
 
 // lấy đường dẫn vật lý của File

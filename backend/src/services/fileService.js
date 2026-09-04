@@ -312,20 +312,26 @@ exports.permanentDeleteFile = async (userId, fileId) => {
   if (!file) {
     throw new Error("Deleted file not found");
   }
+  if (!file.storageName) {
+    throw new Error("File storage information is missing");
+  }
 
-  // Xóa metadata trong Database trước.
-  const deletedFile = await fileRepository.permanentDelete(fileId, userId);
-
-  // Sau khi Database đã xóa thành công, mới xóa File vật lý.
+  // Xóa File vật lý trước.
   try {
-    if (file.storageName && storageService.fileExists(file.storageName)) {
+    if (storageService.fileExists(file.storageName)) {
       storageService.deleteFile(file.storageName);
     }
   } catch (error) {
     console.error("Failed to delete physical file:", error);
-
-    // Không rollback Database ở đây vì metadata đã bị xóa thành công. Có thể xử lý orphan storage bằng cleanup job.
+    throw new Error("Physical file could not be deleted");
   }
+
+  // Sau khi File vật lý đã được xử lý thành công mới xóa metadata trong Database.
+  const deletedFile = await fileRepository.permanentDelete(fileId, userId);
+  if (!deletedFile) {
+    throw new Error("File metadata could not be deleted");
+  }
+
   await activityLogService.log(userId, "File permanent delete", "file", fileId);
   return deletedFile;
 };
