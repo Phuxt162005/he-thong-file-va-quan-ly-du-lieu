@@ -104,13 +104,13 @@ exports.resetPassword = async (resetToken, newPassword, ipAddress = null) => {
   if (typeof resetToken !== "string" || !resetToken.trim()) {
     throw httpError("Reset token is required", 400);
   }
-  validatePassword(newPassword);
 
+  validatePassword(newPassword);
   const tokenHash = crypto
     .createHash("sha256")
     .update(resetToken.trim())
     .digest("hex");
-  const token = await passwordResetTokenRepository.findValidToken(tokenHash);
+  const token = await passwordResetTokenRepository.consumeValidToken(tokenHash);
   if (!token) {
     throw httpError("Invalid or expired reset token", 401);
   }
@@ -121,7 +121,6 @@ exports.resetPassword = async (resetToken, newPassword, ipAddress = null) => {
     throw httpError("User not found", 404);
   }
 
-  await passwordResetTokenRepository.markUsed(token._id);
   await passwordResetTokenRepository.revokeAllByUser(token.user);
   await auditLogService.log({
     userId: token.user,

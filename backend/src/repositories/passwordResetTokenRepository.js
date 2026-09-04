@@ -12,9 +12,9 @@ exports.findValidToken = (tokenHash) => {
   });
 };
 
-exports.markUsed = (id) => {
+exports.consumeValidToken = (tokenHash) => {
   return PasswordResetToken.findOneAndUpdate(
-    { _id: id, usedAt: null },
+    { tokenHash, usedAt: null, expiresAt: { $gt: new Date() } },
     { $set: { usedAt: new Date() } },
     { new: true },
   );
