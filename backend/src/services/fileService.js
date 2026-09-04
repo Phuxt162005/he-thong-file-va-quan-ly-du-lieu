@@ -382,26 +382,22 @@ exports.renameFile = async (userId, fileId, newName) => {
 
 exports.moveFile = async (userId, fileId, destinationFolderId = null) => {
   const file = await fileRepository.findById(fileId);
-
   if (!file) {
     throw httpError("File not found", 404);
   }
 
   // Người dùng phải có quyền đọc file nguồn.
   const owner = await permissionService.isOwner(userId, fileId, "file");
-
   if (!owner) {
     const permissions = await permissionService.resolvePermission(
       userId,
       fileId,
       "file",
     );
-
     if (!permissions.includes("read")) {
       throw httpError("You do not have permission to move this file", 403);
     }
   }
-
   // Kiểm tra quyền ghi ở folder đích.
   await exports.checkUploadPermission(userId, destinationFolderId);
 
@@ -409,7 +405,6 @@ exports.moveFile = async (userId, fileId, destinationFolderId = null) => {
   if (destinationFolderId) {
     const destinationFolder =
       await folderRepository.findById(destinationFolderId);
-
     if (!destinationFolder || destinationFolder.isDeleted) {
       throw httpError("Destination folder not found", 404);
     }
@@ -417,11 +412,9 @@ exports.moveFile = async (userId, fileId, destinationFolderId = null) => {
 
   // Không cần cập nhật nếu đang ở đúng vị trí.
   const currentFolderId = file.folder ? file.folder.toString() : null;
-
   const targetFolderId = destinationFolderId
     ? destinationFolderId.toString()
     : null;
-
   if (currentFolderId === targetFolderId) {
     return file;
   }
