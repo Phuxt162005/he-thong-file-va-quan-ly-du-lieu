@@ -6,13 +6,14 @@ const permissionService = require("./permissionService");
 const File = require("../models/File");
 const Folder = require("../models/Folder");
 const storageService = require("./storageService");
+const httpError = require("../utils/httpError");
 
 exports.createShare = async (userId, data) => {
   if (!data.resourceId) {
     throw new Error("Resource ID is required");
   }
   if (!data.resourceType || !["file", "folder"].includes(data.resourceType)) {
-    throw new Error("Invalid resource type");
+    throw new httpError("Invalid resource type", 400);
   }
 
   /*
@@ -31,7 +32,10 @@ exports.createShare = async (userId, data) => {
       data.resourceType,
     );
     if (!permissions.includes("share")) {
-      throw new Error("You do not have permission to share this resource");
+      throw new httpError(
+        "You do not have permission to share this resource",
+        403,
+      );
     }
   }
 
@@ -54,10 +58,10 @@ exports.createShare = async (userId, data) => {
   ) {
     expiresAt = new Date(data.expiresAt);
     if (Number.isNaN(expiresAt.getTime())) {
-      throw new Error("Invalid expiration date");
+      throw new httpError("Invalid expiration date", 400);
     }
     if (expiresAt <= new Date()) {
-      throw new Error("Expiration date must be in the future");
+      throw new httpError("Expiration date must be in the future", 400);
     }
   }
 
@@ -71,7 +75,7 @@ exports.createShare = async (userId, data) => {
   ) {
     maxDownloads = Number(data.maxDownloads);
     if (!Number.isInteger(maxDownloads) || maxDownloads < 1) {
-      throw new Error("maxDownloads must be a positive integer");
+      throw new httpError("maxDownloads must be a positive integer", 400);
     }
   }
 
@@ -89,23 +93,23 @@ exports.createShare = async (userId, data) => {
 exports.accessShare = async (token, password) => {
   const share = await shareRepository.findByToken(token);
   if (!share) {
-    throw new Error("Share link not found");
+    throw new httpError("Share link not found", 404);
   }
 
   // Kiểm tra hết hạn
   if (share.expiresAt && new Date() > share.expiresAt) {
-    throw new Error("Share link has expired");
+    throw new httpError("Share link has expired", 400);
   }
 
   // Kiểm tra password
   if (share.password) {
     if (!password) {
-      throw new Error("Password required");
+      throw new httpError("Password required", 400);
     }
 
     const valid = await bcrypt.compare(password, share.password);
     if (!valid) {
-      throw new Error("Invalid password");
+      throw new httpError("Invalid password", 400);
     }
   }
   return share;
@@ -113,7 +117,7 @@ exports.accessShare = async (token, password) => {
 
 exports.getSharedFolder = async (share) => {
   if (share.resourceType !== "folder") {
-    throw new Error("Shared resource is not a folder");
+    throw new httpError("Shared resource is not a folder", 400);
   }
 
   const folder = await Folder.findOne({
@@ -121,7 +125,7 @@ exports.getSharedFolder = async (share) => {
     isDeleted: false,
   });
   if (!folder) {
-    throw new Error("Shared folder not found");
+    throw new httpError("Shared folder not found", 404);
   }
   return folder;
 };
@@ -129,7 +133,7 @@ exports.getSharedFolder = async (share) => {
 // lấy folder share con
 exports.getSharedFolderChildren = async (share, folderId) => {
   if (share.resourceType !== "folder") {
-    throw new Error("Shared resource is not a folder");
+    throw new httpError("Shared resource is not a folder", 400);
   }
 
   const sharedFolder = await Folder.findOne({
@@ -137,7 +141,7 @@ exports.getSharedFolderChildren = async (share, folderId) => {
     isDeleted: false,
   });
   if (!sharedFolder) {
-    throw new Error("Shared folder not found");
+    throw new httpError("Shared folder not found", 400);
   }
 
   const requestedFolder = await Folder.findOne({
@@ -145,7 +149,7 @@ exports.getSharedFolderChildren = async (share, folderId) => {
     isDeleted: false,
   });
   if (!requestedFolder) {
-    throw new Error("Folder not found");
+    throw new httpError("Folder not found", 404);
   }
 
   // Chỉ được truy cập Folder nằm bên trong cây của Folder được Share.
@@ -193,7 +197,7 @@ exports.getSharedFolderFiles = async (share, folderId) => {
 // lấy 1 file của folder share
 exports.getSharedFolderFile = async (share, fileId) => {
   if (share.resourceType !== "folder") {
-    throw new Error("Shared resource is not a folder");
+    throw new httpError("Shared resource is not a folder", 400);
   }
 
   const sharedFolder = await Folder.findOne({
@@ -201,16 +205,16 @@ exports.getSharedFolderFile = async (share, fileId) => {
     isDeleted: false,
   });
   if (!sharedFolder) {
-    throw new Error("Shared folder not found");
+    throw new httpError("Shared folder not found", 404);
   }
 
   const file = await File.findOne({ _id: fileId, isDeleted: false });
   if (!file) {
-    throw new Error("Shared file not found");
+    throw new httpError("Shared file not found", 404);
   }
   // File phải nằm bên trong Folder được Share.
   if (!file.folder) {
-    throw new Error("File is outside the shared folder");
+    throw new httpError("File is outside the shared folder", 404);
   }
 
   let currentFolder = await Folder.findOne({
@@ -222,7 +226,7 @@ exports.getSharedFolderFile = async (share, fileId) => {
     // Đã tìm thấy Folder gốc của Share.
     if (currentFolder._id.toString() === sharedFolder._id.toString()) {
       if (!file.storageName || !storageService.fileExists(file.storageName)) {
-        throw new Error("Physical file not found");
+        throw new httpError("Physical file not found", 404);
       }
       const filePath = storageService.getDownloadPath(file.storageName);
       return { file, filePath };
@@ -237,20 +241,20 @@ exports.getSharedFolderFile = async (share, fileId) => {
       isDeleted: false,
     });
   }
-  throw new Error("File is outside the shared folder");
+  throw new httpError("File is outside the shared folder", 404);
 };
 
 exports.getSharedFile = async (share) => {
   if (share.resourceType !== "file") {
-    throw new Error("Shared resource is not a file");
+    throw new httpError("Shared resource is not a file", 400);
   }
 
   const file = await File.findOne({ _id: share.resourceId, isDeleted: false });
   if (!file) {
-    throw new Error("Shared file not found");
+    throw new httpError("Shared file not found", 404);
   }
   if (!file.storageName || !storageService.fileExists(file.storageName)) {
-    throw new Error("Physical file not found");
+    throw new httpError("Physical file not found", 404);
   }
 
   const filePath = storageService.getDownloadPath(file.storageName);
@@ -269,7 +273,7 @@ exports.completeSharedDownload = async (shareId) => {
 exports.disableShare = async (userId, shareId) => {
   const share = await shareRepository.findById(shareId);
   if (!share) {
-    throw new Error("Share link not found");
+    throw new httpError("Share link not found", 404);
   }
 
   // Người tạo Share là Owner của Share Link
@@ -284,7 +288,10 @@ exports.disableShare = async (userId, shareId) => {
     share.resourceType,
   );
   if (!permissions.includes("share")) {
-    throw new Error("You do not have permission to disable this share link");
+    throw new httpError(
+      "You do not have permission to disable this share link",
+      403,
+    );
   }
   return await shareRepository.disable(shareId);
 };
@@ -297,7 +304,7 @@ exports.getMyShares = async (userId, status) => {
 exports.updateShare = async (userId, shareId, data) => {
   const share = await shareRepository.findById(shareId);
   if (!share) {
-    throw new Error("Share link not found");
+    throw new httpError("Share link not found", 404);
   }
   if (share.owner.toString() !== userId.toString()) {
     const permissions = await permissionService.resolvePermission(
@@ -306,7 +313,10 @@ exports.updateShare = async (userId, shareId, data) => {
       share.resourceType,
     );
     if (!permissions.includes("share")) {
-      throw new Error("You do not have permission to update this share link");
+      throw new httpError(
+        "You do not have permission to update this share link",
+        403,
+      );
     }
   }
 
@@ -336,10 +346,10 @@ exports.updateShare = async (userId, shareId, data) => {
   ) {
     const expiresAt = new Date(data.expiresAt);
     if (Number.isNaN(expiresAt.getTime())) {
-      throw new Error("Invalid expiration date");
+      throw new httpError("Invalid expiration date", 400);
     }
     if (expiresAt <= new Date()) {
-      throw new Error("Expiration date must be in the future");
+      throw new httpError("Expiration date must be in the future", 400);
     }
   }
 
@@ -369,10 +379,10 @@ exports.updateShare = async (userId, shareId, data) => {
 exports.getShare = async (userId, shareId) => {
   const share = await shareRepository.findById(shareId);
   if (!share) {
-    throw new Error("Share link not found");
+    throw new httpError("Share link not found", 404);
   }
   if (share.owner.toString() !== userId.toString()) {
-    throw new Error("You do not own this share link");
+    throw new httpError("You do not own this share link", 403);
   }
 
   return share;

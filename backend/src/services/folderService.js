@@ -9,18 +9,18 @@ const httpError = require("../utils/httpError");
 // tạo thư mục
 exports.createFolder = async (userId, data) => {
   if (!data || typeof data.name !== "string") {
-    throw new Error("Folder name is required", 400);
+    throw new httpError("Folder name is required", 400);
   }
 
   const name = data.name.trim();
   if (!name) {
-    throw new Error("Folder name is required", 400);
+    throw new httpError("Folder name is required", 400);
   }
   if (name.length > 255) {
-    throw new Error("Folder name must not exceed 255 characters", 400);
+    throw new httpError("Folder name must not exceed 255 characters", 400);
   }
   if (/[\/\\:*?"<>|]/.test(name)) {
-    throw new Error("Folder name contains invalid characters", 400);
+    throw new httpError("Folder name contains invalid characters", 400);
   }
 
   const parentFolder = data.parentFolder || null;
@@ -42,7 +42,7 @@ exports.createFolder = async (userId, data) => {
   if (parentFolder) {
     const parent = await repository.findById(parentFolder);
     if (!parent) {
-      throw new Error("Parent folder not found", 404);
+      throw new httpError("Parent folder not found", 404);
     }
     const isOwner = await permissionService.isOwner(
       userId,
@@ -56,7 +56,10 @@ exports.createFolder = async (userId, data) => {
         "folder",
       );
       if (!permissions.includes("write")) {
-        throw new Error("You do not have permission to create a folder here");
+        throw new httpError(
+          "You do not have permission to create a folder here",
+          403,
+        );
       }
     }
   }
@@ -83,7 +86,10 @@ exports.getFolders = async (userId, parentFolder = null) => {
         "folder",
       );
       if (!permissions.includes("read")) {
-        throw new Error("You do not have permission to read this folder");
+        throw new httpError(
+          "You do not have permission to read this folder",
+          403,
+        );
       }
     }
   }
@@ -113,18 +119,18 @@ exports.getFolders = async (userId, parentFolder = null) => {
 // đổi tên Folder
 exports.renameFolder = async (userId, folderId, name) => {
   if (typeof name !== "string") {
-    throw new Error("Folder name is required", 400);
+    throw new httpError("Folder name is required", 400);
   }
 
   name = name.trim();
   if (!name) {
-    throw new Error("Folder name is required", 400);
+    throw new httpError("Folder name is required", 400);
   }
   if (name.length > 255) {
-    throw new Error("Folder name must not exceed 255 characters", 400);
+    throw new httpError("Folder name must not exceed 255 characters", 400);
   }
   if (/[\/\\:*?"<>|]/.test(name)) {
-    throw new Error("Folder name contains invalid characters", 400);
+    throw new httpError("Folder name contains invalid characters", 400);
   }
 
   const folder = await repository.findById(folderId);
@@ -140,7 +146,10 @@ exports.renameFolder = async (userId, folderId, name) => {
       "folder",
     );
     if (!permissions.includes("write")) {
-      throw new Error("You do not have permission to rename this folder");
+      throw new httpError(
+        "You do not have permission to rename this folder",
+        403,
+      );
     }
   }
 
@@ -172,7 +181,10 @@ exports.deleteFolder = async (userId, folderId) => {
     );
 
     if (!permissions.includes("delete")) {
-      throw new Error("You do not have permission to delete this folder");
+      throw new httpError(
+        "You do not have permission to delete this folder",
+        403,
+      );
     }
   }
   return await repository.softDeleteCascade(folderId);
@@ -198,7 +210,7 @@ exports.getFolder = async (userId, folderId) => {
     "folder",
   );
   if (!permissions.includes("read")) {
-    throw new Error("You do not have permission to read this folder");
+    throw new httpError("You do not have permission to read this folder", 403);
   }
   return folder;
 };
@@ -218,7 +230,10 @@ exports.getChildren = async (userId, folderId) => {
       "folder",
     );
     if (!permissions.includes("read")) {
-      throw new Error("You do not have permission to read this folder");
+      throw new httpError(
+        "You do not have permission to read this folder",
+        403,
+      );
     }
   }
 
@@ -252,7 +267,7 @@ exports.moveFolder = async (userId, folderId, newParentFolder) => {
 
   // Không được đặt Folder vào chính nó.
   if (newParentFolder && folderId.toString() === newParentFolder.toString()) {
-    throw new Error("Cannot move folder into itself");
+    throw new httpError("Cannot move folder into itself", 400);
   }
   // Kiểm tra Folder đích tồn tại.
   let destination = null;
@@ -260,7 +275,7 @@ exports.moveFolder = async (userId, folderId, newParentFolder) => {
   if (newParentFolder) {
     destination = await repository.findById(newParentFolder);
     if (!destination) {
-      throw new Error("Destination folder not found, 404");
+      throw new httpError("Destination folder not found, 404");
     }
   }
 
@@ -268,7 +283,7 @@ exports.moveFolder = async (userId, folderId, newParentFolder) => {
   let current = destination;
   while (current) {
     if (current._id.toString() === folderId.toString()) {
-      throw new Error("Cannot move folder into its own descendant");
+      throw new httpError("Cannot move folder into its own descendant", 400);
     }
     if (!current.parentFolder) {
       break;
@@ -293,8 +308,9 @@ exports.moveFolder = async (userId, folderId, newParentFolder) => {
         "folder",
       );
       if (!sourcePermissions.includes("write")) {
-        throw new Error(
+        throw new httpError(
           "You do not have permission to move this folder from its current location",
+          403,
         );
       }
     }
@@ -302,7 +318,7 @@ exports.moveFolder = async (userId, folderId, newParentFolder) => {
     // Folder ở Root. Chỉ Owner được phép di chuyển Root Folder.
     const owner = await permissionService.isOwner(userId, folderId, "folder");
     if (!owner) {
-      throw new Error("Only the owner can move a root folder");
+      throw new httpError("Only the owner can move a root folder", 403);
     }
   }
 
@@ -324,7 +340,10 @@ exports.moveFolder = async (userId, folderId, newParentFolder) => {
       );
 
       if (!destinationPermissions.includes("write")) {
-        throw new Error("You do not have permission to move a folder here");
+        throw new httpError(
+          "You do not have permission to move a folder here",
+          403,
+        );
       }
     }
   }
@@ -335,7 +354,7 @@ exports.moveFolder = async (userId, folderId, newParentFolder) => {
 exports.restoreFolder = async (userId, folderId) => {
   const folder = await repository.findDeletedById(folderId, userId);
   if (!folder) {
-    throw new Error("Deleted folder not found", 404);
+    throw new httpError("Deleted folder not found", 404);
   }
 
   const hasDeletedParent = await repository.hasDeletedParent(folder);
@@ -374,13 +393,13 @@ exports.getDeletedFolders = async (userId) => {
 exports.permanentDeleteFolder = async (userId, folderId) => {
   const folder = await repository.findDeletedByOwnerAndId(folderId, userId);
   if (!folder) {
-    throw new Error("Deleted folder not found", 404);
+    throw new httpError("Deleted folder not found", 404);
   }
 
   // Lấy toàn bộ cây Folder đã xóa
   const folders = await repository.findDeletedTree(folderId);
   if (!folders || folders.length === 0) {
-    throw new Error("Deleted folder tree not found", 404);
+    throw new httpError("Deleted folder tree not found", 404);
   }
 
   const folderIds = folders.map((item) => item._id);
@@ -431,7 +450,7 @@ exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
   // 1. Kiểm tra Folder nguồn
   const sourceFolder = await repository.findById(folderId);
   if (!sourceFolder) {
-    throw new Error("Folder not found");
+    throw new httpError("Folder not found", 404);
   }
 
   const sourceOwner = await permissionService.isOwner(
@@ -446,7 +465,10 @@ exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
       "folder",
     );
     if (!sourcePermissions.includes("read")) {
-      throw new Error("You do not have permission to copy this folder");
+      throw new httpError(
+        "You do not have permission to copy this folder",
+        403,
+      );
     }
   }
 
@@ -454,7 +476,7 @@ exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
   if (destinationFolderId) {
     // Không copy vào chính nó
     if (destinationFolderId.toString() === folderId.toString()) {
-      throw new Error("Cannot copy folder into itself");
+      throw new httpError("Cannot copy folder into itself", 403);
     }
 
     // Không copy vào Folder con của chính nó
@@ -463,12 +485,12 @@ exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
       destinationFolderId,
     );
     if (isDescendant) {
-      throw new Error("Cannot copy folder into its own descendant");
+      throw new httpError("Cannot copy folder into its own descendant", 400);
     }
 
     const destinationFolder = await repository.findById(destinationFolderId);
     if (!destinationFolder) {
-      throw new Error("Destination folder not found, 404");
+      throw new httpError("Destination folder not found, 404");
     }
 
     // Kiểm tra quyền write
@@ -484,7 +506,10 @@ exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
         "folder",
       );
       if (!permissions.includes("write")) {
-        throw new Error("You do not have permission to copy into this folder");
+        throw new httpError(
+          "You do not have permission to copy into this folder",
+          403,
+        );
       }
     }
   }
@@ -492,7 +517,7 @@ exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
   // 3. Lấy toàn bộ cây Folder nguồn
   const sourceFolders = await repository.findTreeForCopy(folderId);
   if (sourceFolders.length === 0) {
-    throw new Error("Folder tree not found", 404);
+    throw new httpError("Folder tree not found", 404);
   }
 
   // 4. Chuẩn bị rollback

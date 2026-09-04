@@ -3,6 +3,7 @@ const jwt = require("jsonwebtoken");
 const User = require("../models/User");
 
 const auditLogService = require("./auditLogService");
+const httpError = require("../utils/httpError");
 
 exports.login = async (username, password, ipAddress) => {
   // tìm tài khoản theo username
@@ -15,7 +16,7 @@ exports.login = async (username, password, ipAddress) => {
       ipAddress,
       details: { username },
     });
-    throw new Error("Invalid username or password");
+    throw new httpError("Invalid username or password", 401);
   }
 
   //   so sánh mật khẩu đã mã hóa

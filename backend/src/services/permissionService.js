@@ -3,6 +3,7 @@ const Permission = require("../models/Permission");
 const Folder = require("../models/Folder");
 const File = require("../models/File");
 const User = require("../models/User");
+const httpError = require("../utils/httpError");
 
 // kiểm tra người dùng có quyền quản lý Permission hay không
 exports.canManagePermission = async (userId, resourceId, resourceType) => {
@@ -87,11 +88,11 @@ exports.grantPermission = async (
   permissions,
 ) => {
   if (!userId || !resourceId || !resourceType) {
-    throw new Error("Permission information is required");
+    throw new httpError("Permission information is required");
   }
 
   if (!["file", "folder"].includes(resourceType)) {
-    throw new Error("Invalid resource type");
+    throw new httpError("Invalid resource type", 400);
   }
 
   if (!Array.isArray(permissions) || permissions.length === 0) {
@@ -110,7 +111,7 @@ exports.grantPermission = async (
 
   const isTargetOwner = await exports.isOwner(userId, resourceId, resourceType);
   if (isTargetOwner) {
-    throw new Error("Cannot grant permission to the resource owner");
+    throw new httpError("Cannot grant permission to the resource owner", 403);
   }
 
   const validPermissions = [
@@ -126,7 +127,7 @@ exports.grantPermission = async (
     (permission) => !validPermissions.includes(permission),
   );
   if (invalidPermission) {
-    throw new Error(`Invalid permission: ${invalidPermission}`);
+    throw new httpError(`Invalid permission: ${invalidPermission}`, 400);
   }
 
   const canManage = await exports.canManagePermission(
@@ -135,7 +136,10 @@ exports.grantPermission = async (
     resourceType,
   );
   if (!canManage) {
-    throw new Error("You do not have permission to manage this resource!");
+    throw new httpError(
+      "You do not have permission to manage this resource!",
+      403,
+    );
   }
 
   const currentUserIsOwner = await exports.isOwner(
@@ -165,16 +169,16 @@ exports.grantPermission = async (
 
   const resource = await getResource(resourceId, resourceType);
   if (!resource) {
-    throw new Error("Resource not found");
+    throw new httpError("Resource not found", 404);
   }
 
   const targetUser = await User.findById(userId);
   if (!targetUser) {
-    throw new Error("Target user not found");
+    throw new httpError("Target user not found", 404);
   }
 
   if (currentUserId.toString() === userId.toString()) {
-    throw new Error("Cannot grant permission to yourself");
+    throw new httpError("Cannot grant permission to yourself", 403);
   }
 
   return await permissionRepository.create({
@@ -193,7 +197,7 @@ exports.getPermissions = async (currentUserId, resourceId, resourceType) => {
   }
 
   if (!["file", "folder"].includes(resourceType)) {
-    throw new Error("Invalid resource type");
+    throw new httpError("Invalid resource type", 400);
   }
 
   const canManage = await exports.canManagePermission(
@@ -202,7 +206,7 @@ exports.getPermissions = async (currentUserId, resourceId, resourceType) => {
     resourceType,
   );
   if (!canManage) {
-    throw new Error("You do not have permission to view permissions");
+    throw new httpError("You do not have permission to view permissions", 403);
   }
 
   return await permissionRepository.findByResource(resourceId, resourceType);
@@ -212,7 +216,7 @@ exports.getPermissions = async (currentUserId, resourceId, resourceType) => {
 exports.updatePermission = async (currentUserId, permissionId, permissions) => {
   const permission = await Permission.findById(permissionId);
   if (!permission) {
-    throw new Error("Permission not found.");
+    throw new httpError("Permission not found.", 404);
   }
 
   const isOwner = await exports.isOwner(
@@ -221,7 +225,7 @@ exports.updatePermission = async (currentUserId, permissionId, permissions) => {
     permission.resourceType,
   );
   if (isOwner) {
-    throw new Error("Cannot modify owner's permission");
+    throw new httpError("Cannot modify owner's permission", 403);
   }
 
   const canManage = await exports.canManagePermission(
@@ -230,7 +234,10 @@ exports.updatePermission = async (currentUserId, permissionId, permissions) => {
     permission.resourceType,
   );
   if (!canManage) {
-    throw new Error("You do not have permission to manage this resource!");
+    throw new httpError(
+      "You do not have permission to manage this resource!",
+      403,
+    );
   }
 
   const validPermissions = [
@@ -251,7 +258,7 @@ exports.updatePermission = async (currentUserId, permissionId, permissions) => {
     (permission) => !validPermissions.includes(permission),
   );
   if (invalidPermission) {
-    throw new Error(`Invalid permission: ${invalidPermission}`);
+    throw new httpError(`Invalid permission: ${invalidPermission}`, 400);
   }
 
   // Chỉ Owner mới được cấp permission_management
@@ -274,7 +281,7 @@ exports.updatePermission = async (currentUserId, permissionId, permissions) => {
 exports.revokePermission = async (currentUserId, permissionId) => {
   const permission = await Permission.findById(permissionId);
   if (!permission) {
-    throw new Error("Permission not found");
+    throw new httpError("Permission not found", 404);
   }
 
   const isOwner = await exports.isOwner(
@@ -283,7 +290,7 @@ exports.revokePermission = async (currentUserId, permissionId) => {
     permission.resourceType,
   );
   if (isOwner) {
-    throw new Error("Cannot revoke owner's permission");
+    throw new httpError("Cannot revoke owner's permission", 403);
   }
 
   const canManage = await exports.canManagePermission(
@@ -293,7 +300,10 @@ exports.revokePermission = async (currentUserId, permissionId) => {
   );
 
   if (!canManage) {
-    throw new Error("You do not have permission to manage this resource");
+    throw new httpError(
+      "You do not have permission to manage this resource",
+      403,
+    );
   }
   return await permissionRepository.remove(permissionId);
 };
