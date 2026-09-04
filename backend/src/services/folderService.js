@@ -154,7 +154,7 @@ exports.renameFolder = async (userId, folderId, name) => {
     folderId,
   );
   if (duplicate) {
-    throw new httpError("A folder with the same name already exists", 409);
+    throw httpError("A folder with the same name already exists", 409);
   }
   return await repository.rename(folderId, name);
 };
@@ -347,8 +347,9 @@ exports.restoreFolder = async (userId, folderId) => {
 
   const hasDeletedParent = await repository.hasDeletedParent(folder);
   if (hasDeletedParent) {
-    throw new Error(
+    throw httpError(
       "Cannot restore this folder because its parent folder is deleted",
+      400,
     );
   }
 
@@ -475,7 +476,7 @@ exports.copyFolder = async (userId, folderId, destinationFolderId = null) => {
 
     const destinationFolder = await repository.findById(destinationFolderId);
     if (!destinationFolder) {
-      throw httpError("Destination folder not found, 404");
+      throw httpError("Destination folder not found", 404);
     }
 
     // Kiểm tra quyền write
