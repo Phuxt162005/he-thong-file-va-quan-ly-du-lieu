@@ -29,9 +29,12 @@ exports.login = async (username, password, ipAddress) => {
       ipAddress,
     });
 
-    throw new Error("Invalid username or password!");
+    throw httpError("Invalid username or password!", 401);
   }
 
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT secret is not configured");
+  }
   //   sinh Access Token
   const token = jwt.sign(
     { id: user._id, role: user.role },
