@@ -30,7 +30,7 @@ exports.createFolder = async (userId, data) => {
     name,
   );
   if (duplicate) {
-    throw Error("A folder with the same name already exists", 409);
+    throw httpError("A folder with the same name already exists", 409);
   }
 
   const folderData = {
@@ -154,7 +154,7 @@ exports.renameFolder = async (userId, folderId, name) => {
     folderId,
   );
   if (duplicate) {
-    throw new Error("A folder with the same name already exists");
+    throw new httpError("A folder with the same name already exists", 409);
   }
   return await repository.rename(folderId, name);
 };
@@ -263,7 +263,7 @@ exports.moveFolder = async (userId, folderId, newParentFolder) => {
   if (newParentFolder) {
     destination = await repository.findById(newParentFolder);
     if (!destination) {
-      throw httpError("Destination folder not found, 404");
+      throw httpError("Destination folder not found", 404);
     }
   }
 
