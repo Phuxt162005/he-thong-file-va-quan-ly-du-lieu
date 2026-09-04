@@ -18,6 +18,11 @@ exports.log = async (
 };
 
 // lấy lịch sử hoạt động mới nhất
-exports.getUserActivities = async (userId) => {
-  return await repository.findByUser(userId);
+exports.getUserActivities = async (userId, limit = 100) => {
+  const parsedLimit = Number(limit);
+  if (!Number.isInteger(parsedLimit) || parsedLimit < 1) {
+    throw new Error("Invalid limit");
+  }
+
+  return await repository.findByUser(userId, Math.min(parsedLimit, 100));
 };

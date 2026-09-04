@@ -20,6 +20,10 @@ exports.log = async ({
   });
 };
 
-exports.getDeniedLogs = async () => {
-  return await repository.findDenied();
+exports.getDeniedLogs = async (limit = 100) => {
+  const parsedLimit = Number(limit);
+  if (!Number.isInteger(parsedLimit) || parsedLimit < 1) {
+    throw new Error("Invalid limit");
+  }
+  return await repository.findDenied(Math.min(parsedLimit, 100));
 };

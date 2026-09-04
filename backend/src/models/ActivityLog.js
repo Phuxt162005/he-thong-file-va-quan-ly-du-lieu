@@ -16,5 +16,6 @@ const activityLogSchema = new mongoose.Schema(
 );
 
 activityLogSchema.index({ user: 1, createdAt: -1 });
+activityLogSchema.index({ resourceType: 1, resourceId: 1, createdAt: -1 });
 
 module.exports = mongoose.model("ActivityLog", activityLogSchema);

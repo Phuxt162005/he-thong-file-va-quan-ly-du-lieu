@@ -1,7 +1,11 @@
 const service = require("../services/activityLogService");
 
 exports.getMyActivities = async (req, res) => {
-  // lấy lịch sử của tài khoản hiện tại
-  const logs = await service.getUserActivities(req.user.id);
-  return res.json(logs);
+  try {
+    const logs = await service.getUserActivities(req.user.id, req.query.limit);
+
+    return res.json(logs);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
 };

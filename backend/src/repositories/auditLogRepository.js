@@ -11,6 +11,8 @@ exports.findByUser = (userId) => {
 };
 
 // lấy các sự kiện bị từ chối
-exports.findDenied = () => {
-  return AuditLog.find({ result: "DENIED" }).sort({ createdAt: -1 });
+exports.findDenied = (limit = 100) => {
+  return AuditLog.find({ result: "DENIED" })
+    .sort({ createdAt: -1 })
+    .limit(limit);
 };

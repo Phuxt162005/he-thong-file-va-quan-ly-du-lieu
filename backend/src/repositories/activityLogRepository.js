@@ -6,6 +6,9 @@ exports.create = (data) => {
 };
 
 // lấy lịch sử hoạt động của User
-exports.findByUser = (userId) => {
-  return activityLog.find({ user: userId }).sort({ createdAt: -1 });
+exports.findByUser = (userId, limit = 100) => {
+  return activityLog
+    .find({ user: userId })
+    .sort({ createdAt: -1 })
+    .limit(limit);
 };
