@@ -26,3 +26,15 @@ exports.updateProfile = (id, data) => {
     runValidators: true,
   }).select("-password");
 };
+
+exports.findByIdWithPassword = (userId) => {
+  return User.findById(userId).select("+password");
+};
+
+exports.updatePassword = (userId, password) => {
+  return User.findByIdAndUpdate(
+    userId,
+    { $set: { password } },
+    { new: true, runValidators: true },
+  ).select("-password");
+};

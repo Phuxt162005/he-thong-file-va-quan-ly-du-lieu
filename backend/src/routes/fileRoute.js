@@ -37,6 +37,9 @@ router.get("/:id/download", auth, controller.download);
 // preview
 router.get("/:id/preview", auth, controller.preview);
 
+// move
+router.put("/:id/move", auth, controller.move);
+
 // rename
 router.put("/:id", auth, controller.rename);
 

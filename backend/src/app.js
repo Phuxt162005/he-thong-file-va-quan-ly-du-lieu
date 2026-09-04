@@ -1,7 +1,9 @@
 const express = require("express");
 const errorHandler = require("./middleware/errorHandler.js");
 const logoutRoutes = require("./routes/logoutRoutes");
+const passwordRoutes = require("./routes/passwordRoute");
 const refreshRoutes = require("./routes/refreshRoutes");
+const adminRoutes = require("./routes/adminRoute");
 
 const app = express();
 
@@ -18,6 +20,8 @@ app.use("/api/audit-logs", require("./routes/auditLogRoute.js"));
 
 app.use("/api/auth/logout", logoutRoutes);
 app.use("/api/auth/refresh", refreshRoutes);
+app.use("/api/auth/password", passwordRoutes);
+app.use("/api/admin", adminRoutes);
 
 app.use(errorHandler);
 

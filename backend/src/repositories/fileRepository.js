@@ -116,3 +116,24 @@ exports.updateName = async (fileId, name) => {
     { new: true, runValidators: true },
   );
 };
+
+exports.move = (fileId, destinationFolderId) => {
+  return File.findOneAndUpdate(
+    { _id: fileId, isDeleted: false },
+    { $set: { folder: destinationFolderId || null } },
+    { new: true, runValidators: true },
+  );
+};
+
+exports.findOneByNameAndFolder = (name, folderId, excludeFileId = null) => {
+  const query = {
+    name,
+    folder: folderId || null,
+    isDeleted: false,
+  };
+  if (excludeFileId) {
+    query._id = { $ne: excludeFileId };
+  }
+
+  return File.findOne(query);
+};

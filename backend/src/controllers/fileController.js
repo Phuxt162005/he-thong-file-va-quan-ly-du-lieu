@@ -132,3 +132,13 @@ exports.getFilesByFolder = asyncHandler(async (req, res) => {
 
   return res.json({ files });
 });
+
+exports.move = asyncHandler(async (req, res) => {
+  const file = await fileService.moveFile(
+    req.user.id,
+    req.params.id,
+    req.body.destinationFolderId || null,
+  );
+
+  return res.json({ message: "File moved successfully", file });
+});

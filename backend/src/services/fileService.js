@@ -379,3 +379,74 @@ exports.renameFile = async (userId, fileId, newName) => {
   await activityLogService.log(userId, "File rename", "file", fileId);
   return renamedFile;
 };
+
+exports.moveFile = async (userId, fileId, destinationFolderId = null) => {
+  const file = await fileRepository.findById(fileId);
+
+  if (!file) {
+    throw httpError("File not found", 404);
+  }
+
+  // Người dùng phải có quyền đọc file nguồn.
+  const owner = await permissionService.isOwner(userId, fileId, "file");
+
+  if (!owner) {
+    const permissions = await permissionService.resolvePermission(
+      userId,
+      fileId,
+      "file",
+    );
+
+    if (!permissions.includes("read")) {
+      throw httpError("You do not have permission to move this file", 403);
+    }
+  }
+
+  // Kiểm tra quyền ghi ở folder đích.
+  await exports.checkUploadPermission(userId, destinationFolderId);
+
+  // Nếu folder đích tồn tại thì phải còn hoạt động.
+  if (destinationFolderId) {
+    const destinationFolder =
+      await folderRepository.findById(destinationFolderId);
+
+    if (!destinationFolder || destinationFolder.isDeleted) {
+      throw httpError("Destination folder not found", 404);
+    }
+  }
+
+  // Không cần cập nhật nếu đang ở đúng vị trí.
+  const currentFolderId = file.folder ? file.folder.toString() : null;
+
+  const targetFolderId = destinationFolderId
+    ? destinationFolderId.toString()
+    : null;
+
+  if (currentFolderId === targetFolderId) {
+    return file;
+  }
+
+  // Kiểm tra trùng tên trong folder đích.
+  const duplicate = await fileRepository.findOneByNameAndFolder(
+    file.name,
+    destinationFolderId,
+    fileId,
+  );
+  if (duplicate) {
+    throw httpError(
+      "A file with the same name already exists in the destination folder",
+      409,
+    );
+  }
+
+  const movedFile = await fileRepository.move(fileId, destinationFolderId);
+  if (!movedFile) {
+    throw httpError("File could not be moved", 500);
+  }
+
+  await activityLogService.log(userId, "File move", "file", fileId, {
+    fromFolderId: currentFolderId,
+    toFolderId: targetFolderId,
+  });
+  return movedFile;
+};
