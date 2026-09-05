@@ -11,6 +11,7 @@ import Loading from "../../components/Loading/Loading";
 import ShareDialog from "../../components/ShareDialog/ShareDialog";
 import Modal from "../../components/Modal/Modal";
 import FormInput from "../../components/FormInput/FormInput";
+import FolderPicker from "../../components/FolderPicker/FolderPicker";
 
 import fileService from "../../services/fileService";
 
