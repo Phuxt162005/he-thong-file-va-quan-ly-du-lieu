@@ -19,16 +19,16 @@ export default function ForgotPassword() {
 
     setError("");
     setMessage("");
-    if (!email.trimEnd()) {
+    if (!email.trim()) {
       setError("Vui lòng nhập email.");
       return;
     }
 
     try {
       setLoading(true);
-      await authService.forgotPassword({ email });
+      await authService.forgotPassword({ email: email.trim() });
       setMessage("Yêu cầu đặt lại mật  khẩu đã được gửi.");
-    } catch (error) {
+    } catch (err) {
       setError(err?.message || "Không thể thực hiện yêu cầu.");
     } finally {
       setLoading(false);

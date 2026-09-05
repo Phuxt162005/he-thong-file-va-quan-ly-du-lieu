@@ -28,17 +28,17 @@ const authService = {
   },
 
   async forgotPassword(data) {
-    const response = await api.post("/auth/forgot-password", data);
+    const response = await api.post("/auth/password/forgot", data);
     return response.data;
   },
 
   async resetPassword(data) {
-    const response = await api.post("/auth/reset-password", data);
+    const response = await api.post("/auth/password/reset", data);
     return response.data;
   },
 
   async changePassword(data) {
-    const response = await api.put("/auth/change-password", data);
+    const response = await api.put("/auth/password/change", data);
     return response.data;
   },
 };

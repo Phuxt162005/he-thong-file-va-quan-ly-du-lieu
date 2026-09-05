@@ -28,30 +28,40 @@ export default function ChangePassword() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     setError("");
     setMessage("");
 
-    if (!formData / currentPassword) {
+    if (!formData.currentPassword) {
       setError("Vui lòng nhập mật khẩu hiện tại.");
       return;
     }
-
     if (!formData.newPassword) {
       setError("Vui lòng nhập mật khẩu mới.");
       return;
     }
-
+    if (formData.newPassword.length < 8) {
+      setError("Mật khẩu mới phải có ít nhất 8 ký tự.");
+      return;
+    }
+    if (!formData.confirmPassword) {
+      setError("Vui lòng xác nhận mật khẩu mới.");
+      return;
+    }
     if (formData.newPassword !== formData.confirmPassword) {
       setError("Mật khẩu xác nhận không khớp.");
+      return;
+    }
+    if (formData.currentPassword === formData.newPassword) {
+      setError("Mật khẩu mới không được giống mật khẩu cũ.");
       return;
     }
 
     try {
       setLoading(true);
       await authService.changePassword({
-        currentPassword: formData.newPassword,
+        currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,
+        confirmPassword: formData.confirmPassword,
       });
 
       setMessage("Đổi mật khẩu thành công!");
@@ -81,7 +91,7 @@ export default function ChangePassword() {
             <form className="change-password-form" onSubmit={handleSubmit}>
               <FormInput
                 label="Mật khẩu hiện tại"
-                name="currenPassword"
+                name="currentPassword"
                 value={formData.currentPassword}
                 onChange={handleChange}
                 required
