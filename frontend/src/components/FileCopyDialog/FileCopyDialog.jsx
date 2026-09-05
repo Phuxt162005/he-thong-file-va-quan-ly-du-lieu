@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 import Modal from "../Modal/Modal";
 import FolderPicker from "../FolderPicker/FolderPicker";
@@ -7,15 +7,30 @@ import fileService from "../../services/fileService";
 
 export default function FileCopyDialog({ file, isOpen, onClose, onCopied }) {
   const [destinationFolderId, setDestinationFolderId] = useState(null);
-  const [copyFile, setCopyFile] = useState(null);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
-  const handleCopy = async () => {
+  useEffect(() => {
+    if (!isOpen) {
+      return;
+    }
+
+    setDestinationFolderId(null);
+    setError("");
+  }, [isOpen, file?._id]);
+
+  async function handleCopy() {
+    if (!file?._id) {
+      return;
+    }
+
     try {
       setLoading(true);
       setError("");
+
       await fileService.copyFile(file._id, destinationFolderId);
+
       onCopied?.();
       onClose();
     } catch (err) {
@@ -23,12 +38,12 @@ export default function FileCopyDialog({ file, isOpen, onClose, onCopied }) {
     } finally {
       setLoading(false);
     }
-  };
+  }
 
   return (
     <Modal
       isOpen={isOpen}
-      title="Sao chép file"
+      title={`Sao chép "${file?.name || "file"}"`}
       onClose={() => {
         if (!loading) {
           onClose();
@@ -37,6 +52,7 @@ export default function FileCopyDialog({ file, isOpen, onClose, onCopied }) {
       footer={
         <>
           <button
+            type="button"
             className="btn btn-secondary"
             onClick={onClose}
             disabled={loading}
@@ -45,6 +61,7 @@ export default function FileCopyDialog({ file, isOpen, onClose, onCopied }) {
           </button>
 
           <button
+            type="button"
             className="btn btn-primary"
             onClick={handleCopy}
             disabled={loading}
@@ -54,16 +71,9 @@ export default function FileCopyDialog({ file, isOpen, onClose, onCopied }) {
         </>
       }
     >
-      <FileCopyDialog
-        file={copyFile}
-        isOpen={!!copyFile}
-        onClose={() => setCopyFile(null)}
-        onCopied={() => {
-          setCopyFile(null);
-          loadData();
-        }}
-      />
       {error && <div className="error-message">{error}</div>}
+
+      <p>Chọn thư mục đích:</p>
 
       <FolderPicker
         value={destinationFolderId}
