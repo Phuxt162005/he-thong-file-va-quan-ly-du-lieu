@@ -1,15 +1,19 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import FormInput from "../../components/FormInput/FormInput";
 
 import authService from "../../services/authService";
-import { setAccessToken, setCurrentUser } from "../../utils/authStorage";
+import {
+  setAccessToken,
+  setRefreshToken,
+  setCurrentUser,
+} from "../../utils/authStorage";
 
 import "./Login.css";
 
 export default function Login() {
   const navigate = useNavigate();
+  const location = useLocation();
   const [formData, setFormData] = useState({ username: "", password: "" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -38,13 +42,19 @@ export default function Login() {
       });
 
       const data = response?.data || response;
-      if (data?.accessToken) {
-        setAccessToken(data.accessToken);
+      if (!data?.token || !data?.refreshToken) {
+        throw new Error(
+          "Đăng nhập thành công nhưng máy chủ không trả về token.",
+        );
       }
-      if (data?.user) {
+      setAccessToken(data.token);
+      setRefreshToken(data.refreshToken);
+      if (data.user) {
         setCurrentUser(data.user);
       }
-      navigate("/files");
+      const redirectPath = location.state?.from || "/files";
+
+      navigate(redirectPath, { replace: true });
     } catch (err) {
       if (err?.response?.status === 401) {
         setError("Tên đăng nhập hoặc mật khẩu không chính xác.");

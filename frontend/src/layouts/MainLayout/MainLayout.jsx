@@ -2,22 +2,19 @@ import { Link, useNavigate } from "react-router-dom";
 
 import authService from "../../services/authService";
 import { clearAuth } from "../../utils/authStorage";
+import { useAuth } from "../../context/AuthContext";
 
 import "./MainLayout.css";
 
 export default function MainLayout({ children }) {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   const handleLogout = async () => {
-    try {
-      await authService.logout();
-    } catch (error) {
-      console.error("Login error:", error);
-    } finally {
-      clearAuth();
-      navigate("/login", { replace: true });
-    }
+    await logout();
+    navigate("/login", { replace: true });
   };
+
   return (
     <div className="main-layout">
       {/* Sidebar */}

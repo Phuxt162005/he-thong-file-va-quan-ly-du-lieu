@@ -1,4 +1,5 @@
 const ACCESS_TOKEN_KEY = "accessToken";
+const REFRESH_TOKEN_KEY = "refreshToken";
 const USER_KEY = "user";
 
 export const getAccessToken = () => {
@@ -13,12 +14,23 @@ export const removeAccessToken = () => {
   localStorage.removeItem(ACCESS_TOKEN_KEY);
 };
 
+export const getRefreshToken = () => {
+  return localStorage.getItem(REFRESH_TOKEN_KEY);
+};
+
+export const setRefreshToken = (token) => {
+  localStorage.setItem(REFRESH_TOKEN_KEY, token);
+};
+
+export const removeRefreshToken = () => {
+  localStorage.removeItem(REFRESH_TOKEN_KEY);
+};
+
 export const getCurrentUser = () => {
   const data = localStorage.getItem(USER_KEY);
   if (!data) {
     return null;
   }
-
   try {
     return JSON.parse(data);
   } catch {
@@ -36,5 +48,6 @@ export const removeCurrentUser = () => {
 
 export const clearAuth = () => {
   removeAccessToken();
+  removeRefreshToken();
   removeCurrentUser();
 };

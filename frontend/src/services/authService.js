@@ -11,8 +11,19 @@ const authService = {
     return response.data;
   },
 
-  async refreshToken() {
-    const response = await api.post("/auth/refresh");
+  async refreshToken(refreshToken) {
+    const response = await api.post("/auth/refresh", {
+      refreshToken,
+    });
+
+    return response.data;
+  },
+
+  async logout(refreshToken) {
+    const response = await api.post("/auth/logout", {
+      refreshToken,
+    });
+
     return response.data;
   },
 
@@ -28,12 +39,6 @@ const authService = {
 
   async changePassword(data) {
     const response = await api.put("/auth/change-password", data);
-    return response.data;
-  },
-
-  async logout() {
-    const response = await api.post("/auth/logout");
-    localStorage.removeItem("accessToken");
     return response.data;
   },
 };
