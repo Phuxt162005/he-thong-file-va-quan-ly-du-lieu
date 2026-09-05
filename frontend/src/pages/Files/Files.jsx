@@ -340,3 +340,21 @@ function FolderItem({ folder, onOpen, onRename, onDelete }) {
     </div>
   );
 }
+
+function validateFolderName(value) {
+  const name = value.trim();
+
+  if (!name) {
+    return "Tên thư mục không được để trống.";
+  }
+
+  if (name.length > 255) {
+    return "Tên thư mục không được vượt quá 255 ký tự.";
+  }
+
+  if (/[\\/:*?"<>|]/.test(name)) {
+    return 'Tên thư mục không được chứa các ký tự: \\ / : * ? " < > |';
+  }
+
+  return "";
+}

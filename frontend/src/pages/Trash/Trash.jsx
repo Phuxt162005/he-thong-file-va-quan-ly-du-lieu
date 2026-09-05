@@ -294,7 +294,7 @@ export default function Trash() {
   );
 }
 
-function TrashItem({ file, onRestore, onPermanentDeletes }) {
+function TrashItem({ file, onRestore, onPermanentDelete }) {
   return (
     <div className="trash-item">
       <div className="trash-item__name">

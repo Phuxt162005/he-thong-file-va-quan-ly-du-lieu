@@ -1,7 +1,6 @@
 import api from "./api";
 
 const folderService = {
-  // lấy folder cha
   async getFolders(parentFolder = null) {
     const params = {};
 
@@ -13,55 +12,61 @@ const folderService = {
     return response.data;
   },
 
-  // lấy các folder con
   async getFolder(folderId) {
     const response = await api.get(`/folders/${folderId}`);
     return response.data;
   },
 
-  // tạo folder mới
-  async createFolder(data) {
-    const response = await api.post("/folders", data);
+  async getDeletedFolders() {
+    const response = await api.get("/folders/deleted");
     return response.data;
   },
 
-  // xóa folder
-  async removeFolder(folderId, name) {
-    const response = await api.put(`/folders/${folderId}`, { name });
+  async createFolder(name, parentFolder = null) {
+    const response = await api.post("/folders", {
+      name,
+      parentFolder,
+    });
+
     return response.data;
   },
 
-  // xóa vĩnh viễn
-  async permanentDelete(folderId) {
-    const response = await api.delete(`/folders/${folderId}/permanent`);
+  async renameFolder(folderId, name) {
+    const response = await api.put(`/folders/${folderId}`, {
+      name,
+    });
+
     return response.data;
   },
 
-  // di chuyển folder
-  async moveFolder(folderId, destinationFolderId) {
+  async moveFolder(folderId, destinationFolderId = null) {
     const response = await api.put(`/folders/${folderId}/move`, {
       destinationFolderId,
     });
+
     return response.data;
   },
 
-  // sao chép folder
-  async copyFolder(folderId, destinationFolderId) {
+  async copyFolder(folderId, destinationFolderId = null) {
     const response = await api.post(`/folders/${folderId}/copy`, {
       destinationFolderId,
     });
+
     return response.data;
   },
 
-  // xóa folder
   async deleteFolder(folderId) {
     const response = await api.delete(`/folders/${folderId}`);
     return response.data;
   },
 
-  // khôi phục folder
   async restoreFolder(folderId) {
     const response = await api.put(`/folders/${folderId}/restore`);
+    return response.data;
+  },
+
+  async permanentDelete(folderId) {
+    const response = await api.delete(`/folders/${folderId}/permanent`);
     return response.data;
   },
 };

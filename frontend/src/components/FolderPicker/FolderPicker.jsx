@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import folderService from "../../services/folderService";
 
@@ -15,10 +15,11 @@ function FolderNode({
   onToggle,
   disabledIds,
 }) {
-  const isExpanded = expandedIds.has(folder._id);
-  const isLoading = loadingIds.has(folder._id);
-  const children = childrenMap[folder._id] || [];
-  const isDisabled = disabledIds.has(folder._id);
+  const folderId = String(folder._id);
+  const isExpanded = expandedIds.has(folderId);
+  const isLoading = loadingIds.has(folderId);
+  const children = childrenMap[folderId] || [];
+  const isDisabled = disabledIds.has(folderId);
 
   return (
     <div className="folder-node">
@@ -26,12 +27,17 @@ function FolderNode({
         className={`folder-node__row ${
           selectedId === folder._id ? "folder-node__row--selected" : ""
         } ${isDisabled ? "folder-node__row--disabled" : ""}`}
-        style={{ paddingLeft: `${level * 20}px` }}
+        style={{
+          paddingLeft: `${level * 20}px`,
+        }}
       >
         <button
           type="button"
           className="folder-node__toggle"
-          onClick={() => onToggle(folder)}
+          onClick={(event) => {
+            event.stopPropagation();
+            onToggle(folder);
+          }}
           disabled={isDisabled || isLoading}
         >
           {isLoading ? "..." : isExpanded ? "▾" : "▸"}
@@ -81,75 +87,89 @@ export default function FolderPicker({
   const [loadingIds, setLoadingIds] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const disabledSet = new Set(disabledIds);
+
+  const disabledSet = useMemo(
+    () => new Set(disabledIds.map(String)),
+    [disabledIds],
+  );
 
   useEffect(() => {
     loadRootFolders();
   }, []);
 
-  const loadRootFolders = async () => {
+  async function loadRootFolders() {
     try {
       setLoading(true);
       setError("");
 
       const response = await folderService.getFolders();
+
       const folders = response?.data || response || [];
-      setRootFolders(folders);
+
+      setRootFolders(Array.isArray(folders) ? folders : []);
     } catch (err) {
       setError(err?.message || "Không thể tải danh sách thư mục.");
     } finally {
       setLoading(false);
     }
-  };
+  }
 
-  const loadChildren = async (folderId) => {
+  async function loadChildren(folderId) {
+    const id = String(folderId);
+
     try {
       setLoadingIds((prev) => {
         const next = new Set(prev);
-        next.add(folderId);
+        next.add(id);
         return next;
       });
 
       const response = await folderService.getFolders(folderId);
+
       const children = response?.data || response || [];
-      setChildrenMap((prev) => ({ ...prev, [folderId]: children }));
+
+      setChildrenMap((prev) => ({
+        ...prev,
+        [id]: Array.isArray(children) ? children : [],
+      }));
     } catch (err) {
       setError(err?.message || "Không thể tải thư mục con.");
     } finally {
       setLoadingIds((prev) => {
         const next = new Set(prev);
-        next.delete(folderId);
+        next.delete(id);
         return next;
       });
     }
-  };
+  }
 
-  const handleToggle = async (folder) => {
-    const folderId = folder._id;
+  async function handleToggle(folder) {
+    const folderId = String(folder._id);
+
     if (disabledSet.has(folderId)) {
       return;
     }
 
-    const isExpanded = expandedIds.has(folderId);
-    if (isExpanded) {
+    if (expandedIds.has(folderId)) {
       setExpandedIds((prev) => {
         const next = new Set(prev);
         next.delete(folderId);
         return next;
       });
+
       return;
     }
 
-    // Nếu chưa tải children thì tải
     if (childrenMap[folderId] === undefined) {
-      await loadChildren(folderId);
+      await loadChildren(folder._id);
     }
+
     setExpandedIds((prev) => {
       const next = new Set(prev);
       next.add(folderId);
       return next;
     });
-  };
+  }
 
   if (loading) {
     return <div className="folder-picker">Đang tải thư mục...</div>;
@@ -161,16 +181,16 @@ export default function FolderPicker({
 
   return (
     <div className="folder-picker">
-      {/* Root */}
       <button
         type="button"
-        className={`folder-picker__root ${value === null ? "folder-picker__root--selected" : ""}`}
+        className={`folder-picker__root ${
+          value === null ? "folder-picker__root--selected" : ""
+        }`}
         onClick={() => onChange(null)}
       >
         🏠 Thư mục gốc
       </button>
 
-      {/* Tree */}
       <div className="folder-picker__tree">
         {rootFolders.map((folder) => (
           <FolderNode
