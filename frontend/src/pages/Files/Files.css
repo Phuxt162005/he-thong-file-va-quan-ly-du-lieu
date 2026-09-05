@@ -273,3 +273,16 @@
     flex-direction: column;
   }
 }
+
+.file-list__toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+@media (max-width: 600px) {
+  .file-list__toolbar-actions {
+    width: 100%;
+    flex-wrap: wrap;
+  }
+}

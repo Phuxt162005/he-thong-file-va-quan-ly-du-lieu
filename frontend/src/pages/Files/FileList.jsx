@@ -11,7 +11,6 @@ import Loading from "../../components/Loading/Loading";
 import ShareDialog from "../../components/ShareDialog/ShareDialog";
 import Modal from "../../components/Modal/Modal";
 import FormInput from "../../components/FormInput/FormInput";
-import FolderPicker from "../../components/FolderPicker/FolderPicker";
 
 import fileService from "../../services/fileService";
 
@@ -35,7 +34,11 @@ export default function FileList() {
   const [renaming, setRenaming] = useState(false);
   const [bulkDelete, setBulkDelete] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
+  const [bulkMove, setBulkMove] = useState(false);
+  const [bulkCopy, setBulkCopy] = useState(false);
+  const [bulkProcessing, setBulkProcessing] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
+  const [bulkDestinationFolderId, setBulkDestinationFolderId] = useState(null);
 
   useEffect(() => {
     loadFiles();
@@ -229,6 +232,54 @@ export default function FileList() {
     }
   }
 
+  async function handleBulkMove(destinationFolderId) {
+    if (!selectedFiles.length) {
+      return;
+    }
+
+    try {
+      setBulkProcessing(true);
+      setError("");
+
+      for (const fileId of selectedFiles) {
+        await fileService.moveFile(fileId, destinationFolderId);
+      }
+
+      setSelectedFiles([]);
+      setBulkMove(false);
+
+      refreshFiles();
+    } catch (err) {
+      setError(err?.message || "Không thể di chuyển một hoặc nhiều file.");
+    } finally {
+      setBulkProcessing(false);
+    }
+  }
+
+  async function handleBulkCopy(destinationFolderId) {
+    if (!selectedFiles.length) {
+      return;
+    }
+
+    try {
+      setBulkProcessing(true);
+      setError("");
+
+      for (const fileId of selectedFiles) {
+        await fileService.copyFile(fileId, destinationFolderId);
+      }
+
+      setSelectedFiles([]);
+      setBulkCopy(false);
+
+      refreshFiles();
+    } catch (err) {
+      setError(err?.message || "Không thể sao chép một hoặc nhiều file.");
+    } finally {
+      setBulkProcessing(false);
+    }
+  }
+
   function openContextMenu(event, file) {
     event.preventDefault();
 
@@ -252,6 +303,24 @@ export default function FileList() {
           <span>
             Đã chọn <strong>{selectedFiles.length}</strong> file
           </span>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setBulkMove(true)}
+            disabled={bulkProcessing}
+          >
+            📂 Di chuyển
+          </button>
+
+          <button
+            type="button"
+            className="btn btn-secondary"
+            onClick={() => setBulkCopy(true)}
+            disabled={bulkProcessing}
+          >
+            📋 Sao chép
+          </button>
 
           <button
             type="button"
@@ -342,6 +411,50 @@ export default function FileList() {
         isOpen={Boolean(shareFile)}
         onClose={() => setShareFile(null)}
       />
+
+      <Modal
+        isOpen={bulkMove}
+        title="Di chuyển các file đã chọn"
+        onClose={() => {
+          if (!bulkProcessing) {
+            setBulkMove(false);
+            setBulkDestinationFolderId(null);
+          }
+        }}
+        footer={
+          <>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => {
+                setBulkMove(false);
+                setBulkDestinationFolderId(null);
+              }}
+              disabled={bulkProcessing}
+            >
+              Hủy
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => handleBulkMove(bulkDestinationFolderId)}
+              disabled={bulkProcessing || bulkDestinationFolderId === undefined}
+            >
+              {bulkProcessing ? "Đang di chuyển..." : "Di chuyển"}
+            </button>
+          </>
+        }
+      >
+        <p>
+          Chọn thư mục đích cho <strong>{selectedFiles.length}</strong> file:
+        </p>
+
+        <FolderPicker
+          value={bulkDestinationFolderId}
+          onChange={setBulkDestinationFolderId}
+        />
+      </Modal>
 
       <ConfirmDialog
         isOpen={Boolean(deleteFile)}
