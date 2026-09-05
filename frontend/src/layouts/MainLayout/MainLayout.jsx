@@ -1,10 +1,6 @@
-import { useNavigate } from "react-router-dom";
-
-import Header from "../../components/Header/Header";
-import Sidebar from "../../components/Sidebar/Sidebar";
+import { Link, useNavigate } from "react-router-dom";
 
 import authService from "../../services/authService";
-
 import { clearAuth } from "../../utils/authStorage";
 
 import "./MainLayout.css";
