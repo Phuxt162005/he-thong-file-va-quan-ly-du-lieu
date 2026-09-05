@@ -4,64 +4,95 @@ import fileService from "../../services/fileService";
 
 import "./FileUpload.css";
 
-const UPLOAD_SESSION_KEY = "active_upload_sessions";
 const NORMAL_UPLOAD_LIMIT = 50 * 1024 * 1024;
-
-function getSavedSessions() {
-  try {
-    return JSON.parse(localStorage.getItem(UPLOAD_SESSION_KEY) || "{}");
-  } catch {
-    return {};
-  }
-}
-
-function saveUploadSession(key, session) {
-  const sessions = getSavedSessions();
-  sessions[key] = session;
-  localStorage.setItem(UPLOAD_SESSION_KEY, JSON.stringify(sessions));
-}
-
-function getUploadSession(key) {
-  const sessions = getSavedSessions();
-  return sessions[key] || null;
-}
-
-function removeUploadSession(key) {
-  const sessions = getSavedSessions();
-  delete sessions[key];
-  localStorage.setItem(UPLOAD_SESSION_KEY, JSON.stringify(sessions));
-}
-
-function createFileKey(file, folderId) {
-  return [file.name, file.size, file.lastModified, folderId || "root"].join(
-    "|",
-  );
-}
 
 export default function FileUpload({ folderId = null, onUploaded }) {
   const inputRef = useRef(null);
+
   const [files, setFiles] = useState([]);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
 
   const handleSelectFiles = (event) => {
-    const selected = Array.from(event.target.files || []);
-    setFiles(selected);
+    const selectedFiles = Array.from(event.target.files || []);
+
+    setFiles(
+      selectedFiles.map((file) => ({
+        file,
+        progress: 0,
+        status: "pending",
+        error: "",
+      })),
+    );
     setError("");
+    setSuccess("");
   };
 
-  const updateProgress = (file, completed, total) => {
-    const progress = Math.round((completed / total) * 100);
-
+  const updateFileState = (file, changes) => {
     setFiles((prev) =>
-      prev.map((item) => {
-        if (item === file) {
-          //  File object không nên bị thay đổi trực tiếp. Tạo object mới để lưu progress cho UI.
-          return Object.assign(file, { progress });
-        }
-        return item;
-      }),
+      prev.map((item) =>
+        item.file === file ? { ...item, ...changes } : item,
+      ),
     );
+  };
+
+  const uploadNormalFile = async (file) => {
+    updateFileState(file, { status: "uploading", progress: 0, error: "" });
+
+    await fileService.uploadFile(file, folderId, (event) => {
+      if (!event.total) return;
+
+      updateFileState(file, {
+        progress: Math.round((event.loaded / event.total) * 100),
+      });
+    });
+
+    updateFileState(file, { status: "success", progress: 100 });
+  };
+
+  const uploadChunkedFile = async (file) => {
+    updateFileState(file, { status: "uploading", progress: 0, error: "" });
+
+    const session = await fileService.initiateChunkUpload(file, folderId);
+    const { uploadId, chunkSize, totalChunks } = session;
+
+    for (let index = 0; index < totalChunks; index += 1) {
+      const start = index * chunkSize;
+      const end = Math.min(start + chunkSize, file.size);
+      const chunk = file.slice(start, end);
+
+      await fileService.uploadChunk(uploadId, index, chunk);
+
+      updateFileState(file, {
+        progress: Math.round(((index + 1) / totalChunks) * 100),
+      });
+    }
+
+    await fileService.completeChunkUpload(uploadId);
+    updateFileState(file, { status: "success", progress: 100 });
+  };
+
+  const uploadSingleFile = async (file) => {
+    try {
+      if (file.size === 0) {
+        throw new Error("Không thể upload file rỗng.");
+      }
+
+      if (file.size <= NORMAL_UPLOAD_LIMIT) {
+        await uploadNormalFile(file);
+      } else {
+        await uploadChunkedFile(file);
+      }
+
+      return true;
+    } catch (err) {
+      const message =
+        err?.response?.data?.message || err?.message || "Upload thất bại.";
+
+      updateFileState(file, { status: "error", error: message });
+      return false;
+    }
   };
 
   const handleUpload = async () => {
@@ -70,136 +101,49 @@ export default function FileUpload({ folderId = null, onUploaded }) {
       return;
     }
 
+    setUploading(true);
+    setError("");
+    setSuccess("");
+
+    let successCount = 0;
+    let failedCount = 0;
+
     try {
-      setUploading(true);
-      setError("");
-
-      for (const file of files) {
-        // File nhỏ: Upload trực tiếp bằng Multipart.
-        if (file.size <= NORMAL_UPLOAD_LIMIT) {
-          await fileService.uploadFile(file, folderId, (event) => {
-            if (event.total) {
-              const progress = Math.round((event.loaded / event.total) * 100);
-              setFiles((prev) =>
-                prev.map((item) => {
-                  if (item === file) {
-                    const updateProgress = (file, completed, total) => {
-                      const progress = Math.round((completed / total) * 100);
-
-                      setFiles((prev) =>
-                        prev.map((item) => {
-                          if (item === file) {
-                            return { ...item, progress };
-                          }
-                          return item;
-                        }),
-                      );
-                    };
-                  }
-                  return item;
-                }),
-              );
-            }
-          });
-          continue;
-        }
-
-        // File lớn: sử dụng Chunk Upload.
-        const sessionKey = createFileKey(file, folderId);
-        let savedSession = getUploadSession(sessionKey);
-        let uploadId;
-        let chunkSize;
-        let totalChunks;
-
-        // Chưa có session
-        if (!savedSession) {
-          const session = await fileService.initiateChunkUpload(file, folderId);
-          uploadId = session.uploadId;
-          chunkSize = session.chunkSize;
-          totalChunks = session.totalChunks;
-          saveUploadSession(sessionKey, {
-            uploadId,
-            chunkSize,
-            totalChunks,
-            fileName: file.name,
-            fileSize: file.size,
-            folderId,
-          });
-        } else {
-          // Có session cũ
-          uploadId = savedSession.uploadId;
-          chunkSize = savedSession.chunkSize;
-          totalChunks = savedSession.totalChunks;
-        }
-
-        // Kiểm tra session trên Server
-        let status = await fileService.getChunkUploadStatus(uploadId);
-        // Session không còn tồn tại
-        if (status.status !== "uploading") {
-          removeUploadSession(sessionKey);
-          const session = await fileService.initiateChunkUpload(file, folderId);
-          uploadId = session.uploadId;
-          chunkSize = session.chunkSize;
-          totalChunks = session.totalChunks;
-          saveUploadSession(sessionKey, {
-            uploadId,
-            chunkSize,
-            totalChunks,
-            fileName: file.name,
-            fileSize: file.size,
-            folderId,
-          });
-          status = await fileService.getChunkUploadStatus(uploadId);
-        }
-
-        // Các Chunk đã upload
-        const receivedChunks = new Set(status.receivedChunks);
-
-        // Upload các Chunk còn thiếu
-        for (let index = 0; index < totalChunks; index++) {
-          // Chunk đã tồn tại
-          if (receivedChunks.has(index)) {
-            updateProgress(file, index + 1, totalChunks);
-            continue;
-          }
-
-          const start = index * chunkSize;
-          const end = Math.min(start + chunkSize, file.size);
-          const chunk = file.slice(start, end);
-          await fileService.uploadChunk(uploadId, index, chunk);
-
-          pdateProgress(file, index + 1, totalChunks);
-        }
-        // Merge Chunk
-        await fileService.completeChunkUpload(uploadId);
-        // Upload hoàn tất
-        removeUploadSession(sessionKey);
+      for (const item of files) {
+        const success = await uploadSingleFile(item.file);
+        if (success) successCount += 1;
+        else failedCount += 1;
       }
-      setFiles([]);
 
-      if (inputRef.current) {
-        inputRef.current.value = "";
+      if (successCount > 0) {
+        setSuccess(`Upload thành công ${successCount} file${successCount > 1 ? "s" : ""}.`);
+        onUploaded?.();
       }
-      if (onUploaded) {
-        onUploaded();
+
+      if (failedCount > 0) {
+        setError(`Có ${failedCount} file upload thất bại.`);
       }
-    } catch (err) {
-      // Không xóa Chunk Upload Session khi upload thất bại.
-      setError(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Upload thất bại. Bạn có thể Upload lại để tiếp tục.",
-      );
+
+      if (failedCount === 0) {
+        setFiles([]);
+      }
     } finally {
       setUploading(false);
+      if (inputRef.current) inputRef.current.value = "";
     }
   };
 
   const removeFile = (index) => {
-    if (uploading) {
-      return;
-    }
+    if (uploading) return;
     setFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const clearFiles = () => {
+    if (uploading) return;
+    setFiles([]);
+    setError("");
+    setSuccess("");
+    if (inputRef.current) inputRef.current.value = "";
   };
 
   return (
@@ -215,34 +159,45 @@ export default function FileUpload({ folderId = null, onUploaded }) {
       </div>
 
       {error && <div className="error-message">{error}</div>}
+      {success && <div className="success-message">{success}</div>}
 
       {files.length > 0 && (
         <div className="file-upload__list">
-          {files.map((file, index) => (
-            <div key={`${file.name}-${index}`} className="file-upload__item">
+          {files.map((item, index) => (
+            <div
+              key={`${item.file.name}-${item.file.lastModified}-${index}`}
+              className={`file-upload__item file-upload__item--${item.status}`}
+            >
               <div className="file-upload__info">
-                <span className="file-upload__name">{file.name}</span>
-
-                <span className="file-upload__size">
-                  {formatSize(file.size)}
-                </span>
+                <span className="file-upload__name">{item.file.name}</span>
+                <span className="file-upload__size">{formatSize(item.file.size)}</span>
+                {item.status === "error" && item.error && (
+                  <span className="file-upload__error">{item.error}</span>
+                )}
               </div>
 
-              {uploading && (
+              <div className="file-upload__status">
+                {item.status === "uploading" && <span>{item.progress}%</span>}
+                {item.status === "success" && <span>✓ Thành công</span>}
+                {item.status === "error" && <span>✗ Thất bại</span>}
+                {item.status === "pending" && <span>Chờ upload</span>}
+              </div>
+
+              {item.status === "uploading" && (
                 <div className="file-upload__progress">
                   <div
                     className="file-upload__progress-value"
-                    style={{
-                      width: `${file.progress || 0}%`,
-                    }}
+                    style={{ width: `${item.progress}%` }}
                   />
                 </div>
               )}
 
               {!uploading && (
                 <button
+                  type="button"
                   className="file-upload__remove"
                   onClick={() => removeFile(index)}
+                  aria-label={`Xóa ${item.file.name}`}
                 >
                   ×
                 </button>
@@ -252,21 +207,29 @@ export default function FileUpload({ folderId = null, onUploaded }) {
         </div>
       )}
 
-      <button
-        className="btn btn-primary"
-        onClick={handleUpload}
-        disabled={uploading || files.length === 0}
-      >
-        {uploading ? "Đang upload..." : "Upload"}
-      </button>
+      <div className="file-upload__actions">
+        <button
+          type="button"
+          className="btn btn-primary"
+          onClick={handleUpload}
+          disabled={uploading || files.length === 0}
+        >
+          {uploading ? "Đang upload..." : "Upload"}
+        </button>
+
+        {!uploading && files.length > 0 && (
+          <button type="button" className="btn btn-secondary" onClick={clearFiles}>
+            Xóa danh sách
+          </button>
+        )}
+      </div>
     </div>
   );
 }
 
 function formatSize(bytes) {
-  if (!bytes) {
-    return "0 B";
-  }
+  if (!bytes) return "0 B";
+
   const units = ["B", "KB", "MB", "GB", "TB"];
   const index = Math.floor(Math.log(bytes) / Math.log(1024));
   return `${(bytes / Math.pow(1024, index)).toFixed(2)} ${units[index]}`;
