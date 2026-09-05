@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import Modal from "../Modal/Modal";
 import FolderPicker from "../FolderPicker/FolderPicker";
+
 import folderService from "../../services/folderService";
 
 export default function FolderMoveDialog({ folder, isOpen, onClose, onMoved }) {

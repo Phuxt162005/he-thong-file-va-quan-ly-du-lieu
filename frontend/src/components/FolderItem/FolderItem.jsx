@@ -1,20 +1,76 @@
 import "./FolderItem.css";
 
-export default function FolderItem({ folder, onOpen, onCopy, onShare }) {
+export default function FolderItem({
+  folder,
+  onOpen,
+  onRename,
+  onMove,
+  onCopy,
+  onDelete,
+  onShare,
+  onContextMenu,
+}) {
+  const handleContextMenu = (event) => {
+    event.preventDefault();
+    onContextMenu?.(event, folder);
+  };
+
   return (
-    <div className="folder-item">
-      <div className="folder-main" onDoubleClick={() => onOpen?.(folder)}>
-        <div className="folder-icon">📁</div>
+    <div className="folder-item" onContextMenu={handleContextMenu}>
+      <button
+        type="button"
+        className="folder-item__main"
+        onDoubleClick={() => onOpen?.(folder)}
+      >
+        <span className="folder-item__icon">📁</span>
 
-        <div className="folder-name">{folder.name}</div>
-      </div>
+        <span className="folder-item__name">{folder.name}</span>
+      </button>
 
-      <div className="folder-actions">
-        <button onClick={() => onCopy?.(folder)} title="Sao chép">
+      <div className="folder-item__actions">
+        <button
+          type="button"
+          className="folder-item__action"
+          onClick={() => onRename?.(folder)}
+          title="Đổi tên"
+        >
+          ✏️
+        </button>
+
+        <button
+          type="button"
+          className="folder-item__action"
+          onClick={() => onMove?.(folder)}
+          title="Di chuyển"
+        >
+          📂
+        </button>
+
+        <button
+          type="button"
+          className="folder-item__action"
+          onClick={() => onCopy?.(folder)}
+          title="Sao chép"
+        >
           📋
         </button>
-        <button onClick={() => onShare?.(folder)} title="Chia sẻ">
+
+        <button
+          type="button"
+          className="folder-item__action"
+          onClick={() => onShare?.(folder)}
+          title="Chia sẻ"
+        >
           🔗
+        </button>
+
+        <button
+          type="button"
+          className="folder-item__action"
+          onClick={() => onDelete?.(folder)}
+          title="Xóa"
+        >
+          🗑️
         </button>
       </div>
     </div>

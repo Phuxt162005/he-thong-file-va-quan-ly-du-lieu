@@ -22,10 +22,10 @@ const folderService = {
     return response.data;
   },
 
-  async createFolder(name, parentFolder = null) {
+  async createFolder(data) {
     const response = await api.post("/folders", {
-      name,
-      parentFolder,
+      name: data.name,
+      parentFolder: data.parentFolder || null,
     });
 
     return response.data;
@@ -41,7 +41,7 @@ const folderService = {
 
   async moveFolder(folderId, destinationFolderId = null) {
     const response = await api.put(`/folders/${folderId}/move`, {
-      destinationFolderId,
+      parentFolder: destinationFolderId || null,
     });
 
     return response.data;
@@ -49,7 +49,7 @@ const folderService = {
 
   async copyFolder(folderId, destinationFolderId = null) {
     const response = await api.post(`/folders/${folderId}/copy`, {
-      destinationFolderId,
+      destinationFolderId: destinationFolderId || null,
     });
 
     return response.data;
