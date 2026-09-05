@@ -28,3 +28,10 @@ exports.updateProfile = asyncHandler(async (req, res) => {
 
   return res.json(user);
 });
+
+// lấy dung lượng lưu trữ
+exports.getStorageQuota = asyncHandler(async (req, res) => {
+  const storage = await userService.getStorageQuota(req.user.id);
+
+  return res.json(storage);
+});

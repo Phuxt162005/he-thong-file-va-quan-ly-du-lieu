@@ -137,3 +137,64 @@ exports.findOneByNameAndFolder = (name, folderId, excludeFileId = null) => {
 
   return File.findOne(query);
 };
+
+const handleSubmit = async (event) => {
+  event.preventDefault();
+
+  setError("");
+  setMessage("");
+
+  if (!token) {
+    setError("Liên kết đặt lại mật khẩu không hợp lệ.");
+    return;
+  }
+
+  if (!formData.password) {
+    setError("Vui lòng nhập mật khẩu mới.");
+    return;
+  }
+
+  if (formData.password.length < 8) {
+    setError("Mật khẩu mới phải có ít nhất 8 ký tự.");
+    return;
+  }
+
+  if (!formData.confirmPassword) {
+    setError("Vui lòng xác nhận mật khẩu mới.");
+    return;
+  }
+
+  if (formData.password !== formData.confirmPassword) {
+    setError("Mật khẩu xác nhận không khớp.");
+    return;
+  }
+
+  try {
+    setLoading(true);
+
+    await authService.resetPassword({
+      resetToken: token,
+      newPassword: formData.password,
+      confirmPassword: formData.confirmPassword,
+    });
+
+    setMessage("Đặt lại mật khẩu thành công!");
+
+    setTimeout(() => {
+      navigate("/login", { replace: true });
+    }, 1000);
+  } catch (err) {
+    setError(err?.message || "Không thể đặt lại mật khẩu.");
+  } finally {
+    setLoading(false);
+  }
+};
+
+exports.getStorageUsedByOwner = async (ownerId) => {
+  const result = await File.aggregate([
+    { $match: { owner: ownerId, isDeleted: false } },
+    { $group: { _id: null, total: { $sum: "$size" } } },
+  ]);
+
+  return result[0]?.total || 0;
+};

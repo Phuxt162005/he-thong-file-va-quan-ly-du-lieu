@@ -18,7 +18,7 @@ const userService = {
 
   async findByLoginName(loginName) {
     const response = await api.get("/users/search", {
-      params: { login_name: loginName },
+      params: { username: loginName },
     });
     return response.data;
   },

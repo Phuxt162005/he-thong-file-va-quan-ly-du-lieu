@@ -83,3 +83,30 @@ exports.updateProfile = async (id, data = {}) => {
     throw error;
   }
 };
+
+exports.getStorageQuota = async (userId) => {
+  if (!userId) {
+    throw httpError("User ID is required", 400);
+  }
+
+  const user = await userRepository.findById(userId);
+  if (!user) {
+    throw httpError("User not found", 404);
+  }
+
+  const storageUsed =
+    await require("../repositories/fileRepository").getStorageUsedByOwner(
+      userId,
+    );
+  const storageLimit = Number(user.storageLimit || 0);
+  const storageRemaining = Math.max(storageLimit - storageUsed, 0);
+  const usagePercent =
+    storageLimit > 0 ? Math.min((storageUsed / storageLimit) * 100, 100) : 0;
+
+  return {
+    storageUsed,
+    storageLimit,
+    storageRemaining,
+    usagePercent,
+  };
+};
