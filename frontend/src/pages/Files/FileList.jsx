@@ -114,14 +114,17 @@ export default function FileList() {
       setError("");
 
       const response = await fileService.downloadFile(file._id);
-      const blob = response.data;
-
+      const blob = response?.data;
       if (!(blob instanceof Blob)) {
         throw new Error("Dữ liệu download không hợp lệ.");
+      }
+      if (blob.size === 0) {
+        throw new Error("File không có dữ liệu để download.");
       }
 
       objectUrl = URL.createObjectURL(blob);
       const link = document.createElement("a");
+
       link.href = objectUrl;
       link.download = file.name || "download";
       link.style.display = "none";
@@ -130,11 +133,17 @@ export default function FileList() {
       link.click();
       document.body.removeChild(link);
     } catch (err) {
-      const message = await getDownloadErrorMessage(err);
+      const message =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Không thể download file.";
+
       setError(message);
     } finally {
       if (objectUrl) {
-        setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
+        setTimeout(() => {
+          URL.revokeObjectURL(objectUrl);
+        }, 1000);
       }
       setDownloadingId(null);
     }

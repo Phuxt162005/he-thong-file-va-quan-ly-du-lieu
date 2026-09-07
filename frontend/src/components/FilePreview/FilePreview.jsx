@@ -10,16 +10,39 @@ import "./FilePreview.css";
 const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"];
 const VIDEO_EXTENSIONS = ["mp4", "webm", "ogg", "mov"];
 const AUDIO_EXTENSIONS = ["mp3", "wav", "ogg", "m4a"];
+const TEXT_EXTENSIONS = [
+  "txt",
+  "md",
+  "csv",
+  "json",
+  "xml",
+  "html",
+  "css",
+  "js",
+  "jsx",
+  "ts",
+  "tsx",
+  "java",
+  "py",
+  "c",
+  "cpp",
+  "h",
+  "hpp",
+  "sql",
+  "log",
+];
 
 export default function FilePreview({ file, isOpen, onClose }) {
   const [url, setUrl] = useState(null);
+  const [textContent, setTextContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     let objectUrl = null;
     let cancelled = false;
-    const loadPreview = async () => {
+
+    async function loadPreview() {
       if (!isOpen || !file?._id) {
         return;
       }
@@ -28,30 +51,45 @@ export default function FilePreview({ file, isOpen, onClose }) {
         setLoading(true);
         setError("");
         setUrl(null);
+        setTextContent("");
+
         const response = await fileService.previewFile(file._id);
-
-        if (cancelled) {
-          return;
-        }
-
         const blob = response?.data;
         if (!(blob instanceof Blob)) {
           throw new Error("Dữ liệu preview không hợp lệ.");
         }
+
+        const extension = getExtension(file?.name);
+        if (TEXT_EXTENSIONS.includes(extension)) {
+          const text = await blob.text();
+          if (!cancelled) {
+            setTextContent(text);
+          }
+          return;
+        }
         objectUrl = URL.createObjectURL(blob);
-        setUrl(objectUrl);
+
+        if (!cancelled) {
+          setUrl(objectUrl);
+        }
       } catch (err) {
         if (cancelled) {
           return;
         }
-        setError(err?.message || "Không thể preview file.");
+        const message =
+          err?.response?.data?.message ||
+          err?.message ||
+          "Không thể preview file.";
+
+        setError(message);
       } finally {
         if (!cancelled) {
           setLoading(false);
         }
       }
-    };
+    }
     loadPreview();
+
     return () => {
       cancelled = true;
       if (objectUrl) {
@@ -61,7 +99,8 @@ export default function FilePreview({ file, isOpen, onClose }) {
   }, [isOpen, file?._id]);
 
   const extension = getExtension(file?.name);
-  const renderContent = () => {
+
+  function renderContent() {
     if (loading) {
       return <Loading message="Đang tải preview..." />;
     }
@@ -73,17 +112,19 @@ export default function FilePreview({ file, isOpen, onClose }) {
 
           <p>{error}</p>
 
-          <button className="btn btn-secondary" onClick={onClose}>
+          <button type="button" className="btn btn-secondary" onClick={onClose}>
             Đóng
           </button>
         </div>
       );
     }
 
+    if (TEXT_EXTENSIONS.includes(extension)) {
+      return <pre className="file-preview__text">{textContent}</pre>;
+    }
     if (!url) {
       return null;
     }
-
     if (IMAGE_EXTENSIONS.includes(extension)) {
       return (
         <img
@@ -128,15 +169,14 @@ export default function FilePreview({ file, isOpen, onClose }) {
 
         <p>Định dạng file này chưa hỗ trợ xem trực tiếp.</p>
 
-        <button
-          className="btn btn-primary"
-          onClick={() => downloadBlob(url, file?.name)}
-        >
-          Download
+        <p>Vui lòng đóng cửa sổ Preview và sử dụng chức năng Download.</p>
+
+        <button type="button" className="btn btn-secondary" onClick={onClose}>
+          Đóng
         </button>
       </div>
     );
-  };
+  }
 
   return (
     <Modal isOpen={isOpen} title={file?.name || "Preview"} onClose={onClose}>
@@ -151,13 +191,4 @@ function getExtension(name = "") {
     return "";
   }
   return name.substring(lastDot + 1).toLowerCase();
-}
-
-function downloadBlob(url, fileName) {
-  const link = document.createElement("a");
-  link.href = url;
-  link.download = fileName || "file";
-  document.body.appendChild(link);
-  link.click();
-  document.body.removeChild(link);
 }
