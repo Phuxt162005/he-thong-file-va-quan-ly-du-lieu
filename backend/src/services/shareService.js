@@ -102,7 +102,7 @@ exports.createShare = async (userId, data) => {
   });
 };
 
-exports.accessShare = async (token, password) => {
+exports.accessShare = async (token, password, userId = null) => {
   const share = await shareRepository.findByToken(token);
   if (!share) {
     throw new httpError("Share link not found", 404);
@@ -110,10 +110,39 @@ exports.accessShare = async (token, password) => {
   if (share.isActive === false) {
     throw new httpError("Share link has been revoked", 400);
   }
-
   // Kiểm tra hết hạn
   if (share.expiresAt && new Date() > share.expiresAt) {
     throw new httpError("Share link has expired", 400);
+  }
+
+  // Private Share bắt buộc đăng nhập
+  if (share.visibility === "private") {
+    if (!userId) {
+      throw new httpError(
+        "Authentication is required for private Share Link",
+        401,
+      );
+    }
+    // Owner luôn được phép truy cập
+    const isOwner = share.owner.toString() === userId.toString();
+    if (!isOwner) {
+      const permissions = await permissionService.resolvePermission(
+        userId,
+        share.resourceId,
+        share.resourceType,
+      );
+      if (
+        !permissions.includes("view") &&
+        !permissions.includes("read") &&
+        !permissions.includes("edit") &&
+        !permissions.includes("share")
+      ) {
+        throw new httpError(
+          "You do not have permission to access this private Share Link",
+          403,
+        );
+      }
+    }
   }
 
   // Kiểm tra password
@@ -121,7 +150,6 @@ exports.accessShare = async (token, password) => {
     if (!password) {
       throw new httpError("Password required", 400);
     }
-
     const valid = await bcrypt.compare(password, share.password);
     if (!valid) {
       throw new httpError("Invalid password", 400);

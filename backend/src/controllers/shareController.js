@@ -17,6 +17,7 @@ exports.access = asyncHandler(async (req, res) => {
   const share = await shareService.accessShare(
     req.params.token,
     req.body.password,
+    req.user?.id,
   );
 
   let resource;
@@ -55,6 +56,7 @@ exports.download = asyncHandler(async (req, res) => {
   const share = await shareService.accessShare(
     req.params.token,
     req.body.password,
+    req.user?.id,
   );
   if (share.accessType === "view") {
     return res.status(403).json({
@@ -83,6 +85,7 @@ exports.folder = asyncHandler(async (req, res) => {
   const share = await shareService.accessShare(
     req.params.token,
     req.body.password,
+    req.user?.id,
   );
 
   if (share.resourceType !== "folder") {
@@ -106,6 +109,7 @@ exports.folderChildren = asyncHandler(async (req, res) => {
   const share = await shareService.accessShare(
     req.params.token,
     req.body.password,
+    req.user?.id,
   );
   if (share.resourceType !== "folder") {
     return res.status(400).json({ message: "Shared resource is not a folder" });
@@ -162,6 +166,7 @@ exports.folderDownload = asyncHandler(async (req, res) => {
   const share = await shareService.accessShare(
     req.params.token,
     req.body.password,
+    req.user?.id,
   );
   if (share.accessType === "view") {
     return res.status(403).json({

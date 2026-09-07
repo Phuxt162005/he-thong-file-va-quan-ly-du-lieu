@@ -42,14 +42,18 @@ export default function ShareAccess() {
         setCurrentFolderId(response.resourceId);
       }
     } catch (err) {
-      const message = err?.response?.data?.message || err?.message || "";
-      if (message === "Password required" || message === "Invalid password") {
-        setNeedPassword(true);
-        if (message === "Invalid password") {
-          setError("Mật khẩu không chính xác.");
-        }
+      const status = err?.response?.status;
+
+      if (status === 401) {
+        setError("Share Link này là Private. Vui lòng đăng nhập để truy cập.");
+      } else if (status === 403) {
+        setError("Bạn không có quyền truy cập Share Link này.");
       } else {
-        setError(message || "Không thể truy cập Share Link.");
+        setError(
+          err?.response?.data?.message ||
+            err?.message ||
+            "Không thể truy cập Share Link.",
+        );
       }
     } finally {
       setLoading(false);
@@ -272,25 +276,47 @@ export default function ShareAccess() {
 
             {files.length === 0 && <p>Không có tệp.</p>}
 
-            {files.map((file) => (
-              <div key={file._id} className="share-file-item">
-                <span>📄 {file.name || file.fileName || "File"}</span>
-
-                {share?.accessType === "view" ? (
-                  <span className="share-file-item__view-only">👁 Chỉ xem</span>
-                ) : (
-                  <button
-                    className="btn btn-primary"
-                    disabled={downloadingFileId === file._id}
-                    onClick={() => handleDownloadFolderFile(file)}
-                  >
-                    {downloadingFileId === file._id
-                      ? "Đang tải..."
-                      : "Download"}
-                  </button>
-                )}
+            <div className="share-access-card__info">
+              <div>
+                {share?.visibility === "private" ? "🔒 Private" : "🌐 Public"}
               </div>
-            ))}
+
+              <div>
+                {share?.accessType === "view"
+                  ? "👁 View Only"
+                  : "⬇️ Cho phép Download"}
+              </div>
+
+              {share?.expiresAt && (
+                <div>
+                  Hết hạn: {new Date(share.expiresAt).toLocaleString("vi-VN")}
+                </div>
+              )}
+            </div>
+
+            <div className="share-files">
+              {files.map((file) => (
+                <div key={file._id} className="share-file-item">
+                  <span>📄 {file.name || file.fileName || "File"}</span>
+
+                  {share?.accessType === "view" ? (
+                    <span className="share-file-item__view-only">
+                      👁 Chỉ xem
+                    </span>
+                  ) : (
+                    <button
+                      className="btn btn-primary"
+                      disabled={downloadingFileId === file._id}
+                      onClick={() => handleDownloadFolderFile(file)}
+                    >
+                      {downloadingFileId === file._id
+                        ? "Đang tải..."
+                        : "Download"}
+                    </button>
+                  )}
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
