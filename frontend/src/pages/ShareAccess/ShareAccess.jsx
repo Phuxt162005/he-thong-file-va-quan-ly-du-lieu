@@ -258,13 +258,40 @@ export default function ShareAccess() {
               <div key={file._id} className="share-file-item">
                 <span>📄 {file.name || file.fileName || "File"}</span>
 
-                <button
-                  className="btn btn-primary"
-                  disabled={downloadingFileId === file._id}
-                  onClick={() => handleDownloadFolderFile(file)}
-                >
-                  {downloadingFileId === file._id ? "Đang tải..." : "Download"}
-                </button>
+                {share?.accessType === "view" ? (
+                  <span className="share-file-item__view-only">👁 Chỉ xem</span>
+                ) : (
+                  <button
+                    className="btn btn-primary"
+                    disabled={downloadingFileId === file._id}
+                    onClick={() => handleDownloadFolderFile(file)}
+                  >
+                    {downloadingFileId === file._id
+                      ? "Đang tải..."
+                      : "Download"}
+                  </button>
+                )}
+
+                <div className="share-access-card__info">
+                  <div>
+                    {share?.visibility === "private"
+                      ? "🔒 Private"
+                      : "🌐 Public"}
+                  </div>
+
+                  <div>
+                    {share?.accessType === "view"
+                      ? "👁 View Only"
+                      : "⬇️ Cho phép Download"}
+                  </div>
+
+                  {share?.expiresAt && (
+                    <div>
+                      Hết hạn:{" "}
+                      {new Date(share.expiresAt).toLocaleString("vi-VN")}
+                    </div>
+                  )}
+                </div>
               </div>
             ))}
           </div>
@@ -305,13 +332,19 @@ export default function ShareAccess() {
         {error && <div className="error-message">{error}</div>}
 
         <div className="share-access-card__actions">
-          <button
-            className="btn btn-primary"
-            onClick={() => handleDownloadFile(share)}
-            disabled={downloadingFileId !== null}
-          >
-            {downloadingFileId ? "Đang tải..." : "Download"}
-          </button>
+          {share?.accessType === "view" ? (
+            <div className="share-access-card__view-only">
+              👁 Chế độ View Only — không cho phép Download
+            </div>
+          ) : (
+            <button
+              className="btn btn-primary"
+              onClick={() => handleDownloadFile(share)}
+              disabled={downloadingFileId !== null}
+            >
+              {downloadingFileId ? "Đang tải..." : "Download"}
+            </button>
+          )}
         </div>
       </div>
     </div>

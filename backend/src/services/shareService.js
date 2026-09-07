@@ -79,6 +79,16 @@ exports.createShare = async (userId, data) => {
     }
   }
 
+  const visibility = data.visibility || "public";
+  if (!["public", "private"].includes(visibility)) {
+    throw new httpError("Invalid visibility", 400);
+  }
+
+  const accessType = data.accessType || "download";
+  if (!["view", "download"].includes(accessType)) {
+    throw new httpError("Invalid access type", 400);
+  }
+
   return await shareRepository.create({
     resourceId: data.resourceId,
     resourceType: data.resourceType,
@@ -87,6 +97,8 @@ exports.createShare = async (userId, data) => {
     password,
     expiresAt,
     maxDownloads,
+    visibility,
+    accessType,
   });
 };
 
@@ -94,6 +106,9 @@ exports.accessShare = async (token, password) => {
   const share = await shareRepository.findByToken(token);
   if (!share) {
     throw new httpError("Share link not found", 404);
+  }
+  if (share.isActive === false) {
+    throw new httpError("Share link has been revoked", 400);
   }
 
   // Kiểm tra hết hạn
@@ -353,8 +368,30 @@ exports.updateShare = async (userId, shareId, data) => {
     }
   }
 
+  if (
+    data.visibility !== undefined &&
+    !["public", "private"].includes(data.visibility)
+  ) {
+    throw new httpError("Invalid visibility", 400);
+  }
+
+  if (
+    data.accessType !== undefined &&
+    !["view", "download"].includes(data.accessType)
+  ) {
+    throw new httpError("Invalid access type", 400);
+  }
+
   // Dùng hasOwnProperty để phân biệt
   const updateData = {};
+
+  if (Object.prototype.hasOwnProperty.call(data, "visibility")) {
+    updateData.visibility = data.visibility;
+  }
+
+  if (Object.prototype.hasOwnProperty.call(data, "accessType")) {
+    updateData.accessType = data.accessType;
+  }
 
   if (Object.prototype.hasOwnProperty.call(data, "expiresAt")) {
     updateData.expiresAt = data.expiresAt || null;

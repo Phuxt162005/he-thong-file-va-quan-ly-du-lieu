@@ -9,6 +9,8 @@ import "./ShareDialog.css";
 
 export default function ShareDialog({ resource, isOpen, onClose, onCreated }) {
   const [formData, setFormData] = useState({
+    visibility: "public",
+    accessType: "download",
     expiresAt: "",
     password: "",
     maxDownloads: "",
@@ -53,6 +55,8 @@ export default function ShareDialog({ resource, isOpen, onClose, onCreated }) {
         maxDownloads: formData.maxDownloads
           ? Number(formData.maxDownloads)
           : null,
+        visibility: formData.visibility,
+        accessType: formData.accessType,
       };
       const response = await shareService.createShare(data);
       const share =
@@ -76,6 +80,8 @@ export default function ShareDialog({ resource, isOpen, onClose, onCreated }) {
 
     setCreatedShare(null);
     setFormData({
+      visibility: "public",
+      accessType: "download",
       expiresAt: "",
       password: "",
       maxDownloads: "",
@@ -145,6 +151,38 @@ export default function ShareDialog({ resource, isOpen, onClose, onCreated }) {
             <span>Tài nguyên:</span>
 
             <strong>{resource?.name}</strong>
+          </div>
+
+          <div className="share-form__group">
+            <label htmlFor="visibility">Phạm vi truy cập</label>
+
+            <select
+              id="visibility"
+              name="visibility"
+              className="input"
+              value={formData.visibility}
+              onChange={handleChange}
+              disabled={loading}
+            >
+              <option value="public">Public - Công khai</option>
+              <option value="private">Private - Riêng tư</option>
+            </select>
+          </div>
+
+          <div className="share-form__group">
+            <label htmlFor="accessType">Quyền truy cập</label>
+
+            <select
+              id="accessType"
+              name="accessType"
+              className="input"
+              value={formData.accessType}
+              onChange={handleChange}
+              disabled={loading}
+            >
+              <option value="download">Cho phép xem và Download</option>
+              <option value="view">View Only - Chỉ xem</option>
+            </select>
           </div>
 
           <FormInput

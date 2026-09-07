@@ -45,6 +45,8 @@ exports.access = asyncHandler(async (req, res) => {
     maxDownloads: share.maxDownloads,
     downloadCount: share.downloadCount,
     isActive: share.isActive,
+    visibility: share.visibility,
+    accessType: share.accessType,
   });
 });
 
@@ -54,6 +56,11 @@ exports.download = asyncHandler(async (req, res) => {
     req.params.token,
     req.body.password,
   );
+  if (share.accessType === "view") {
+    return res.status(403).json({
+      message: "This Share Link is View Only",
+    });
+  }
 
   if (share.resourceType !== "file") {
     return res
@@ -156,7 +163,11 @@ exports.folderDownload = asyncHandler(async (req, res) => {
     req.params.token,
     req.body.password,
   );
-
+  if (share.accessType === "view") {
+    return res.status(403).json({
+      message: "This Share Link is View Only",
+    });
+  }
   if (share.resourceType !== "folder") {
     return res.status(400).json({ message: "Shared resource is not a folder" });
   }

@@ -20,6 +20,8 @@ export default function Shares() {
   const [revokeModal, setRevokeModal] = useState(false);
   const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState({
+    visibility: "public",
+    accessType: "download",
     expiresAt: "",
     password: "",
     maxDownloads: "",
@@ -57,6 +59,8 @@ export default function Shares() {
   const openEdit = (share) => {
     setSelectedShare(share);
     setFormData({
+      visibility: share.visibility || "public",
+      accessType: share.accessType || "download",
       expiresAt: formatDateTime(share.expiresAt),
       password: "",
       maxDownloads: share.maxDownloads ?? "",
@@ -96,6 +100,12 @@ export default function Shares() {
         data.password = "";
       } else if (formData.password) {
         data.password = formData.password;
+      }
+      if (formData.visibility !== (selectedShare.visibility || "public")) {
+        data.visibility = formData.visibility;
+      }
+      if (formData.accessType !== (selectedShare.accessType || "download")) {
+        data.accessType = formData.accessType;
       }
 
       const response = await shareService.updateShare(selectedShare._id, data);
@@ -253,6 +263,38 @@ export default function Shares() {
           </>
         }
       >
+        <div className="share-edit-form__group">
+          <label htmlFor="edit-visibility">Phạm vi truy cập</label>
+
+          <select
+            id="edit-visibility"
+            name="visibility"
+            className="input"
+            value={formData.visibility}
+            onChange={handleChange}
+            disabled={saving}
+          >
+            <option value="public">Public - Công khai</option>
+            <option value="private">Private - Riêng tư</option>
+          </select>
+        </div>
+
+        <div className="share-edit-form__group">
+          <label htmlFor="edit-accessType">Quyền truy cập</label>
+
+          <select
+            id="edit-accessType"
+            name="accessType"
+            className="input"
+            value={formData.accessType}
+            onChange={handleChange}
+            disabled={saving}
+          >
+            <option value="download">Cho phép xem và Download</option>
+            <option value="view">View Only - Chỉ xem</option>
+          </select>
+        </div>
+
         <div className="share-edit-form">
           <FormInput
             label="Ngày hết hạn"
@@ -330,6 +372,16 @@ function ShareItem({ share, onEdit, onRevoke, onCopy }) {
 
           <span>{share.resourceType === "folder" ? "Folder" : "File"}</span>
         </div>
+      </div>
+
+      <div className="share-item__access">
+        <span>
+          {share.visibility === "private" ? "🔒 Private" : "🌐 Public"}
+        </span>
+
+        <span>
+          {share.accessType === "view" ? "👁 View Only" : "⬇️ Download"}
+        </span>
       </div>
 
       <div className="share-item__expiry">
