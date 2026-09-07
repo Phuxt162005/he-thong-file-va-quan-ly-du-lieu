@@ -233,6 +233,24 @@ export default function ShareAccess() {
 
           {error && <div className="error-message">{error}</div>}
 
+          <div className="share-access-card__info">
+            <div>
+              {share?.visibility === "private" ? "🔒 Private" : "🌐 Public"}
+            </div>
+
+            <div>
+              {share?.accessType === "view"
+                ? "👁 View Only"
+                : "⬇️ Cho phép Download"}
+            </div>
+
+            {share?.expiresAt && (
+              <div>
+                Hết hạn: {new Date(share.expiresAt).toLocaleString("vi-VN")}
+              </div>
+            )}
+          </div>
+
           <div className="share-folder-content">
             {loading && <Loading message="Đang tải thư mục..." />}
 
@@ -271,27 +289,6 @@ export default function ShareAccess() {
                       : "Download"}
                   </button>
                 )}
-
-                <div className="share-access-card__info">
-                  <div>
-                    {share?.visibility === "private"
-                      ? "🔒 Private"
-                      : "🌐 Public"}
-                  </div>
-
-                  <div>
-                    {share?.accessType === "view"
-                      ? "👁 View Only"
-                      : "⬇️ Cho phép Download"}
-                  </div>
-
-                  {share?.expiresAt && (
-                    <div>
-                      Hết hạn:{" "}
-                      {new Date(share.expiresAt).toLocaleString("vi-VN")}
-                    </div>
-                  )}
-                </div>
               </div>
             ))}
           </div>
