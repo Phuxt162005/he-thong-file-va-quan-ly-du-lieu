@@ -15,6 +15,16 @@ const shareLinkSchema = new mongoose.Schema(
     maxDownloads: { type: Number, default: null },
     downloadCount: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
+    visibility: {
+      type: String,
+      enum: ["public", "private"],
+      default: "public",
+    },
+    accessType: {
+      type: String,
+      enum: ["view", "download"],
+      default: "download",
+    },
   },
   { timestamps: true },
 );
