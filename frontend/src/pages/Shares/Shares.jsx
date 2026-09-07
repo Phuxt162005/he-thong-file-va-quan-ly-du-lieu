@@ -34,17 +34,21 @@ export default function Shares() {
     try {
       setLoading(true);
       setError("");
+
       const response = await shareService.getShares();
       const allShares = response?.data || response || [];
       if (filter === "all") {
         setShares(allShares);
-      } else {
-        setShares(allShares.filter((share) => getStatus(share) === filter));
+        return;
       }
 
-      setShares(response?.data || response || []);
+      setShares(allShares.filter((share) => getStatus(share) === filter));
     } catch (err) {
-      setError(err?.message || "Không thể tải danh sách Share Link.");
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Không thể tải danh sách Share Link.",
+      );
     } finally {
       setLoading(false);
     }
@@ -141,14 +145,20 @@ export default function Shares() {
 
   const copyShareLink = async (share) => {
     const url =
-      share.url ||
-      share.shareUrl ||
-      (share.token ? `${window.location.origin}/share/${share.token}` : "");
-
+      share?.url ||
+      share?.shareUrl ||
+      (share?.token ? `${window.location.origin}/share/${share.token}` : "");
     if (!url) {
+      setError("Không tìm thấy URL của Share Link.");
       return;
     }
-    await navigator.clipboard.writeText(url);
+
+    try {
+      await navigator.clipboard.writeText(url);
+      setError("");
+    } catch {
+      setError("Không thể sao chép Share Link.");
+    }
   };
 
   if (loading) {
