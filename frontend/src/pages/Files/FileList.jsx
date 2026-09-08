@@ -13,9 +13,12 @@ import Modal from "../../components/Modal/Modal";
 import FormInput from "../../components/FormInput/FormInput";
 import FolderPicker from "../../components/FolderPicker/FolderPicker";
 
+import { useAuth } from "../../context/AuthContext";
+
 import fileService from "../../services/fileService";
 
 export default function FileList() {
+  const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const folderId = searchParams.get("folder");
   const [files, setFiles] = useState([]);
@@ -413,6 +416,8 @@ export default function FileList() {
         isOpen={Boolean(permissionFile)}
         resourceId={permissionFile?._id}
         resourceType="file"
+        resource={permissionFile}
+        currentUserId={user?._id || user?.id}
         onClose={() => setPermissionFile(null)}
       />
 
