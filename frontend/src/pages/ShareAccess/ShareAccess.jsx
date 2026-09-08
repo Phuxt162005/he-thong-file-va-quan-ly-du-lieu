@@ -254,6 +254,23 @@ export default function ShareAccess() {
             >
               Truy cập
             </button>
+
+            <button
+              className="btn btn-secondary"
+              onClick={() => handlePreviewFile(file)}
+              disabled={previewLoading}
+            >
+              Preview
+            </button>
+
+            {previewFile && previewUrl && (
+              <FilePreview
+                file={previewFile}
+                isOpen={true}
+                onClose={handleClosePreview}
+                previewUrl={previewUrl}
+              />
+            )}
           </form>
         </div>
       </div>

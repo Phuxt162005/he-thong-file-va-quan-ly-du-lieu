@@ -32,7 +32,12 @@ const TEXT_EXTENSIONS = [
   "log",
 ];
 
-export default function FilePreview({ file, isOpen, onClose }) {
+export default function FilePreview({
+  file,
+  isOpen,
+  onClose,
+  previewUrl = null,
+}) {
   const [url, setUrl] = useState(null);
   const [textContent, setTextContent] = useState("");
   const [loading, setLoading] = useState(false);
@@ -89,6 +94,11 @@ export default function FilePreview({ file, isOpen, onClose }) {
       }
     }
     loadPreview();
+    if (previewUrl) {
+      setUrl(previewUrl);
+      setLoading(false);
+      return;
+    }
 
     return () => {
       cancelled = true;
