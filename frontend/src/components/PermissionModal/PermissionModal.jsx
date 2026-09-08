@@ -38,9 +38,18 @@ export default function PermissionModal({
   const [selectedPermissions, setSelectedPermissions] = useState(["read"]);
   const [confirmRevoke, setConfirmRevoke] = useState(null);
   const ownerId =
-    resource?.owner?._id || resource?.owner?.id || resource?.owner || null;
-  const isOwner =
-    ownerId && currentUserId && ownerId.toString() === currentUserId.toString();
+    resource?.owner?._id ||
+    resource?.owner?.id ||
+    (typeof resource?.owner === "string" ? resource.owner : null) ||
+    null;
+  const isOwner = Boolean(
+    ownerId && currentUserId && ownerId.toString() === currentUserId.toString(),
+  );
+  const ownerName =
+    resource?.owner?.username ||
+    resource?.owner?.login_name ||
+    resource?.owner?.email ||
+    "Chủ sở hữu";
 
   useEffect(() => {
     if (!isOpen || !resourceId) {
@@ -211,11 +220,7 @@ export default function PermissionModal({
             <h3>Chủ sở hữu</h3>
 
             <div className="permission-item permission-item--owner">
-              <strong>
-                {resource?.owner?.username ||
-                  resource?.owner?.login_name ||
-                  "Owner"}
-              </strong>
+              <strong>{ownerName}</strong>
 
               <span>👑 Owner — có toàn quyền</span>
             </div>
@@ -241,8 +246,7 @@ export default function PermissionModal({
 
             <div className="permission-modal__options">
               {PERMISSION_OPTIONS.map((option) => {
-                const disabled =
-                  option.value === "permission_management" && !isOwner;
+                const disabled = saving;
 
                 return (
                   <label key={option.value}>
@@ -381,7 +385,7 @@ function PermissionItem({ permission, saving, isOwner, onUpdate, onRevoke }) {
       <div className="permission-item__permissions">
         {PERMISSION_OPTIONS.map((option) => {
           const ownerOnly = option.value === "permission_management";
-          const disabled = saving || (ownerOnly && !isOwner);
+          const disabled = saving;
 
           return (
             <label key={option.value}>
