@@ -398,12 +398,6 @@ function PermissionItem({ permission, saving, isOwner, onUpdate, onRevoke }) {
           const ownerOnly = option.value === "permission_management";
           const disabled = saving;
 
-          {
-            ownerOnly && (
-              <span className="permission-option__owner-only">(chỉ Owner)</span>
-            );
-          }
-
           return (
             <label key={option.value}>
               <input
@@ -414,6 +408,12 @@ function PermissionItem({ permission, saving, isOwner, onUpdate, onRevoke }) {
               />
 
               {option.label}
+
+              {ownerOnly && (
+                <span className="permission-option__owner-only">
+                  (chỉ Owner)
+                </span>
+              )}
             </label>
           );
         })}
