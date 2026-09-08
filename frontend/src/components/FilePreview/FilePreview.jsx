@@ -98,6 +98,7 @@ export default function FilePreview({
       setLoading(false);
       return;
     }
+
     loadPreview();
 
     return () => {
