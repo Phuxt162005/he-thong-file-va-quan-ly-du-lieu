@@ -254,24 +254,7 @@ export default function ShareAccess() {
             >
               Truy cập
             </button>
-
-            <button
-              className="btn btn-secondary"
-              onClick={() => handlePreviewFile(file)}
-              disabled={previewLoading}
-            >
-              Preview
-            </button>
           </form>
-
-          {previewFile && previewUrl && (
-            <FilePreview
-              file={previewFile}
-              isOpen={true}
-              onClose={handleClosePreview}
-              previewUrl={previewUrl}
-            />
-          )}
         </div>
       </div>
     );
@@ -377,24 +360,43 @@ export default function ShareAccess() {
                 <div key={file._id} className="share-file-item">
                   <span>📄 {file.name || file.fileName || "File"}</span>
 
-                  {share?.accessType === "view" ? (
-                    <span className="share-file-item__view-only">
-                      👁 Chỉ xem
-                    </span>
-                  ) : (
+                  <div className="share-file-item__actions">
                     <button
-                      className="btn btn-primary"
-                      disabled={downloadingFileId === file._id}
-                      onClick={() => handleDownloadFolderFile(file)}
+                      className="btn btn-secondary"
+                      onClick={() => handlePreviewFile(file)}
+                      disabled={previewLoading}
                     >
-                      {downloadingFileId === file._id
-                        ? "Đang tải..."
-                        : "Download"}
+                      Preview
                     </button>
-                  )}
+
+                    {share?.accessType === "view" ? (
+                      <span className="share-file-item__view-only">
+                        👁 Chỉ xem
+                      </span>
+                    ) : (
+                      <button
+                        className="btn btn-primary"
+                        disabled={downloadingFileId === file._id}
+                        onClick={() => handleDownloadFolderFile(file)}
+                      >
+                        {downloadingFileId === file._id
+                          ? "Đang tải..."
+                          : "Download"}
+                      </button>
+                    )}
+                  </div>
                 </div>
               ))}
             </div>
+
+            {previewFile && previewUrl && (
+              <FilePreview
+                file={previewFile}
+                isOpen={true}
+                onClose={handleClosePreview}
+                previewUrl={previewUrl}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -433,6 +435,14 @@ export default function ShareAccess() {
         {error && <div className="error-message">{error}</div>}
 
         <div className="share-access-card__actions">
+          <button
+            className="btn btn-secondary"
+            onClick={() => handlePreviewFile(share)}
+            disabled={previewLoading}
+          >
+            Preview
+          </button>
+
           {share?.accessType === "view" ? (
             <div className="share-access-card__view-only">
               👁 Chế độ View Only — không cho phép Download
@@ -447,6 +457,15 @@ export default function ShareAccess() {
             </button>
           )}
         </div>
+
+        {previewFile && previewUrl && (
+          <FilePreview
+            file={previewFile}
+            isOpen={true}
+            onClose={handleClosePreview}
+            previewUrl={previewUrl}
+          />
+        )}
       </div>
     </div>
   );
