@@ -93,12 +93,12 @@ export default function FilePreview({
         }
       }
     }
-    loadPreview();
     if (previewUrl) {
       setUrl(previewUrl);
       setLoading(false);
       return;
     }
+    loadPreview();
 
     return () => {
       cancelled = true;

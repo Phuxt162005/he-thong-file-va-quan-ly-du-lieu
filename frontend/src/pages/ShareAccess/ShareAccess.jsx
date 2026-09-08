@@ -262,16 +262,16 @@ export default function ShareAccess() {
             >
               Preview
             </button>
-
-            {previewFile && previewUrl && (
-              <FilePreview
-                file={previewFile}
-                isOpen={true}
-                onClose={handleClosePreview}
-                previewUrl={previewUrl}
-              />
-            )}
           </form>
+
+          {previewFile && previewUrl && (
+            <FilePreview
+              file={previewFile}
+              isOpen={true}
+              onClose={handleClosePreview}
+              previewUrl={previewUrl}
+            />
+          )}
         </div>
       </div>
     );
