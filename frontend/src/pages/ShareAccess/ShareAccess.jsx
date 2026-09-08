@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 
 import Loading from "../../components/Loading/Loading";
 import FormInput from "../../components/FormInput/FormInput";
+import FilePreview from "../../components/FilePreview/FilePreview";
 
 import shareService from "../../services/shareService";
 
@@ -18,6 +19,9 @@ export default function ShareAccess() {
   const [password, setPassword] = useState("");
   const [needPassword, setNeedPassword] = useState(false);
   const [downloadingFileId, setDownloadingFileId] = useState(null);
+  const [previewFile, setPreviewFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
 
   // Kiểm tra Share Link
   const loadShare = async (enteredPassword = null) => {
@@ -43,17 +47,23 @@ export default function ShareAccess() {
       }
     } catch (err) {
       const status = err?.response?.status;
-
+      const message = err?.response?.data?.message || err?.message || "";
+      if (status === 400 && message === "Password required") {
+        setNeedPassword(true);
+        setError("");
+        return;
+      }
+      if (status === 400 && message === "Invalid password") {
+        setNeedPassword(true);
+        setError("Mật khẩu không chính xác.");
+        return;
+      }
       if (status === 401) {
         setError("Share Link này là Private. Vui lòng đăng nhập để truy cập.");
       } else if (status === 403) {
         setError("Bạn không có quyền truy cập Share Link này.");
       } else {
-        setError(
-          err?.response?.data?.message ||
-            err?.message ||
-            "Không thể truy cập Share Link.",
-        );
+        setError(message || "Không thể truy cập Share Link.");
       }
     } finally {
       setLoading(false);
@@ -94,6 +104,41 @@ export default function ShareAccess() {
     loadShare(password);
   };
 
+  const handlePreviewFile = async (file) => {
+    try {
+      setPreviewLoading(true);
+      setError("");
+
+      const response = await shareService.previewSharedFile(
+        token,
+        password || null,
+      );
+      if (!(response?.data instanceof Blob)) {
+        throw new Error("Dữ liệu preview không hợp lệ.");
+      }
+      const url = URL.createObjectURL(response.data);
+
+      setPreviewUrl(url);
+      setPreviewFile(file);
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Không thể Preview file.",
+      );
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleClosePreview = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(null);
+    setPreviewFile(null);
+  };
+
   // Download file trực tiếp
   const handleDownloadFile = async (file) => {
     try {
@@ -114,9 +159,17 @@ export default function ShareAccess() {
       link.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(
-        err?.response?.data?.message || err?.message || "Không thể Download.",
-      );
+      const status = err?.response?.status;
+      const message = err?.response?.data?.message || err?.message || "";
+      if (status === 403) {
+        setError(message || "Share Link này không cho phép Download.");
+      } else if (status === 404) {
+        setError("Tài nguyên được chia sẻ không còn tồn tại.");
+      } else if (status === 400) {
+        setError(message || "Share Link không còn khả dụng.");
+      } else {
+        setError(message || "Không thể Download.");
+      }
     } finally {
       setDownloadingFileId(null);
     }
@@ -143,9 +196,17 @@ export default function ShareAccess() {
       link.remove();
       URL.revokeObjectURL(url);
     } catch (err) {
-      setError(
-        err?.response?.data?.message || err?.message || "Không thể Download.",
-      );
+      const status = err?.response?.status;
+      const message = err?.response?.data?.message || err?.message || "";
+      if (status === 403) {
+        setError(message || "Share Link này không cho phép Download.");
+      } else if (status === 404) {
+        setError("Tài nguyên được chia sẻ không còn tồn tại.");
+      } else if (status === 400) {
+        setError(message || "Share Link không còn khả dụng.");
+      } else {
+        setError(message || "Không thể Download.");
+      }
     } finally {
       setDownloadingFileId(null);
     }

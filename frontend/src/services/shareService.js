@@ -74,6 +74,16 @@ const shareService = {
     });
     return response.data;
   },
+
+  // preview File được Share
+  async previewSharedFile(token, password = null) {
+    const response = await api.post(
+      `/shares/preview/${token}`,
+      { password },
+      { responseType: "blob" },
+    );
+    return response;
+  },
 };
 
 export default shareService;

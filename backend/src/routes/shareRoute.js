@@ -38,4 +38,6 @@ router.put("/:id", auth, controller.update);
 // vô hiệu hóa Share Link
 router.delete("/:id", auth, controller.disable);
 
+router.post("/preview/:token", optionalAuth, controller.preview);
+
 module.exports = router;

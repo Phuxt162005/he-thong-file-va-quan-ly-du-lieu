@@ -131,11 +131,14 @@ exports.accessShare = async (token, password, userId = null) => {
         share.resourceId,
         share.resourceType,
       );
+
       if (
-        !permissions.includes("view") &&
         !permissions.includes("read") &&
-        !permissions.includes("edit") &&
-        !permissions.includes("share")
+        !permissions.includes("write") &&
+        !permissions.includes("download") &&
+        !permissions.includes("delete") &&
+        !permissions.includes("share") &&
+        !permissions.includes("permission_management")
       ) {
         throw new httpError(
           "You do not have permission to access this private Share Link",
@@ -449,6 +452,13 @@ exports.getShare = async (userId, shareId) => {
   if (share.owner.toString() !== userId.toString()) {
     throw new httpError("You do not own this share link", 403);
   }
-
   return share;
+};
+
+exports.getSharedFilePreview = async (share) => {
+  if (share.resourceType !== "file") {
+    throw new httpError("This endpoint only supports shared files", 400);
+  }
+  const result = await exports.getSharedFile(share);
+  return result;
 };

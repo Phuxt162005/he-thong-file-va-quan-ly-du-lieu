@@ -189,3 +189,15 @@ exports.folderDownload = asyncHandler(async (req, res) => {
     }
   });
 });
+
+// preview file thông qua Share Link
+exports.preview = asyncHandler(async (req, res) => {
+  const share = await shareService.accessShare(
+    req.params.token,
+    req.body.password,
+    req.user?.id,
+  );
+
+  const result = await shareService.getSharedFilePreview(share);
+  return res.sendFile(result.filePath);
+});
