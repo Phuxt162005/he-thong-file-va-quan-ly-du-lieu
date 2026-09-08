@@ -116,10 +116,6 @@ export default function PermissionModal({
       setError("Vui lòng chọn ít nhất một quyền.");
       return;
     }
-    if (selectedPermissions.includes("permission_management") && !isOwner) {
-      setError("Chỉ Owner mới được cấp quyền Quản lý quyền.");
-      return;
-    }
 
     try {
       setSaving(true);
@@ -267,6 +263,21 @@ export default function PermissionModal({
                     )}
                   </label>
                 );
+
+                <input
+                  type="checkbox"
+                  checked={selectedPermissions.includes(option.value)}
+                  onChange={() => handlePermissionChange(option.value)}
+                  disabled={disabled}
+                />;
+
+                {
+                  option.value === "permission_management" && (
+                    <span className="permission-option__owner-only">
+                      (chỉ Owner)
+                    </span>
+                  );
+                }
               })}
             </div>
 
@@ -386,6 +397,12 @@ function PermissionItem({ permission, saving, isOwner, onUpdate, onRevoke }) {
         {PERMISSION_OPTIONS.map((option) => {
           const ownerOnly = option.value === "permission_management";
           const disabled = saving;
+
+          {
+            ownerOnly && (
+              <span className="permission-option__owner-only">(chỉ Owner)</span>
+            );
+          }
 
           return (
             <label key={option.value}>
