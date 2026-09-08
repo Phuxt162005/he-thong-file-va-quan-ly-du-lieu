@@ -31,10 +31,16 @@ export default function Trash() {
     setRestoreFolderModal(true);
   };
 
-  // mở modal đã xóa
+  // mở modal xóa vĩnh viễn file
   const openPermanentDeleteModal = (file) => {
     setSelectedDeleteFile(file);
     setPermanentDeleteModal(true);
+  };
+
+  // mở modal xóa vĩnh viễn folder
+  const openPermanentDeleteFolderModal = (folder) => {
+    setSelectedDeleteFolder(folder);
+    setPermanentDeleteFolderModal(true);
   };
 
   // đóng model đã xóa
