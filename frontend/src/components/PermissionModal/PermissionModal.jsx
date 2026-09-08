@@ -250,34 +250,18 @@ export default function PermissionModal({
                       type="checkbox"
                       checked={selectedPermissions.includes(option.value)}
                       onChange={() => handlePermissionChange(option.value)}
-                      disabled={saving || disabled}
+                      disabled={disabled}
                     />
 
                     {option.label}
 
-                    {disabled && (
+                    {option.value === "permission_management" && (
                       <span className="permission-option__owner-only">
-                        {" "}
-                        (Owner)
+                        (chỉ Owner)
                       </span>
                     )}
                   </label>
                 );
-
-                <input
-                  type="checkbox"
-                  checked={selectedPermissions.includes(option.value)}
-                  onChange={() => handlePermissionChange(option.value)}
-                  disabled={disabled}
-                />;
-
-                {
-                  option.value === "permission_management" && (
-                    <span className="permission-option__owner-only">
-                      (chỉ Owner)
-                    </span>
-                  );
-                }
               })}
             </div>
 
