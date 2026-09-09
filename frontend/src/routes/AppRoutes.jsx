@@ -63,7 +63,9 @@ function AppRoutes() {
         path="/profile"
         element={
           <ProtectedRoute>
-            <Profile />
+            <MainLayout>
+              <Profile />
+            </MainLayout>
           </ProtectedRoute>
         }
       />

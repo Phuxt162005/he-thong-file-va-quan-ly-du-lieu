@@ -14,6 +14,7 @@ function FileItem({
   onPermission,
   onShare,
   onContextMenu,
+  onDragStart,
   downloading = false,
 }) {
   function handleSelect() {

@@ -39,7 +39,6 @@ export default function Files() {
   const [shareFolder, setShareFolder] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
   const [breadcrumbItems, setBreadcrumbItems] = useState([]);
-  const [draggingFileId, setDraggingFileId] = useState(null);
   const [dragError, setDragError] = useState("");
 
   useEffect(() => {
@@ -253,16 +252,11 @@ export default function Files() {
     if (!fileId || !destinationFolder?._id) {
       return;
     }
-    if (String(fileId) === String(destinationFolder._id)) {
-      return;
-    }
 
     try {
       setDragError("");
       await fileService.moveFile(fileId, destinationFolder._id);
-      setDraggingFileId(null);
       refreshFolders();
-      setRefreshKey((value) => value + 1);
     } catch (err) {
       setDragError(
         err?.response?.data?.message ||
