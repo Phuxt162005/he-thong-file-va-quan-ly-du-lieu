@@ -231,7 +231,11 @@ export default function Admin() {
         await adminService.createUser(payload);
       }
 
-      closeForm();
+      setShowForm(false);
+      setEditingUser(null);
+      setForm(EMPTY_FORM);
+      setFormError("");
+
       await loadData();
     } catch (err) {
       setFormError(err?.message || "Không thể lưu thông tin người dùng.");
