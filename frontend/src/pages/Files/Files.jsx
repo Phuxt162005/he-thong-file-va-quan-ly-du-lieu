@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 
 import FileUpload from "../../components/FileUpload/FileUpload";
-import MainLayout from "../../layouts/MainLayout/MainLayout";
 import Breadcrumb from "../../components/Breadcrumb/Breadcrumb";
 import Loading from "../../components/Loading/Loading";
 import Modal from "../../components/Modal/Modal";
@@ -210,7 +209,7 @@ export default function Files() {
   }
 
   return (
-    <MainLayout>
+    <>
       <div className="files-page">
         <Breadcrumb />
 
@@ -517,6 +516,6 @@ export default function Files() {
           </button>
         </div>
       )}
-    </MainLayout>
+    </>
   );
 }
