@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import Loading from "../../components/Loading/Loading";
-import activityLogService from "../../services/activityLogService";
 import { useAuth } from "../../context/AuthContext";
+import activityLogService from "../../services/activityLogService";
 
 import "./ActivityLog.css";
 
@@ -10,8 +10,8 @@ const ACTION_LABELS = {
   create: "Tạo",
   create_file: "Tạo file",
   create_folder: "Tạo thư mục",
-  upload: "Upload",
-  download: "Download",
+  upload: "Tải lên",
+  download: "Tải xuống",
   preview: "Xem trước",
   rename: "Đổi tên",
   move: "Di chuyển",
@@ -40,18 +40,21 @@ function formatAction(action) {
   if (!action) {
     return "-";
   }
-  return (
-    ACTION_LABELS[action] ||
-    action
-      .replaceAll("_", " ")
-      .replace(/\b\w/g, (character) => character.toUpperCase())
-  );
+
+  if (ACTION_LABELS[action]) {
+    return ACTION_LABELS[action];
+  }
+
+  return action
+    .replaceAll("_", " ")
+    .replace(/\b\w/g, (character) => character.toUpperCase());
 }
 
 function formatResourceType(resourceType) {
   if (!resourceType) {
     return "-";
   }
+
   return RESOURCE_LABELS[resourceType] || resourceType;
 }
 
@@ -61,6 +64,7 @@ function formatDate(date) {
   }
 
   const parsedDate = new Date(date);
+
   if (Number.isNaN(parsedDate.getTime())) {
     return "-";
   }
@@ -74,6 +78,7 @@ function formatDetails(details) {
   }
 
   const entries = Object.entries(details);
+
   if (entries.length === 0) {
     return "-";
   }
@@ -89,65 +94,91 @@ function formatDetails(details) {
           formattedValue = String(value);
         }
       }
+
       return `${key}: ${formattedValue}`;
     })
     .join(" • ");
 }
 
+function getResultClass(result) {
+  if (result === "DENIED") {
+    return "audit-result audit-result--denied";
+  }
+
+  if (result === "FAILED") {
+    return "audit-result audit-result--failed";
+  }
+
+  return "audit-result audit-result--success";
+}
+
 export default function ActivityLog() {
   const { user } = useAuth();
+
   const isAdmin = user?.role === "admin";
+
   const [activities, setActivities] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
+
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+
   const [error, setError] = useState("");
   const [auditError, setAuditError] = useState("");
 
-  const loadActivities = async ({ showLoading = true } = {}) => {
-    try {
-      if (showLoading) {
-        setLoading(true);
-      } else {
-        setRefreshing(true);
+  const loadData = useCallback(
+    async ({ initial = false } = {}) => {
+      try {
+        if (initial) {
+          setLoading(true);
+        } else {
+          setRefreshing(true);
+        }
+
+        setError("");
+        setAuditError("");
+
+        const activityPromise = activityLogService.getMyActivities(100);
+
+        const auditPromise = isAdmin
+          ? activityLogService.getDeniedAuditLogs(100)
+          : Promise.resolve([]);
+
+        const [activityResponse, auditResponse] = await Promise.all([
+          activityPromise,
+          auditPromise,
+        ]);
+
+        const activityData = Array.isArray(activityResponse)
+          ? activityResponse
+          : activityResponse?.activities || activityResponse?.data || [];
+
+        const auditData = Array.isArray(auditResponse)
+          ? auditResponse
+          : auditResponse?.logs || auditResponse?.data || [];
+
+        setActivities(Array.isArray(activityData) ? activityData : []);
+
+        setAuditLogs(Array.isArray(auditData) ? auditData : []);
+      } catch (err) {
+        if (isAdmin) {
+          setAuditError(
+            err?.message || "Không thể tải dữ liệu Activity/Audit Log.",
+          );
+        } else {
+          setError(err?.message || "Không thể tải lịch sử hoạt động.");
+        }
+      } finally {
+        setLoading(false);
+        setRefreshing(false);
       }
-
-      setError("");
-      setAuditError("");
-
-      const activityPromise = activityLogService.getMyActivities(100);
-      const auditPromise = isAdmin
-        ? activityLogService.getDeniedAuditLogs(100)
-        : Promise.resolve([]);
-      const [activityResponse, auditResponse] = await Promise.all([
-        activityPromise,
-        auditPromise,
-      ]);
-
-      const activityData = Array.isArray(activityResponse)
-        ? activityResponse
-        : activityResponse?.activities || activityResponse?.data || [];
-      const auditData = Array.isArray(auditResponse)
-        ? auditResponse
-        : auditResponse?.logs || auditResponse?.data || [];
-
-      setActivities(Array.isArray(activityData) ? activityData : []);
-      setAuditLogs(Array.isArray(auditData) ? auditData : []);
-    } catch (err) {
-      if (isAdmin) {
-        setAuditError(err?.message || "Không thể tải Audit/Security Log.");
-      } else {
-        setError(err?.message || "Không thể tải lịch sử hoạt động.");
-      }
-    } finally {
-      setLoading(false);
-      setRefreshing(false);
-    }
-  };
+    },
+    [isAdmin],
+  );
 
   useEffect(() => {
-    loadActivities();
-  }, []);
+    loadData({ initial: true });
+  }, [loadData]);
 
   if (loading) {
     return <Loading message="Đang tải lịch sử hoạt động..." />;
@@ -162,8 +193,9 @@ export default function ActivityLog() {
         </div>
 
         <button
+          type="button"
           className="btn btn-secondary"
-          onClick={() => loadActivities({ showLoading: false })}
+          onClick={() => loadData()}
           disabled={refreshing}
         >
           {refreshing ? "Đang tải..." : "Làm mới"}
@@ -172,11 +204,20 @@ export default function ActivityLog() {
 
       {error && <div className="error-message">{error}</div>}
 
-      <div className="activity-card">
+      <section className="activity-card">
+        <div className="activity-card__header">
+          <div>
+            <h2>Hoạt động của tôi</h2>
+            <p>Lịch sử thao tác của tài khoản hiện tại.</p>
+          </div>
+
+          <span className="activity-count">{activities.length} hoạt động</span>
+        </div>
+
         {activities.length === 0 ? (
           <div className="activity-empty">
             <div className="activity-empty__icon">📝</div>
-            <h2>Chưa có hoạt động</h2>
+            <h3>Chưa có hoạt động</h3>
             <p>Không có lịch sử hoạt động nào để hiển thị.</p>
           </div>
         ) : (
@@ -186,7 +227,7 @@ export default function ActivityLog() {
                 <tr>
                   <th>Thời gian</th>
                   <th>Thao tác</th>
-                  <th>Loại tài nguyên</th>
+                  <th>Tài nguyên</th>
                   <th>Resource ID</th>
                   <th>Chi tiết</th>
                 </tr>
@@ -220,23 +261,25 @@ export default function ActivityLog() {
             </table>
           </div>
         )}
-      </div>
+      </section>
 
       {isAdmin && (
-        <div className="activity-card">
-          <div className="activity-section-header">
+        <section className="activity-card">
+          <div className="activity-card__header">
             <div>
               <h2>Audit / Security Log</h2>
               <p>Các sự kiện truy cập bị hệ thống từ chối.</p>
             </div>
+
+            <span className="activity-admin-badge">Admin</span>
           </div>
 
           {auditError && <div className="error-message">{auditError}</div>}
 
           {auditLogs.length === 0 ? (
-            <div className="activity-empty activity-empty--small">
+            <div className="activity-empty">
               <div className="activity-empty__icon">🛡️</div>
-              <h2>Không có sự kiện bị từ chối</h2>
+              <h3>Không có sự kiện bị từ chối</h3>
               <p>Chưa ghi nhận sự kiện DENIED nào.</p>
             </div>
           ) : (
@@ -265,8 +308,8 @@ export default function ActivityLog() {
                       <td>{formatResourceType(log.resourceType)}</td>
 
                       <td>
-                        <span className="audit-result audit-result--denied">
-                          DENIED
+                        <span className={getResultClass(log.result)}>
+                          {log.result || "DENIED"}
                         </span>
                       </td>
 
@@ -283,7 +326,7 @@ export default function ActivityLog() {
               </table>
             </div>
           )}
-        </div>
+        </section>
       )}
     </div>
   );
