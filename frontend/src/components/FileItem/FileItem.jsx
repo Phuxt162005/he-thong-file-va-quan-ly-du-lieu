@@ -29,11 +29,19 @@ function FileItem({
     onContextMenu?.(event, file);
   }
 
+  function handleDragStart(event) {
+    event.dataTransfer.effectAllowed = "move";
+    event.dataTransfer.setData("application/x-file-id", String(file._id));
+    onDragStart?.(file);
+  }
+
   return (
     <div
       className={selected ? "file-item file-item--selected" : "file-item"}
+      draggable
       onDoubleClick={handleDoubleClick}
       onContextMenu={handleContextMenu}
+      onDragStart={handleDragStart}
     >
       <div className="file-item__select">
         <input

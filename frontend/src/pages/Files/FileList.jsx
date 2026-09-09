@@ -43,6 +43,8 @@ export default function FileList() {
   const [bulkProcessing, setBulkProcessing] = useState(false);
   const [contextMenu, setContextMenu] = useState(null);
   const [bulkDestinationFolderId, setBulkDestinationFolderId] = useState(null);
+  const [clipboardFiles, setClipboardFiles] = useState([]);
+  const [pasting, setPasting] = useState(false);
 
   useEffect(() => {
     loadFiles();
@@ -293,6 +295,46 @@ export default function FileList() {
     }
   }
 
+  function handleCopyToClipboard() {
+    if (!selectedFiles.length) {
+      return;
+    }
+
+    setClipboardFiles([...selectedFiles]);
+    setError(`Đã sao chép ${selectedFiles.length} file vào Clipboard.`);
+  }
+
+  async function handlePaste() {
+    if (!clipboardFiles.length || pasting) {
+      return;
+    }
+
+    try {
+      setPasting(true);
+      setError("");
+
+      let successCount = 0;
+      for (const fileId of clipboardFiles) {
+        await fileService.copyFile(fileId, folderId || null);
+        successCount += 1;
+      }
+
+      setError("");
+      setSelectedFiles([]);
+      await loadFiles();
+      setClipboardFiles([]);
+      if (successCount > 0) {
+        setError(`Đã dán ${successCount} file vào thư mục hiện tại.`);
+      }
+    } catch (err) {
+      setError(
+        err?.response?.data?.message || err?.message || "Không thể dán file.",
+      );
+    } finally {
+      setPasting(false);
+    }
+  }
+
   function openContextMenu(event, file) {
     event.preventDefault();
 
@@ -311,37 +353,85 @@ export default function FileList() {
     <>
       {error && <div className="error-message">{error}</div>}
 
-      {selectedFiles.length > 0 && (
+      {(selectedFiles.length > 0 || clipboardFiles.length > 0) && (
         <div className="file-list__toolbar">
-          <span>
-            Đã chọn <strong>{selectedFiles.length}</strong> file
-          </span>
+          <div className="file-list__toolbar-info">
+            {selectedFiles.length > 0 && (
+              <span>
+                Đã chọn <strong>{selectedFiles.length}</strong> file
+              </span>
+            )}
 
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setBulkMove(true)}
-            disabled={bulkProcessing}
-          >
-            📂 Di chuyển
-          </button>
+            {clipboardFiles.length > 0 && (
+              <span className="file-list__clipboard">
+                📋 Clipboard: {clipboardFiles.length} file
+              </span>
+            )}
+          </div>
 
-          <button
-            type="button"
-            className="btn btn-secondary"
-            onClick={() => setBulkCopy(true)}
-            disabled={bulkProcessing}
-          >
-            📋 Sao chép
-          </button>
+          <div className="file-list__toolbar-actions">
+            {selectedFiles.length > 0 && (
+              <>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={handleCopyToClipboard}
+                  disabled={bulkProcessing || pasting}
+                >
+                  📋 Copy
+                </button>
 
-          <button
-            type="button"
-            className="btn btn-danger"
-            onClick={() => setBulkDelete(true)}
-          >
-            🗑️ Xóa đã chọn
-          </button>
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setBulkMove(true)}
+                  disabled={bulkProcessing || pasting}
+                >
+                  📂 Di chuyển
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setBulkCopy(true)}
+                  disabled={bulkProcessing || pasting}
+                >
+                  📑 Copy tới...
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-danger"
+                  onClick={() => setBulkDelete(true)}
+                  disabled={bulkDeleting || pasting}
+                >
+                  🗑️ Xóa đã chọn
+                </button>
+              </>
+            )}
+
+            {clipboardFiles.length > 0 && (
+              <>
+                <button
+                  type="button"
+                  className="btn btn-primary"
+                  onClick={handlePaste}
+                  disabled={pasting}
+                >
+                  {pasting ? "Đang dán..." : "📌 Paste"}
+                </button>
+
+                <button
+                  type="button"
+                  className="btn btn-secondary"
+                  onClick={() => setClipboardFiles([])}
+                  disabled={pasting}
+                >
+                  Xóa Clipboard
+                </button>
+              </>
+            )}
+          </div>
         </div>
       )}
 
@@ -380,6 +470,9 @@ export default function FileList() {
               onPermission={setPermissionFile}
               onShare={setShareFile}
               onContextMenu={openContextMenu}
+              onDragStart={() => {
+                setError("");
+              }}
               downloading={downloadingId === file._id}
             />
           ))
@@ -580,11 +673,13 @@ export default function FileList() {
           <button
             type="button"
             onClick={() => {
-              setCopyFile(contextMenu.file);
+              setClipboardFiles([contextMenu.file._id]);
+              setSelectedFiles([contextMenu.file._id]);
               setContextMenu(null);
+              setError("Đã sao chép file vào Clipboard.");
             }}
           >
-            📋 Sao chép
+            📋 Copy
           </button>
 
           <button

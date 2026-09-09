@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 import "./FolderItem.css";
 
 export default function FolderItem({
@@ -9,14 +11,46 @@ export default function FolderItem({
   onDelete,
   onShare,
   onContextMenu,
+  onDropFile,
 }) {
+  const [dragOver, setDragOver] = useState(false);
+
   const handleContextMenu = (event) => {
     event.preventDefault();
     onContextMenu?.(event, folder);
   };
 
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+    setDragOver(true);
+  };
+
+  const handleDragLeave = () => {
+    setDragOver(false);
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    setDragOver(false);
+
+    const fileId = event.dataTransfer.getData("application/x-file-id");
+    if (!fileId) {
+      return;
+    }
+    onDropFile?.(fileId, folder);
+  };
+
   return (
-    <div className="folder-item" onContextMenu={handleContextMenu}>
+    <div
+      className={
+        dragOver ? "folder-item folder-item--drag-over" : "folder-item"
+      }
+      onContextMenu={handleContextMenu}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
       <button
         type="button"
         className="folder-item__main"

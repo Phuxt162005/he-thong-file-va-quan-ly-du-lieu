@@ -1,69 +1,134 @@
-import { Link, useNavigate } from "react-router-dom";
+import { useState } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 
-import authService from "../../services/authService";
-import { clearAuth } from "../../utils/authStorage";
 import { useAuth } from "../../context/AuthContext";
 
 import "./MainLayout.css";
 
 export default function MainLayout({ children }) {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
+  const location = useLocation();
+  const { logout } = useAuth();
+
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = async () => {
     await logout();
     navigate("/login", { replace: true });
   };
 
+  const closeMobileMenu = () => {
+    setMobileMenuOpen(false);
+  };
+
+  const isActive = (path) => {
+    if (path === "/") {
+      return location.pathname === "/";
+    }
+
+    return location.pathname.startsWith(path);
+  };
+
+  const menuItems = [
+    {
+      path: "/",
+      label: "Tổng quan",
+      icon: "🏠",
+    },
+    {
+      path: "/files",
+      label: "Tệp của tôi",
+      icon: "📁",
+    },
+    {
+      path: "/shares",
+      label: "Được chia sẻ",
+      icon: "🔗",
+    },
+    {
+      path: "/trash",
+      label: "Thùng rác",
+      icon: "🗑️",
+    },
+    {
+      path: "/activities",
+      label: "Lịch sử hoạt động",
+      icon: "📝",
+    },
+    {
+      path: "/profile",
+      label: "Hồ sơ",
+      icon: "👤",
+    },
+  ];
+
   return (
     <div className="main-layout">
-      {/* Sidebar */}
+      <header className="main-layout__mobile-header">
+        <button
+          type="button"
+          className="main-layout__menu-button"
+          onClick={() => setMobileMenuOpen((value) => !value)}
+          aria-label="Mở menu"
+          aria-expanded={mobileMenuOpen}
+        >
+          ☰
+        </button>
 
-      <aside className="sidebar">
+        <strong>Hệ thống quản lý file</strong>
+      </header>
+
+      {mobileMenuOpen && (
+        <button
+          type="button"
+          className="main-layout__mobile-backdrop"
+          onClick={closeMobileMenu}
+          aria-label="Đóng menu"
+        />
+      )}
+
+      <aside
+        className={`sidebar ${mobileMenuOpen ? "sidebar--mobile-open" : ""}`}
+      >
         <div className="sidebar__header">
-          <h2>Tệp của tôi</h2>
+          <div className="sidebar__brand-icon">📁</div>
+
+          <div>
+            <strong>File Manager</strong>
+            <span>Quản lý dữ liệu</span>
+          </div>
         </div>
 
-        <nav className="sidebar-menu">
-          <Link to="/" className="sidebar-menu__item">
-            <span>🏠</span>
-            <span>Tổng quan</span>
-          </Link>
+        <nav className="sidebar__nav">
+          {menuItems.map((item) => (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={
+                isActive(item.path)
+                  ? "sidebar__item sidebar__item--active"
+                  : "sidebar__item"
+              }
+              onClick={closeMobileMenu}
+            >
+              <span className="sidebar__icon">{item.icon}</span>
 
-          <Link to="/files" className="sidebar-menu__item">
-            <span>📁</span>
-            <span>Tệp của tôi</span>
-          </Link>
-
-          <Link to="/shares" className="sidebar-menu__item">
-            <span>🔗</span>
-            <span>Được chia sẻ</span>
-          </Link>
-
-          <Link to="/trash" className="sidebar-menu__item">
-            <span>🗑️</span>
-            <span>Thùng rác</span>
-          </Link>
-
-          <Link to="/activities" className="sidebar-menu__item">
-            <span>📝</span>
-            <span>Lịch sử hoạt động</span>
-          </Link>
-
-          <Link to="/profile" className="sidebar-menu__item">
-            <span>👤</span>
-            <span>Hồ sơ</span>
-          </Link>
+              <span className="sidebar__label">{item.label}</span>
+            </Link>
+          ))}
         </nav>
 
-        <div className="sidebar__footer">
-          <button className="btn btn-danger" onClick={handleLogout}>
-            Đăng xuất
+        <div className="sidebar__bottom">
+          <button
+            type="button"
+            className="sidebar__logout"
+            onClick={handleLogout}
+          >
+            <span className="sidebar__icon">🚪</span>
+            <span className="sidebar__label">Đăng xuất</span>
           </button>
         </div>
       </aside>
-
-      {/* Nội dung chính */}
 
       <main className="main-layout__content">{children}</main>
     </div>

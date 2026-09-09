@@ -14,6 +14,7 @@ import FolderMoveDialog from "../../components/FolderMoveDialog/FolderMoveDialog
 import FolderCopyDialog from "../../components/FolderCopyDialog/FolderCopyDialog";
 
 import folderService from "../../services/folderService";
+import fileService from "../../services/fileService";
 
 import FileList from "./FileList";
 
@@ -38,6 +39,8 @@ export default function Files() {
   const [shareFolder, setShareFolder] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
   const [breadcrumbItems, setBreadcrumbItems] = useState([]);
+  const [draggingFileId, setDraggingFileId] = useState(null);
+  const [dragError, setDragError] = useState("");
 
   useEffect(() => {
     loadFolders();
@@ -246,6 +249,29 @@ export default function Files() {
     });
   }
 
+  async function handleDropFile(fileId, destinationFolder) {
+    if (!fileId || !destinationFolder?._id) {
+      return;
+    }
+    if (String(fileId) === String(destinationFolder._id)) {
+      return;
+    }
+
+    try {
+      setDragError("");
+      await fileService.moveFile(fileId, destinationFolder._id);
+      setDraggingFileId(null);
+      refreshFolders();
+      setRefreshKey((value) => value + 1);
+    } catch (err) {
+      setDragError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Không thể di chuyển file.",
+      );
+    }
+  }
+
   return (
     <>
       <div className="files-page">
@@ -254,22 +280,38 @@ export default function Files() {
         <div className="files-page__header">
           <div>
             <h1>Tệp của tôi</h1>
+
+            <p className="files-page__subtitle">
+              Quản lý file và thư mục của bạn
+            </p>
           </div>
 
-          <button
-            type="button"
-            className="btn btn-primary"
-            onClick={() => {
-              setError("");
-              setFolderName("");
-              setCreateModal(true);
-            }}
-          >
-            + Thư mục mới
-          </button>
+          <div className="files-page__toolbar">
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                setError("");
+                setFolderName("");
+                setCreateModal(true);
+              }}
+            >
+              + Thư mục mới
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={refreshFolders}
+            >
+              ↻ Làm mới
+            </button>
+          </div>
         </div>
 
         {error && <div className="error-message">{error}</div>}
+
+        {dragError && <div className="error-message">{dragError}</div>}
 
         <div className="folder-manager">
           <aside className="folder-manager__sidebar">
@@ -316,6 +358,7 @@ export default function Files() {
                     key={folder._id}
                     folder={folder}
                     onOpen={handleOpenFolder}
+                    onDropFile={handleDropFile}
                     onRename={openRenameModal}
                     onMove={openMoveModal}
                     onCopy={openCopyModal}
