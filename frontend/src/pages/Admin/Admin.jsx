@@ -33,6 +33,45 @@ function formatBytes(bytes) {
   }`;
 }
 
+function formatUptime(seconds) {
+  const value = Number(seconds);
+  if (!Number.isFinite(value) || value < 0) {
+    return "-";
+  }
+
+  const totalSeconds = Math.floor(value);
+  const days = Math.floor(totalSeconds / 86400);
+  const hours = Math.floor((totalSeconds % 86400) / 3600);
+  const minutes = Math.floor((totalSeconds % 3600) / 60);
+  const remainingSeconds = totalSeconds % 60;
+  const parts = [];
+
+  if (days > 0) {
+    parts.push(`${days} ngày`);
+  }
+  if (hours > 0 || days > 0) {
+    parts.push(`${hours} giờ`);
+  }
+  if (minutes > 0 || hours > 0 || days > 0) {
+    parts.push(`${minutes} phút`);
+  }
+  parts.push(`${remainingSeconds} giây`);
+  return parts.join(" ");
+}
+
+function getMemoryUsagePercent(memoryUsage) {
+  const heapUsed = Number(memoryUsage?.heapUsed);
+  const heapTotal = Number(memoryUsage?.heapTotal);
+  if (
+    !Number.isFinite(heapUsed) ||
+    !Number.isFinite(heapTotal) ||
+    heapTotal <= 0
+  ) {
+    return 0;
+  }
+  return Math.min((heapUsed / heapTotal) * 100, 100);
+}
+
 function formatDate(date) {
   if (!date) {
     return "-";
@@ -304,7 +343,11 @@ export default function Admin() {
   const deletedFolders = systemStats?.deletedFolders ?? 0;
   const totalStorageLimit = storageStats?.totalStorageLimit ?? 0;
   const totalStorageUsed = storageStats?.totalStorageUsed ?? 0;
+  const totalFileSize = storageStats?.totalFileSize ?? 0;
+  const availableStorage = storageStats?.availableStorage ?? 0;
   const storagePercent = getStoragePercent(totalStorageUsed, totalStorageLimit);
+  const memoryUsage = systemStats?.memoryUsage;
+  const memoryUsagePercent = getMemoryUsagePercent(memoryUsage);
 
   return (
     <div className="admin-page">
@@ -389,9 +432,12 @@ export default function Admin() {
 
               <div>
                 <span>Còn lại</span>
-                <strong>
-                  {formatBytes(storageStats?.availableStorage ?? 0)}
-                </strong>
+                <strong>{formatBytes(availableStorage)}</strong>
+              </div>
+
+              <div>
+                <span>Kích thước file thực tế</span>
+                <strong>{formatBytes(totalFileSize)}</strong>
               </div>
             </div>
 
@@ -402,6 +448,99 @@ export default function Admin() {
                   width: `${storagePercent}%`,
                 }}
               />
+            </div>
+          </>
+        )}
+      </section>
+
+      {/* System information */}
+      <section className="admin-card">
+        <div className="admin-card__header">
+          <div>
+            <h2>Thông tin hệ thống</h2>
+            <p>
+              Theo dõi trạng thái runtime và tài nguyên mà backend đang sử dụng.
+            </p>
+          </div>
+
+          <span className="admin-system-status">● Hệ thống đang hoạt động</span>
+        </div>
+
+        {statsError ? (
+          <div className="error-message">{statsError}</div>
+        ) : !systemStats ? (
+          <div className="admin-empty">Chưa có dữ liệu thống kê hệ thống.</div>
+        ) : (
+          <>
+            <div className="admin-system-grid">
+              <div className="admin-system-item">
+                <span>Node.js</span>
+                <strong>{systemStats.nodeVersion || "-"}</strong>
+              </div>
+
+              <div className="admin-system-item">
+                <span>Môi trường</span>
+                <strong>{systemStats.environment || "-"}</strong>
+              </div>
+
+              <div className="admin-system-item">
+                <span>Uptime</span>
+                <strong>{formatUptime(systemStats.uptime)}</strong>
+              </div>
+
+              <div className="admin-system-item">
+                <span>Tổng người dùng</span>
+                <strong>{totalUsers}</strong>
+              </div>
+
+              <div className="admin-system-item">
+                <span>File đang hoạt động</span>
+                <strong>{totalFiles}</strong>
+              </div>
+
+              <div className="admin-system-item">
+                <span>Thư mục đang hoạt động</span>
+                <strong>{totalFolders}</strong>
+              </div>
+
+              <div className="admin-system-item">
+                <span>File trong thùng rác</span>
+                <strong>{deletedFiles}</strong>
+              </div>
+
+              <div className="admin-system-item">
+                <span>Thư mục trong thùng rác</span>
+                <strong>{deletedFolders}</strong>
+              </div>
+            </div>
+
+            <div className="admin-memory">
+              <div className="admin-memory__header">
+                <div>
+                  <span>Bộ nhớ Node.js</span>
+                  <strong>
+                    {formatBytes(memoryUsage?.heapUsed)} /{" "}
+                    {formatBytes(memoryUsage?.heapTotal)}
+                  </strong>
+                </div>
+
+                <strong>{memoryUsagePercent.toFixed(1)}%</strong>
+              </div>
+
+              <div className="admin-storage-bar">
+                <div
+                  className="admin-storage-bar__fill"
+                  style={{
+                    width: `${memoryUsagePercent}%`,
+                  }}
+                />
+              </div>
+
+              <div className="admin-memory__details">
+                <span>RSS: {formatBytes(memoryUsage?.rss)}</span>
+
+                <span>External: {formatBytes(memoryUsage?.external)}</span>
+              </div>
             </div>
           </>
         )}

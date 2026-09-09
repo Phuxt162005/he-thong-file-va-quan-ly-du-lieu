@@ -483,3 +483,105 @@
     width: 100%;
   }
 }
+
+.admin-system-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border-radius: 20px;
+  background-color: var(--color-background);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+  white-space: nowrap;
+}
+
+.admin-system-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--spacing-md);
+}
+
+.admin-system-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  background-color: var(--color-background);
+}
+
+.admin-system-item span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.admin-system-item strong {
+  font-size: var(--font-size-sm);
+  word-break: break-word;
+}
+
+.admin-memory {
+  margin-top: var(--spacing-lg);
+  padding-top: var(--spacing-lg);
+  border-top: var(--border-width) solid var(--color-border);
+}
+
+.admin-memory__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-sm);
+}
+
+.admin-memory__header div {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.admin-memory__header span {
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-sm);
+}
+
+.admin-memory__header strong {
+  font-size: var(--font-size-sm);
+}
+
+.admin-memory__details {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-top: var(--spacing-sm);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+@media (max-width: 1100px) {
+  .admin-system-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .admin-storage-values {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 700px) {
+  .admin-system-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-memory__header,
+  .admin-memory__details {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .admin-system-status {
+    align-self: flex-start;
+  }
+}
