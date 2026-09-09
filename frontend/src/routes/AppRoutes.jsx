@@ -11,6 +11,7 @@ import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
 import ChangePassword from "../pages/ChangePassword/ChangePassword";
 import Admin from "../pages/Admin/Admin";
 import Trash from "../pages/Trash/Trash";
+import ActivityLog from "../pages/ActivityLog/ActivityLog";
 
 import MainLayout from "../layouts/MainLayout/MainLayout";
 import ProtectedRoute from "./ProtectedRoute";
@@ -95,6 +96,17 @@ function AppRoutes() {
           <ProtectedRoute>
             <MainLayout>
               <Trash />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/activities"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <ActivityLog />
             </MainLayout>
           </ProtectedRoute>
         }
