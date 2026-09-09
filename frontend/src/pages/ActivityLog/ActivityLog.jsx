@@ -114,15 +114,11 @@ function getResultClass(result) {
 
 export default function ActivityLog() {
   const { user } = useAuth();
-
   const isAdmin = user?.role === "admin";
-
   const [activities, setActivities] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
-
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
-
   const [error, setError] = useState("");
   const [auditError, setAuditError] = useState("");
 
@@ -139,7 +135,6 @@ export default function ActivityLog() {
         setAuditError("");
 
         const activityPromise = activityLogService.getMyActivities(100);
-
         const auditPromise = isAdmin
           ? activityLogService.getDeniedAuditLogs(100)
           : Promise.resolve([]);
@@ -152,13 +147,11 @@ export default function ActivityLog() {
         const activityData = Array.isArray(activityResponse)
           ? activityResponse
           : activityResponse?.activities || activityResponse?.data || [];
-
         const auditData = Array.isArray(auditResponse)
           ? auditResponse
           : auditResponse?.logs || auditResponse?.data || [];
 
         setActivities(Array.isArray(activityData) ? activityData : []);
-
         setAuditLogs(Array.isArray(auditData) ? auditData : []);
       } catch (err) {
         if (isAdmin) {
