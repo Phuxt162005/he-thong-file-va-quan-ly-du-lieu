@@ -37,9 +37,11 @@ export default function Files() {
   const [saving, setSaving] = useState(false);
   const [shareFolder, setShareFolder] = useState(null);
   const [contextMenu, setContextMenu] = useState(null);
+  const [breadcrumbItems, setBreadcrumbItems] = useState([]);
 
   useEffect(() => {
     loadFolders();
+    loadBreadcrumb();
   }, [currentFolderId]);
 
   useEffect(() => {
@@ -51,6 +53,42 @@ export default function Files() {
       document.removeEventListener("click", handleDocumentClick);
     };
   }, []);
+
+  async function loadBreadcrumb() {
+    if (!currentFolderId) {
+      setBreadcrumbItems([]);
+      return;
+    }
+
+    try {
+      const items = [];
+      let folderId = currentFolderId;
+      const visited = new Set();
+      while (folderId) {
+        if (visited.has(String(folderId))) {
+          break;
+        }
+        visited.add(String(folderId));
+
+        const folder = await folderService.getFolder(folderId);
+        if (!folder) {
+          break;
+        }
+
+        items.unshift({
+          id: folder._id,
+          name: folder.name,
+          path: `/files?folder=${folder._id}`,
+        });
+
+        folderId = folder.parentFolder || null;
+      }
+      setBreadcrumbItems(items);
+    } catch (err) {
+      // Breadcrumb là phần phụ của File Manager, không để lỗi breadcrumb chặn toàn bộ trang.
+      setBreadcrumbItems([]);
+    }
+  }
 
   async function loadFolders() {
     try {
@@ -211,7 +249,7 @@ export default function Files() {
   return (
     <>
       <div className="files-page">
-        <Breadcrumb />
+        <Breadcrumb items={breadcrumbItems} />
 
         <div className="files-page__header">
           <div>

@@ -23,7 +23,7 @@ export default function Breadcrumb({ items = [] }) {
               <span className="breadcrumb__current">{item.name}</span>
             ) : (
               <Link
-                to={item.path || `/files/${item.id}`}
+                to={item.path || `/files?folder=${item.id}`}
                 className="breadcrumb__item"
               >
                 {item.name}
