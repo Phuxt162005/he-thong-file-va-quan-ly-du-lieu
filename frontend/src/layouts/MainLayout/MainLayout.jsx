@@ -45,6 +45,11 @@ export default function MainLayout({ children }) {
             <span>Thùng rác</span>
           </Link>
 
+          <Link to="/activities" className="sidebar-menu__item">
+            <span>📝</span>
+            <span>Lịch sử hoạt động</span>
+          </Link>
+
           <Link to="/profile" className="sidebar-menu__item">
             <span>👤</span>
             <span>Hồ sơ</span>
