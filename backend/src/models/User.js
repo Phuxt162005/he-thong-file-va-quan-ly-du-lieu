@@ -23,6 +23,18 @@ const userSchema = new mongoose.Schema(
       maxLength: 255,
       match: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
     },
+    firstName: {
+      type: String,
+      trim: true,
+      default: "",
+      maxLength: 100,
+    },
+    lastName: {
+      type: String,
+      trim: true,
+      default: "",
+      maxLength: 100,
+    },
     avatar: { type: String, default: null },
     storageUsed: {
       type: Number,

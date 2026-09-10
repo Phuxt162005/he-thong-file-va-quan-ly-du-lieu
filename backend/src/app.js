@@ -6,6 +6,29 @@ const refreshRoutes = require("./routes/refreshRoutes");
 const adminRoutes = require("./routes/adminRoute");
 
 const app = express();
+const allowedOrigin = process.env.FRONTEND_URL || "http://localhost:5173";
+
+// CORS Frontend sử dụng Authorization header nên không cần credentials/cookie.
+app.use((req, res, next) => {
+  const origin = req.headers.origin;
+
+  if (origin === allowedOrigin) {
+    res.setHeader("Access-Control-Allow-Origin", origin);
+  }
+
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
+
+  res.setHeader(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-Chunk-Index, X-Chunk-Checksum",
+  );
+
+  if (req.method === "OPTIONS") {
+    return res.sendStatus(204);
+  }
+
+  next();
+});
 
 app.use(express.json());
 

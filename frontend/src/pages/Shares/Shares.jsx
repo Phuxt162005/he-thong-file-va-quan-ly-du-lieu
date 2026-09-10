@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 
-import MainLayout from "../../layouts/MainLayout/MainLayout";
 import Loading from "../../components/Loading/Loading";
 import Modal from "../../components/Modal/Modal";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
@@ -172,15 +171,11 @@ export default function Shares() {
   };
 
   if (loading) {
-    return (
-      <MainLayout>
-        <Loading message="Đang tải Share Link..." />
-      </MainLayout>
-    );
+    return <Loading message="Đang tải Share Link..." />;
   }
 
   return (
-    <MainLayout>
+    <>
       <div className="shares-page">
         <div className="shares-page__header">
           <div>
@@ -355,7 +350,7 @@ export default function Shares() {
           }
         }}
       />
-    </MainLayout>
+    </>
   );
 }
 

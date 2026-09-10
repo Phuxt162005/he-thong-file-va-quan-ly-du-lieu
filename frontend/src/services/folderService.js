@@ -18,7 +18,7 @@ const folderService = {
   },
 
   async getDeletedFolders() {
-    const response = await api.get("/folders/deleted");
+    const response = await api.get("/folders/trash");
     return response.data;
   },
 

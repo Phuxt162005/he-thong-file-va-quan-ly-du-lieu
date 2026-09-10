@@ -19,10 +19,13 @@ exports.findByLoginName = asyncHandler(async (req, res) => {
 
 // cập nhật hồ sơ
 exports.updateProfile = asyncHandler(async (req, res) => {
-  const { username, email, avatar } = req.body;
+  const { username, email, firstName, lastName, avatar } = req.body;
+
   const user = await userService.updateProfile(req.user.id, {
     username,
     email,
+    firstName,
+    lastName,
     avatar,
   });
 

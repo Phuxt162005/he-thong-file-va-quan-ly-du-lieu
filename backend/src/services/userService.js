@@ -51,12 +51,34 @@ exports.updateProfile = async (id, data = {}) => {
     }
 
     const email = data.email.trim().toLowerCase();
-
     if (email.length > 255 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       throw httpError("Invalid email", 400);
     }
-
     allowedData.email = email;
+  }
+
+  if (data.firstName !== undefined) {
+    if (typeof data.firstName !== "string") {
+      throw httpError("Invalid first name", 400);
+    }
+
+    const firstName = data.firstName.trim();
+    if (firstName.length > 100) {
+      throw httpError("First name must not exceed 100 characters", 400);
+    }
+    allowedData.firstName = firstName;
+  }
+
+  if (data.lastName !== undefined) {
+    if (typeof data.lastName !== "string") {
+      throw httpError("Invalid last name", 400);
+    }
+
+    const lastName = data.lastName.trim();
+    if (lastName.length > 100) {
+      throw httpError("Last name must not exceed 100 characters", 400);
+    }
+    allowedData.lastName = lastName;
   }
 
   if (data.avatar !== undefined) {

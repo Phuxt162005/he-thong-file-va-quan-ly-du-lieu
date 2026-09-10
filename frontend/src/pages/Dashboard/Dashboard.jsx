@@ -47,8 +47,8 @@ export default function Dashboard() {
     );
   }
 
-  const used = Number(storage?.storageUsed || storage?.used || 0);
-  const quota = Number(storage?.storageQuota || storage?.quota || 0);
+  const used = Number(storage?.storageUsed || 0);
+  const quota = Number(storage?.storageLimit || 0);
   const percentage = quota > 0 ? Math.min((used / quota) * 100, 100) : 0;
   const recentFiles = [...files]
     .sort(
