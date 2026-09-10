@@ -57,3 +57,47 @@ exports.login = async (username, password, ipAddress) => {
 
   return { token, refreshToken, user: userData };
 };
+
+exports.register = async (username, email, password) => {
+  if (!process.env.JWT_SECRET) {
+    throw new Error("JWT secret is not configured");
+  }
+
+  const normalizedUsername = username.trim();
+  const normalizedEmail = email.trim().toLowerCase();
+  const existingUser = await User.findOne({
+    $or: [{ username: normalizedUsername }, { email: normalizedEmail }],
+  });
+  if (existingUser) {
+    if (existingUser.username === normalizedUsername) {
+      throw httpError("Username already exists", 409);
+    }
+    throw httpError("Email already exists", 409);
+  }
+  const hashedPassword = await bcrypt.hash(password, 10);
+
+  try {
+    const user = await User.create({
+      username: normalizedUsername,
+      email: normalizedEmail,
+      password: hashedPassword,
+    });
+    await auditLogService.log({
+      userId: user._id,
+      action: "REGISTER",
+      result: "SUCCESS",
+    });
+
+    const userData = user.toObject();
+    delete userData.password;
+    return userData;
+  } catch (error) {
+    if (error?.code === 11000) {
+      if (error.keyPattern?.email) {
+        throw httpError("Email already exists", 409);
+      }
+      throw httpError("Username already exists", 409);
+    }
+    throw error;
+  }
+};

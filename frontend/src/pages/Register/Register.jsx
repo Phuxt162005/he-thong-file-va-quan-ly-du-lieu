@@ -12,6 +12,7 @@ export default function Register() {
   const navigate = useNavigate();
   const [formData, setFormData] = useState({
     username: "",
+    email: "",
     password: "",
     confirmPassword: "",
   });
@@ -31,14 +32,22 @@ export default function Register() {
       setError("vui lòng nhập tên đăng nhập.");
       return;
     }
-
     if (!formData.password) {
       setError("Vui lòng nhập mật khẩu.");
       return;
     }
-
     if (formData.password !== formData.confirmPassword) {
       setError("Mật khẩu xác nhận không khớp.");
+      return;
+    }
+
+    const email = formData.email.trim();
+    if (!email) {
+      setError("Vui lòng nhập email.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Email không hợp lệ.");
       return;
     }
 
@@ -46,7 +55,8 @@ export default function Register() {
       setLoading(true);
       setError("");
       await authService.register({
-        username: formData.username,
+        username: formData.username.trim(),
+        email: formData.email.trim(),
         password: formData.password,
       });
       navigate("/login");
@@ -75,6 +85,17 @@ export default function Register() {
               value={formData.username}
               onChange={handleChange}
               placeholder="Nhập tên đăng nhập"
+              required
+              disabled={loading}
+            />
+
+            <FormInput
+              label="Email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Nhập email"
               required
               disabled={loading}
             />
