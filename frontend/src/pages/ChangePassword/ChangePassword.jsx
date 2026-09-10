@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import MainLayout from "../../layouts/MainLayout/MainLayout";
 import FormInput from "../../components/FormInput/FormInput";
 
 import authService from "../../services/authService";
@@ -78,68 +77,66 @@ export default function ChangePassword() {
   };
 
   return (
-    <MainLayout>
-      <div className="change-password-page">
-        <div className="change-password-card">
-          <div className="change-password-card__header">
-            <h1>Đổi mật khẩu</h1>
+    <div className="change-password-page">
+      <div className="change-password-card">
+        <div className="change-password-card__header">
+          <h1>Đổi mật khẩu</h1>
 
-            {error && <div className="error-message">{error}</div>}
+          {error && <div className="error-message">{error}</div>}
 
-            {message && <div className="success-message">{message}</div>}
+          {message && <div className="success-message">{message}</div>}
 
-            <form className="change-password-form" onSubmit={handleSubmit}>
-              <FormInput
-                label="Mật khẩu hiện tại"
-                name="currentPassword"
-                value={formData.currentPassword}
-                onChange={handleChange}
-                required
+          <form className="change-password-form" onSubmit={handleSubmit}>
+            <FormInput
+              label="Mật khẩu hiện tại"
+              name="currentPassword"
+              value={formData.currentPassword}
+              onChange={handleChange}
+              required
+              disabled={loading}
+            />
+
+            <FormInput
+              label="Mật khẩu mới"
+              name="newPassword"
+              type="password"
+              value={formData.newPassword}
+              onChange={handleChange}
+              required
+              disabled={loading}
+            />
+
+            <FormInput
+              label="Xác nhận mật khẩu mới"
+              name="confirmPassword"
+              type="password"
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              required
+              disabled={loading}
+            />
+
+            <div className="change-password-form__actions">
+              <button
+                type="button"
+                className="btn btn-secondary"
+                onClick={() => navigate("/profile")}
                 disabled={loading}
-              />
+              >
+                Hủy
+              </button>
 
-              <FormInput
-                label="Mật khẩu mới"
-                name="newPassword"
-                type="password"
-                value={formData.newPassword}
-                onChange={handleChange}
-                required
+              <button
+                type="submit"
+                className="btn btn-primary"
                 disabled={loading}
-              />
-
-              <FormInput
-                label="Xác nhận mật khẩu mới"
-                name="confirmPassword"
-                type="password"
-                value={formData.confirmPassword}
-                onChange={handleChange}
-                required
-                disabled={loading}
-              />
-
-              <div className="change-password-form__actions">
-                <button
-                  type="button"
-                  className="btn btn-secondary"
-                  onClick={() => navigate("/profile")}
-                  disabled={loading}
-                >
-                  Hủy
-                </button>
-
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={loading}
-                >
-                  {loading ? "Đang xử lý..." : "Đổi mật khẩu"}
-                </button>
-              </div>
-            </form>
-          </div>
+              >
+                {loading ? "Đang xử lý..." : "Đổi mật khẩu"}
+              </button>
+            </div>
+          </form>
         </div>
       </div>
-    </MainLayout>
+    </div>
   );
 }

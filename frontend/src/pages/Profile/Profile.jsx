@@ -61,15 +61,25 @@ function Profile() {
   const handleSubmit = async (event) => {
     event.preventDefault();
 
+    const email = formData.email.trim();
+    if (!email) {
+      setError("Vui lòng nhập email.");
+      return;
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      setError("Email không hợp lệ.");
+      return;
+    }
+
     try {
       setSaving(true);
       setError("");
       setMessage("");
 
       const response = await userService.updateProfile({
-        email: formData.email,
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+        email,
+        firstName: formData.firstName.trim(),
+        lastName: formData.lastName.trim(),
       });
       const data = response?.data || response;
 

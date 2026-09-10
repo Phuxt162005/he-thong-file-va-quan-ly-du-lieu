@@ -9,6 +9,7 @@ import Shares from "../pages/Shares/Shares";
 import ShareAccess from "../pages/ShareAccess/ShareAccess";
 import ForgotPassword from "../pages/ForgotPassword/ForgotPassword";
 import ChangePassword from "../pages/ChangePassword/ChangePassword";
+import ResetPassword from "../pages/ResetPassword/ResetPassword";
 import Admin from "../pages/Admin/Admin";
 import Trash from "../pages/Trash/Trash";
 import ActivityLog from "../pages/ActivityLog/ActivityLog";
@@ -23,6 +24,7 @@ function AppRoutes() {
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
+      <Route path="/reset-password" element={<ResetPassword />} />
       <Route path="/share/:token" element={<ShareAccess />} />
 
       {/* yêu cầu đăng nhập */}
