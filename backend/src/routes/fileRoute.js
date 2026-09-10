@@ -57,3 +57,5 @@ router.post("/:id/copy", auth, controller.copy);
 
 // lấy thông tin file
 router.get("/:id", auth, controller.getFile);
+
+module.exports = router;
