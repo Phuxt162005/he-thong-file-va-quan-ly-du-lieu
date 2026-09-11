@@ -90,14 +90,19 @@ export default function MainLayout({ children }) {
       <aside
         className={`sidebar ${mobileMenuOpen ? "sidebar--mobile-open" : ""}`}
       >
-        <div className="sidebar__header">
+        <Link
+          to="/"
+          className="sidebar__header"
+          onClick={closeMobileMenu}
+          aria-label="Về trang Tổng quan"
+        >
           <div className="sidebar__brand-icon">📁</div>
 
-          <div>
+          <div className="sidebar__brand-text">
             <strong>File Manager</strong>
             <span>Quản lý dữ liệu</span>
           </div>
-        </div>
+        </Link>
 
         <nav className="sidebar__nav">
           {menuItems.map((item) => (
