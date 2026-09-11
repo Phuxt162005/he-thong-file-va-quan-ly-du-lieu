@@ -74,10 +74,6 @@
   font-size: 22px;
 }
 
-.sidebar__brand-text {
-  min-width: 0;
-}
-
 .sidebar__header strong,
 .sidebar__header span {
   display: block;
