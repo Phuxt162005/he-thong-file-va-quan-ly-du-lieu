@@ -83,26 +83,23 @@
   display: block;
 }
 
+.sidebar__brand-text {
+  min-width: 0;
+}
+
 .sidebar__header strong {
+  display: block;
   font-size: var(--font-size-md);
   line-height: 1.25;
 }
 
 .sidebar__header span {
+  display: block;
   margin-top: 2px;
+
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
   line-height: 1.25;
-}
-
-.sidebar__header strong {
-  font-size: var(--font-size-md);
-}
-
-.sidebar__header span {
-  margin-top: 2px;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-xs);
 }
 
 .sidebar__nav {
