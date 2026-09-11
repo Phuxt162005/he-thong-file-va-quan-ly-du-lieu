@@ -8,6 +8,7 @@ const fileService = require("./fileService");
 const activityLogService = require("./activityLogService");
 const storageService = require("./storageService");
 const permissionService = require("./permissionService");
+const { normalizeFileName } = require("../utils/fileNameUtils");
 
 const DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024;
 const SESSION_EXPIRE_MS = 24 * 60 * 60 * 1000;

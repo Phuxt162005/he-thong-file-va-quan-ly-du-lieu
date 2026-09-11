@@ -1,6 +1,7 @@
 const fileService = require("../services/fileService");
 const storageService = require("../services/storageService");
 const asyncHandler = require("../middleware/asyncHandler");
+const { normalizeFileName } = require("../utils/fileNameUtils");
 
 // lấy file
 exports.getFile = asyncHandler(async (req, res) => {
@@ -37,10 +38,12 @@ exports.upload = asyncHandler(async (req, res) => {
 
   const folderId = req.body.folderId || null;
   await fileService.checkUploadPermission(req.user.id, folderId);
-  stored = storageService.saveFile(req.file.buffer, req.file.originalname);
+  const normalizedFileName = normalizeFileName(req.file.originalname);
+
+  stored = storageService.saveFile(req.file.buffer, normalizedFileName);
 
   const file = await fileService.createFile(req.user.id, folderId, {
-    originalname: req.file.originalname,
+    originalname: normalizedFileName,
     filename: stored.storageName,
     mimeType: req.file.mimetype,
     size: req.file.size,
