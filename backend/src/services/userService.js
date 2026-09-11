@@ -100,7 +100,7 @@ exports.updateProfile = async (id, data = {}) => {
     return user;
   } catch (error) {
     if (error?.code === 11000) {
-      throw httpError("Username already exists", 509);
+      throw httpError("Username already exists", 409);
     }
     throw error;
   }

@@ -59,10 +59,6 @@ exports.login = async (username, password, ipAddress) => {
 };
 
 exports.register = async (username, email, password) => {
-  if (!process.env.JWT_SECRET) {
-    throw new Error("JWT secret is not configured");
-  }
-
   const normalizedUsername = username.trim();
   const normalizedEmail = email.trim().toLowerCase();
   const existingUser = await User.findOne({
