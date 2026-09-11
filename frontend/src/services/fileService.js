@@ -21,9 +21,11 @@ const fileService = {
   async uploadFile(file, folderId = null, onProgress) {
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("fileName", file.name);
     if (folderId) {
       formData.append("folderId", folderId);
     }
+
     const response = await api.post("/files/upload", formData, {
       headers: {
         "Content-Type": "multipart/form-data",

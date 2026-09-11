@@ -13,41 +13,6 @@ const { normalizeFileName } = require("../utils/fileNameUtils");
 const DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024;
 const SESSION_EXPIRE_MS = 24 * 60 * 60 * 1000;
 
-function normalizeFileName(fileName) {
-  if (typeof fileName !== "string" || !fileName) {
-    return fileName;
-  }
-
-  let normalized = fileName;
-
-  // Một chuỗi Unicode bình thường không cần xử lý.
-  // Chỉ thử sửa khi có các dấu hiệu phổ biến của UTF-8 bị decode sai.
-  const mojibakePattern = /(?:Ã.|Â.|â.|ð.|Ð.|Ñ.|á.|é.|í.|ó.|ú.|ý.|ă.|đ.|ơ.|ư.)/;
-  if (!mojibakePattern.test(normalized)) {
-    return normalized;
-  }
-  // UTF-8 bị đọc nhầm thành Latin-1/Windows-1252.
-  // Thử tối đa 2 lần để xử lý trường hợp bị encode/decode sai nhiều lớp.
-  for (let i = 0; i < 2; i++) {
-    try {
-      const repaired = Buffer.from(normalized, "latin1").toString("utf8");
-      if (!repaired || repaired === normalized) {
-        break;
-      }
-      normalized = repaired;
-
-      // Nếu chuỗi sau khi sửa không còn dấu hiệu mojibake
-      // thì dừng lại.
-      if (!mojibakePattern.test(normalized)) {
-        break;
-      }
-    } catch {
-      break;
-    }
-  }
-  return normalized;
-}
-
 exports.initiateUpload = async (
   userId,
   { fileName, mimeType, fileSize, folderId, chunkSize = DEFAULT_CHUNK_SIZE },
