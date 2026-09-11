@@ -12,10 +12,39 @@ const permissionService = require("./permissionService");
 const DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024;
 const SESSION_EXPIRE_MS = 24 * 60 * 60 * 1000;
 
+function normalizeFileName(fileName) {
+  if (typeof fileName !== "string") {
+    return fileName;
+  }
+
+  // Chỉ xử lý các chuỗi có dấu hiệu UTF-8 bị decode thành Latin-1/Windows-1252.
+  // Nếu tên đã là Unicode UTF-8 bình thường thì giữ nguyên.
+  if (!/[ÃÂ][\x80-\xBF]|â[\x80-\xBF]|ð[\x80-\xBF]/.test(fileName)) {
+    return fileName;
+  }
+
+  try {
+    const normalized = Buffer.from(fileName, "latin1").toString("utf8");
+
+    // Chỉ dùng kết quả nếu việc chuyển đổi thực sự tạo ra chuỗi hợp lệ.
+    if (normalized && normalized !== fileName) {
+      return normalized;
+    }
+  } catch {
+    // Giữ nguyên tên gốc nếu không thể chuẩn hóa.
+  }
+
+  return fileName;
+}
+
 exports.initiateUpload = async (
   userId,
   { fileName, mimeType, fileSize, folderId, chunkSize = DEFAULT_CHUNK_SIZE },
 ) => {
+  const normalizedFileName = normalizeFileName(fileName);
+  if (!normalizedFileName) {
+    throw new Error("File name is required");
+  }
   if (!fileName) {
     throw new Error("File name is required");
   }
@@ -53,7 +82,7 @@ exports.initiateUpload = async (
   const session = await uploadRepository.create({
     user: userId,
     folder: folderId || null,
-    fileName,
+    fileName: normalizedFileName,
     mimeType: mimeType || "application/octet-stream",
     fileSize,
     chunkSize,
