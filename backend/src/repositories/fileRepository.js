@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const File = require("../models/File");
 
 // tạo metadata cho file
@@ -139,8 +140,10 @@ exports.findOneByNameAndFolder = (name, folderId, excludeFileId = null) => {
 };
 
 exports.getStorageUsedByOwner = async (ownerId) => {
+  const ownerObjectId = new mongoose.Types.ObjectId(ownerId);
+
   const result = await File.aggregate([
-    { $match: { owner: ownerId, isDeleted: false } },
+    { $match: { owner: ownerObjectId, isDeleted: false } },
     { $group: { _id: null, total: { $sum: "$size" } } },
   ]);
 

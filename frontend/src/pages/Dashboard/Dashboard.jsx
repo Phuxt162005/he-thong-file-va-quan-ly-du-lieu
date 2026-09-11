@@ -29,8 +29,13 @@ export default function Dashboard() {
       ]);
       const fileData = fileResponse?.data || fileResponse || [];
       const storageData = storageResponse?.data || storageResponse || null;
+      const normalizedFiles = Array.isArray(fileData)
+        ? fileData
+        : Array.isArray(fileData?.files)
+          ? fileData.files
+          : [];
 
-      setFiles(Array.isArray(fileData) ? fileData : []);
+      setFiles(normalizedFiles);
       setStorage(storageData);
     } catch (err) {
       setError(err?.message || "Không thể tải dữ liệu Dashboard.");
