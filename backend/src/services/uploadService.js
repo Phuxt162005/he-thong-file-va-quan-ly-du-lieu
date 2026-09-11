@@ -13,28 +13,38 @@ const DEFAULT_CHUNK_SIZE = 5 * 1024 * 1024;
 const SESSION_EXPIRE_MS = 24 * 60 * 60 * 1000;
 
 function normalizeFileName(fileName) {
-  if (typeof fileName !== "string") {
+  if (typeof fileName !== "string" || !fileName) {
     return fileName;
   }
 
-  // Chỉ xử lý các chuỗi có dấu hiệu UTF-8 bị decode thành Latin-1/Windows-1252.
-  // Nếu tên đã là Unicode UTF-8 bình thường thì giữ nguyên.
-  if (!/[ÃÂ][\x80-\xBF]|â[\x80-\xBF]|ð[\x80-\xBF]/.test(fileName)) {
-    return fileName;
+  let normalized = fileName;
+
+  // Một chuỗi Unicode bình thường không cần xử lý.
+  // Chỉ thử sửa khi có các dấu hiệu phổ biến của UTF-8 bị decode sai.
+  const mojibakePattern = /(?:Ã.|Â.|â.|ð.|Ð.|Ñ.|á.|é.|í.|ó.|ú.|ý.|ă.|đ.|ơ.|ư.)/;
+  if (!mojibakePattern.test(normalized)) {
+    return normalized;
   }
+  // UTF-8 bị đọc nhầm thành Latin-1/Windows-1252.
+  // Thử tối đa 2 lần để xử lý trường hợp bị encode/decode sai nhiều lớp.
+  for (let i = 0; i < 2; i++) {
+    try {
+      const repaired = Buffer.from(normalized, "latin1").toString("utf8");
+      if (!repaired || repaired === normalized) {
+        break;
+      }
+      normalized = repaired;
 
-  try {
-    const normalized = Buffer.from(fileName, "latin1").toString("utf8");
-
-    // Chỉ dùng kết quả nếu việc chuyển đổi thực sự tạo ra chuỗi hợp lệ.
-    if (normalized && normalized !== fileName) {
-      return normalized;
+      // Nếu chuỗi sau khi sửa không còn dấu hiệu mojibake
+      // thì dừng lại.
+      if (!mojibakePattern.test(normalized)) {
+        break;
+      }
+    } catch {
+      break;
     }
-  } catch {
-    // Giữ nguyên tên gốc nếu không thể chuẩn hóa.
   }
-
-  return fileName;
+  return normalized;
 }
 
 exports.initiateUpload = async (
@@ -43,9 +53,6 @@ exports.initiateUpload = async (
 ) => {
   const normalizedFileName = normalizeFileName(fileName);
   if (!normalizedFileName) {
-    throw new Error("File name is required");
-  }
-  if (!fileName) {
     throw new Error("File name is required");
   }
   if (!fileSize || fileSize <= 0) {
