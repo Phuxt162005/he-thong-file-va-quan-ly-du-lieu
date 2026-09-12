@@ -461,6 +461,7 @@ export default function FileList() {
               file={file}
               selected={selectedFiles.includes(file._id)}
               onSelect={handleSelect}
+              onOpen={setPreviewFile}
               onDownload={handleDownload}
               onPreview={setPreviewFile}
               onRename={openRename}
