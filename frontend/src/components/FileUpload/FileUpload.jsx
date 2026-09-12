@@ -12,10 +12,9 @@ export default function FileUpload({ folderId = null, onUploaded }) {
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [isDragging, setIsDragging] = useState(false);
 
-  const handleSelectFiles = (event) => {
-    const selectedFiles = Array.from(event.target.files || []);
-
+  const setSelectedFiles = (selectedFiles) => {
     setFiles(
       selectedFiles.map((file) => ({
         file,
@@ -28,11 +27,51 @@ export default function FileUpload({ folderId = null, onUploaded }) {
     setSuccess("");
   };
 
+  const handleSelectFiles = (event) => {
+    const selectedFiles = Array.from(event.target.files || []);
+    setSelectedFiles(selectedFiles);
+  };
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (!uploading) {
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    if (event.currentTarget === event.target) {
+      setIsDragging(false);
+    }
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setIsDragging(false);
+
+    if (uploading) {
+      return;
+    }
+
+    const droppedFiles = Array.from(event.dataTransfer?.files || []);
+    if (droppedFiles.length === 0) {
+      return;
+    }
+    setSelectedFiles(droppedFiles);
+  };
+
   const updateFileState = (file, changes) => {
     setFiles((prev) =>
       prev.map((item) => (item.file === file ? { ...item, ...changes } : item)),
     );
   };
+
   const uploadNormalFile = async (file) => {
     updateFileState(file, {
       status: "uploading",
@@ -166,15 +205,37 @@ export default function FileUpload({ folderId = null, onUploaded }) {
 
   return (
     <div className="file-upload">
-      <div className="file-upload__select">
+      <label
+        className={`file-upload__dropzone ${
+          isDragging ? "file-upload__dropzone--dragging" : ""
+        } ${uploading ? "file-upload__dropzone--disabled" : ""}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
+      >
         <input
           ref={inputRef}
+          className="file-upload__input"
           type="file"
           multiple
           onChange={handleSelectFiles}
           disabled={uploading}
         />
-      </div>
+
+        <span className="file-upload__dropzone-icon">↑</span>
+
+        <span className="file-upload__dropzone-title">
+          {isDragging ? "Thả file vào đây" : "Kéo và thả file vào đây"}
+        </span>
+
+        <span className="file-upload__dropzone-text">hoặc</span>
+
+        <span className="file-upload__dropzone-button">Chọn file</span>
+
+        <span className="file-upload__dropzone-hint">
+          Có thể chọn nhiều file cùng lúc
+        </span>
+      </label>
 
       {error && <div className="error-message">{error}</div>}
 
