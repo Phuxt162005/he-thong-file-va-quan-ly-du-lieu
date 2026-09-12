@@ -72,6 +72,75 @@ ol {
 }
 
 /* =========================================================
+   COMMON LAYOUT / SPACING SYSTEM
+   ========================================================= */
+
+.stack-xs {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.stack-sm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.stack-md {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.stack-lg {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.stack-xl {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xl);
+}
+
+.inline-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.inline-actions-md {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+}
+
+.section {
+  width: 100%;
+  margin-top: var(--spacing-xl);
+}
+
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+}
+
+.surface {
+  background-color: var(--color-surface);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-lg);
+}
+
+.surface-padded {
+  padding: var(--spacing-lg);
+}
+
+/* =========================================================
    COMMON BUTTON SYSTEM
    ========================================================= */
 .btn {
@@ -236,8 +305,8 @@ ol {
 /* common input */
 .input {
   width: 100%;
-  min-height: 40px;
-  padding: var(--spacing-sm) var(--spacing-md);
+  height: 40px;
+  padding: 0 var(--spacing-md);
   color: var(--color-text);
   background-color: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
@@ -271,14 +340,16 @@ ol {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
-  margin-bottom: var(--spacing-md);
+  margin-bottom: var(--spacing-lg);
 }
 
 /* common card */
 .card {
+  width: 100%;
+  padding: var(--spacing-lg);
   background-color: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
 }
 

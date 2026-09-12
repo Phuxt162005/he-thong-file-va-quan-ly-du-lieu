@@ -24,7 +24,7 @@
 }
 
 .folder-item {
-  min-height: 60px;
+  min-height: 56px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -72,11 +72,13 @@
 }
 
 .folder-item__action {
-  width: 36px;
-  height: 36px;
-  display: flex;
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
+  border: var(--border-width) solid transparent;
   background: transparent;
   border-radius: var(--radius-sm);
 }
@@ -92,10 +94,15 @@
 }
 
 .files-page__section {
+  width: 100%;
   margin-top: var(--spacing-xl);
 }
 
 .files-page__section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--spacing-md);
   margin-bottom: var(--spacing-md);
 }
 
