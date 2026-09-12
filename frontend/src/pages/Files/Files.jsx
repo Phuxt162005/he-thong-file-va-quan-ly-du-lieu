@@ -269,8 +269,6 @@ export default function Files() {
   return (
     <>
       <div className="files-page">
-        <Breadcrumb items={breadcrumbItems} />
-
         <div className="files-page__header">
           <div>
             <h1>Tệp của tôi</h1>
@@ -306,6 +304,8 @@ export default function Files() {
         {error && <div className="error-message">{error}</div>}
 
         {dragError && <div className="error-message">{dragError}</div>}
+
+        <Breadcrumb items={breadcrumbItems} />
 
         <div className="folder-manager">
           <aside className="folder-manager__sidebar">
