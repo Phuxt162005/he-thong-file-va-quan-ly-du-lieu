@@ -147,18 +147,161 @@
 }
 
 /* ========================================
-   Image
+   Image Preview
    ======================================== */
+
+.file-preview__image-wrapper {
+  position: relative;
+
+  width: 100%;
+  height: calc(94vh - 68px);
+
+  min-height: 500px;
+
+  display: flex;
+  flex-direction: column;
+
+  overflow: hidden;
+
+  background: #eee2df;
+}
+
+/* ----------------------------------------
+   Image toolbar
+   ---------------------------------------- */
+
+.file-preview__image-toolbar {
+  position: absolute;
+
+  top: 16px;
+  left: 50%;
+
+  z-index: 10;
+
+  display: flex;
+  align-items: center;
+
+  transform: translateX(-50%);
+
+  padding: 6px;
+
+  background: rgba(238, 226, 223, 0.94);
+
+  border: 1px solid #6da0e1;
+  border-radius: 12px;
+
+  box-shadow: 0 4px 16px rgba(91, 97, 178, 0.18);
+
+  backdrop-filter: blur(8px);
+}
+
+.file-preview__image-tool {
+  width: 38px;
+  height: 34px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0;
+
+  border: 0;
+  border-radius: 8px;
+
+  background: transparent;
+  color: #5b61b2;
+
+  font-size: 21px;
+  font-weight: 600;
+
+  cursor: pointer;
+
+  transition:
+    background-color 0.18s ease,
+    color 0.18s ease;
+}
+
+.file-preview__image-tool:hover:not(:disabled) {
+  background: #dec1db;
+  color: #5b61b2;
+}
+
+.file-preview__image-tool:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.file-preview__image-tool:focus-visible {
+  outline: 2px solid #2f80e4;
+  outline-offset: 2px;
+}
+
+.file-preview__zoom-value {
+  min-width: 58px;
+
+  text-align: center;
+
+  color: #5b61b2;
+
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.file-preview__toolbar-divider {
+  width: 1px;
+  height: 22px;
+
+  margin: 0 5px;
+
+  background: #6da0e1;
+}
+
+/* ----------------------------------------
+   Image stage
+   ---------------------------------------- */
+
+.file-preview__image-stage {
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  overflow: hidden;
+
+  cursor: default;
+
+  touch-action: none;
+}
+
+.file-preview__image-stage.is-dragging {
+  cursor: grabbing;
+}
+
+/* ----------------------------------------
+   Image itself
+   ---------------------------------------- */
 
 .file-preview__image {
   display: block;
 
-  max-width: 100%;
-  max-height: calc(92vh - 100px);
+  max-width: 85%;
+  max-height: 85%;
 
   object-fit: contain;
 
-  border-radius: 4px;
+  user-select: none;
+
+  will-change: transform;
+
+  transform-origin: center center;
+
+  transition: transform 0.15s ease;
+}
+
+.file-preview__image-stage.is-dragging .file-preview__image {
+  transition: none;
 }
 
 /* ========================================

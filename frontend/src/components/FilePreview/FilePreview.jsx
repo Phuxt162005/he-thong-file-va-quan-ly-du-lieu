@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import Modal from "../Modal/Modal";
 import Loading from "../Loading/Loading";
@@ -42,6 +42,10 @@ export default function FilePreview({
   const [textContent, setTextContent] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [imageZoom, setImageZoom] = useState(1);
+  const [imagePosition, setImagePosition] = useState({ x: 0, y: 0 });
+  const [isDraggingImage, setIsDraggingImage] = useState(false);
+  const imageDragStart = useRef({ x: 0, y: 0 });
 
   useEffect(() => {
     let objectUrl = null;
@@ -109,7 +113,86 @@ export default function FilePreview({
     };
   }, [isOpen, file?._id]);
 
+  useEffect(() => {
+    setImageZoom(1);
+    setImagePosition({ x: 0, y: 0 });
+    setIsDraggingImage(false);
+  }, [isOpen, file?._id]);
+
   const extension = getExtension(file?.name);
+
+  const IMAGE_ZOOM_MIN = 0.25;
+  const IMAGE_ZOOM_MAX = 4;
+  const IMAGE_ZOOM_STEP = 0.25;
+
+  function clampImageZoom(value) {
+    return Math.min(IMAGE_ZOOM_MAX, Math.max(IMAGE_ZOOM_MIN, value));
+  }
+
+  function zoomImage(direction) {
+    setImageZoom((current) => {
+      const next =
+        direction === "in"
+          ? current + IMAGE_ZOOM_STEP
+          : current - IMAGE_ZOOM_STEP;
+
+      return clampImageZoom(next);
+    });
+  }
+
+  function resetImageView() {
+    setImageZoom(1);
+    setImagePosition({
+      x: 0,
+      y: 0,
+    });
+  }
+
+  function handleImageWheel(event) {
+    event.preventDefault();
+
+    setImageZoom((current) => {
+      const next =
+        event.deltaY < 0
+          ? current + IMAGE_ZOOM_STEP
+          : current - IMAGE_ZOOM_STEP;
+
+      return clampImageZoom(next);
+    });
+  }
+
+  function handleImagePointerDown(event) {
+    if (imageZoom <= 1) {
+      return;
+    }
+    event.currentTarget.setPointerCapture(event.pointerId);
+    setIsDraggingImage(true);
+
+    imageDragStart.current = {
+      x: event.clientX - imagePosition.x,
+      y: event.clientY - imagePosition.y,
+    };
+  }
+
+  function handleImagePointerMove(event) {
+    if (!isDraggingImage) {
+      return;
+    }
+    setImagePosition({
+      x: event.clientX - imageDragStart.current.x,
+      y: event.clientY - imageDragStart.current.y,
+    });
+  }
+
+  function handleImagePointerUp(event) {
+    if (!isDraggingImage) {
+      return;
+    }
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId);
+    }
+    setIsDraggingImage(false);
+  }
 
   function renderContent() {
     if (loading) {
@@ -138,11 +221,68 @@ export default function FilePreview({
     }
     if (IMAGE_EXTENSIONS.includes(extension)) {
       return (
-        <img
-          className="file-preview__image"
-          src={url}
-          alt={file?.name || "Preview"}
-        />
+        <div className="file-preview__image-wrapper">
+          <div className="file-preview__image-toolbar">
+            <button
+              type="button"
+              className="file-preview__image-tool"
+              onClick={() => zoomImage("out")}
+              disabled={imageZoom <= IMAGE_ZOOM_MIN}
+              aria-label="Thu nhỏ ảnh"
+              title="Thu nhỏ"
+            >
+              −
+            </button>
+
+            <span className="file-preview__zoom-value">
+              {Math.round(imageZoom * 100)}%
+            </span>
+
+            <button
+              type="button"
+              className="file-preview__image-tool"
+              onClick={() => zoomImage("in")}
+              disabled={imageZoom >= IMAGE_ZOOM_MAX}
+              aria-label="Phóng to ảnh"
+              title="Phóng to"
+            >
+              +
+            </button>
+
+            <span className="file-preview__toolbar-divider" />
+
+            <button
+              type="button"
+              className="file-preview__image-tool"
+              onClick={resetImageView}
+              aria-label="Đặt lại ảnh"
+              title="Đặt lại"
+            >
+              ↺
+            </button>
+          </div>
+
+          <div
+            className={`file-preview__image-stage ${
+              isDraggingImage ? "is-dragging" : ""
+            }`}
+            onWheel={handleImageWheel}
+            onPointerDown={handleImagePointerDown}
+            onPointerMove={handleImagePointerMove}
+            onPointerUp={handleImagePointerUp}
+            onPointerCancel={handleImagePointerUp}
+          >
+            <img
+              className="file-preview__image"
+              src={url}
+              alt={file?.name || "Preview"}
+              draggable={false}
+              style={{
+                transform: `translate(${imagePosition.x}px, ${imagePosition.y}px) scale(${imageZoom})`,
+              }}
+            />
+          </div>
+        </div>
       );
     }
 
