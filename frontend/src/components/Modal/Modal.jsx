@@ -2,7 +2,14 @@ import { useEffect } from "react";
 
 import "./Modal.css";
 
-export default function Modal({ isOpen, title, children, onClose, footer }) {
+export default function Modal({
+  isOpen,
+  title,
+  children,
+  onClose,
+  footer,
+  className = "",
+}) {
   useEffect(() => {
     if (!isOpen) {
       return;
@@ -33,7 +40,7 @@ export default function Modal({ isOpen, title, children, onClose, footer }) {
   return (
     <div className="modal-overlay" onMouseDown={handleOverlayClick}>
       <div
-        className="modal modal-component"
+        className={`modal modal-component ${className}`.trim()}
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="modal-component__header">

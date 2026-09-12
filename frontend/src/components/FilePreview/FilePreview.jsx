@@ -190,7 +190,12 @@ export default function FilePreview({
   }
 
   return (
-    <Modal isOpen={isOpen} title={file?.name || "Preview"} onClose={onClose}>
+    <Modal
+      isOpen={isOpen}
+      title={file?.name || "Preview"}
+      onClose={onClose}
+      className="file-preview-modal"
+    >
       <div className="file-preview">{renderContent()}</div>
     </Modal>
   );
