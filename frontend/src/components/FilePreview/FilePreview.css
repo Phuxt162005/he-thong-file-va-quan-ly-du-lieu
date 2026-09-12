@@ -1,187 +1,275 @@
-/* ================================
+/* ========================================
    File Preview
-   ================================ */
+   ======================================== */
+
 .file-preview {
   width: 100%;
   min-height: 320px;
+
   display: flex;
   align-items: center;
   justify-content: center;
+
   box-sizing: border-box;
 }
 
-/* ================================
-   PDF Preview
-   ================================ */
+/* ========================================
+   Preview Modal
+   ======================================== */
+
 .file-preview-modal {
-  width: min(94vw, 1400px);
-  max-width: 1400px;
+  width: 88vw !important;
+  max-width: 1500px !important;
+
+  height: 94vh !important;
+  max-height: 94vh !important;
+
+  margin: 0 auto;
+
+  overflow: hidden;
 }
 
-.file-preview-modal .modal-component__body {
-  padding: 0;
-  background: #eee2df;
-}
+/* ========================================
+   Header
+   ======================================== */
 
 .file-preview-modal .modal-component__header {
-  min-height: 64px;
-  padding: 0 20px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  width: 100%;
+  height: 68px;
+  min-height: 68px;
+
+  padding: 12px 18px;
+
+  box-sizing: border-box;
+
   background: #dec1db;
-  border-bottom: 1px solid #5b61b2;
+  border-bottom: 1px solid #6da0e1;
+
+  gap: 16px;
 }
 
 .file-preview-modal .modal-component__header h2 {
+  flex: 1;
+  min-width: 0;
+
   margin: 0;
+
   color: #5b61b2;
-  font-size: 17px;
+
+  font-size: 18px;
   font-weight: 600;
+  line-height: 1.3;
+
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* ========================================
+   Close button
+   ======================================== */
+
 .file-preview-modal .modal-component__close {
-  width: 38px;
-  height: 38px;
+  width: 42px;
+  height: 42px;
+
+  flex: 0 0 42px;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
-  border: 1px solid #5b61b2;
+
+  padding: 0;
+
+  border: 1px solid #6da0e1;
   border-radius: 10px;
+
   background: #eee2df;
   color: #5b61b2;
-  font-size: 24px;
+
+  font-size: 26px;
+  font-weight: 400;
   line-height: 1;
+
   cursor: pointer;
+
   transition:
     background-color 0.18s ease,
     color 0.18s ease,
-    transform 0.18s ease;
+    border-color 0.18s ease;
 }
 
 .file-preview-modal .modal-component__close:hover {
   background: #5b61b2;
   color: #eee2df;
-  transform: translateY(-1px);
+  border-color: #5b61b2;
 }
 
 .file-preview-modal .modal-component__close:focus-visible {
-  outline: 3px solid #6da0e1;
+  outline: 3px solid #2f80e4;
   outline-offset: 2px;
 }
 
-/* ================================
-   Preview container
-   ================================ */
-.file-preview {
+/* ========================================
+   Body
+   ======================================== */
+
+.file-preview-modal .modal-component__body {
+  width: 100%;
+  height: calc(94vh - 68px);
+
+  padding: 0;
+
   background: #eee2df;
+
+  overflow: hidden;
 }
 
-/* ================================
-   Image
-   ================================ */
-.file-preview__image {
-  display: block;
-  max-width: 100%;
-  max-height: 76vh;
-  object-fit: contain;
-  border-radius: 8px;
-}
+/* ========================================
+   PDF
+   ======================================== */
 
-/* ================================
-   PDF iframe
-   ================================ */
 .file-preview__frame {
   display: block;
+
   width: 100%;
-  height: min(78vh, 820px);
+  height: calc(94vh - 68px);
+
+  min-height: 600px;
+
   border: 0;
-  border-radius: 0;
+
   background: #ffffff;
 }
 
-/* ================================
+/* ========================================
+   Image
+   ======================================== */
+
+.file-preview__image {
+  display: block;
+
+  max-width: 100%;
+  max-height: calc(92vh - 100px);
+
+  object-fit: contain;
+
+  border-radius: 4px;
+}
+
+/* ========================================
    Video
-   ================================ */
+   ======================================== */
+
 .file-preview__video {
   display: block;
+
   width: 100%;
-  max-height: 76vh;
-  border-radius: 8px;
+  max-height: calc(92vh - 100px);
+
   background: #5b61b2;
 }
 
-/* ================================
+/* ========================================
    Audio
-   ================================ */
+   ======================================== */
+
 .file-preview__audio {
   width: 100%;
   max-width: 600px;
 }
 
-/* ================================
+/* ========================================
    Text
-   ================================ */
+   ======================================== */
+
 .file-preview__text {
   width: 100%;
-  max-height: 76vh;
+  max-height: calc(92vh - 100px);
+
   margin: 0;
   padding: 20px;
+
   box-sizing: border-box;
+
   overflow: auto;
+
   white-space: pre-wrap;
   word-break: break-word;
+
   font-family: Consolas, Monaco, "Courier New", monospace;
   font-size: 14px;
   line-height: 1.6;
+
   color: #5b61b2;
+
   background: #ffffff;
+
   border: 1px solid #6da0e1;
-  border-radius: 8px;
+  border-radius: 4px;
 }
 
-/* ================================
+/* ========================================
    Unsupported
-   ================================ */
+   ======================================== */
+
 .file-preview__unsupported {
   width: 100%;
+
   display: flex;
   flex-direction: column;
   align-items: center;
+
   gap: 12px;
+
   padding: 50px 20px;
+
   box-sizing: border-box;
+
   text-align: center;
+
   color: #5b61b2;
 }
 
 .file-preview__unsupported-icon {
-  font-size: 64px;
+  font-size: 56px;
 }
 
 .file-preview__unsupported h3 {
   margin: 0;
+
   color: #5b61b2;
 }
 
 .file-preview__unsupported p {
   margin: 0;
+
   color: #5b61b2;
 }
 
-/* ================================
+/* ========================================
    Error
-   ================================ */
+   ======================================== */
+
 .file-preview__error {
   width: 100%;
+
   display: flex;
   flex-direction: column;
   align-items: center;
+
   gap: 12px;
+
   padding: 50px 20px;
+
   box-sizing: border-box;
+
   text-align: center;
+
   color: #5b61b2;
 }
 
@@ -193,44 +281,78 @@
   margin: 0;
 }
 
-/* ================================
+/* ========================================
    Responsive
-   ================================ */
+   ======================================== */
+
 @media (max-width: 900px) {
   .file-preview-modal {
-    width: 96vw;
+    width: 94vw;
+    max-width: 94vw;
+
+    height: 92vh;
+    max-height: 92vh;
   }
 
   .file-preview-modal .modal-component__header {
-    min-height: 56px;
-    padding: 0 14px;
+    height: 60px;
+    min-height: 60px;
+
+    padding: 10px 14px;
   }
 
   .file-preview-modal .modal-component__header h2 {
-    font-size: 15px;
+    font-size: 16px;
+  }
+
+  .file-preview-modal .modal-component__close {
+    width: 38px;
+    height: 38px;
+
+    flex-basis: 38px;
+  }
+
+  .file-preview-modal .modal-component__body {
+    height: calc(92vh - 60px);
   }
 
   .file-preview__frame {
-    height: 72vh;
+    height: calc(92vh - 60px);
+    min-height: 400px;
   }
 }
 
 @media (max-width: 600px) {
   .file-preview-modal {
     width: 100vw;
+    max-width: 100vw;
+
+    height: 100vh;
+    max-height: 100vh;
+
+    border-radius: 0;
   }
 
   .file-preview-modal .modal-component__header {
-    min-height: 52px;
-    padding: 0 12px;
+    height: 56px;
+    min-height: 56px;
+
+    padding: 8px 10px;
   }
 
   .file-preview-modal .modal-component__close {
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
+
+    flex-basis: 36px;
+  }
+
+  .file-preview-modal .modal-component__body {
+    height: calc(100vh - 56px);
   }
 
   .file-preview__frame {
-    height: 68vh;
+    height: calc(100vh - 56px);
+    min-height: 350px;
   }
 }
