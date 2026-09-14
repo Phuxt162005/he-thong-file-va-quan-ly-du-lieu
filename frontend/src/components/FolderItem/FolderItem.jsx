@@ -19,7 +19,6 @@ export default function FolderItem({
   const handleDragOver = (event) => {
     event.preventDefault();
     event.stopPropagation();
-
     event.dataTransfer.dropEffect = "move";
     event.currentTarget.classList.add("folder-item--drag-over");
   };
@@ -27,18 +26,15 @@ export default function FolderItem({
   const handleDragLeave = (event) => {
     event.preventDefault();
     event.stopPropagation();
-
     event.currentTarget.classList.remove("folder-item--drag-over");
   };
 
   const handleDrop = (event) => {
     event.preventDefault();
     event.stopPropagation();
-
     event.currentTarget.classList.remove("folder-item--drag-over");
 
     const fileId = event.dataTransfer.getData("application/x-file-id");
-
     if (!fileId) {
       return;
     }
@@ -49,7 +45,6 @@ export default function FolderItem({
   const handleAction = (event, callback) => {
     event.preventDefault();
     event.stopPropagation();
-
     callback?.(folder);
   };
 
@@ -61,6 +56,12 @@ export default function FolderItem({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
+      {/* Checkbox */}
+      <div className="folder-item__select">
+        <span />
+      </div>
+
+      {/* Icon */}
       <button
         type="button"
         className="folder-item__main"
@@ -76,7 +77,26 @@ export default function FolderItem({
         </span>
       </button>
 
+      {/* Size */}
+      <div className="folder-item__size">-</div>
+
+      {/* Date */}
+      <div className="folder-item__date">
+        {formatFolderDate(folder.updatedAt || folder.createdAt)}
+      </div>
+
+      {/* Actions */}
       <div className="folder-item__actions">
+        <button
+          type="button"
+          className="folder-item__action"
+          onClick={(event) => handleAction(event, onOpen)}
+          title="Mở thư mục"
+          aria-label={`Mở ${folder.name || "thư mục"}`}
+        >
+          👁
+        </button>
+
         <button
           type="button"
           className="folder-item__action"
@@ -85,26 +105,6 @@ export default function FolderItem({
           aria-label={`Đổi tên ${folder.name || "thư mục"}`}
         >
           ✏️
-        </button>
-
-        <button
-          type="button"
-          className="folder-item__action"
-          onClick={(event) => handleAction(event, onMove)}
-          title="Di chuyển"
-          aria-label={`Di chuyển ${folder.name || "thư mục"}`}
-        >
-          📂
-        </button>
-
-        <button
-          type="button"
-          className="folder-item__action"
-          onClick={(event) => handleAction(event, onCopy)}
-          title="Sao chép"
-          aria-label={`Sao chép ${folder.name || "thư mục"}`}
-        >
-          📋
         </button>
 
         <button
@@ -126,7 +126,25 @@ export default function FolderItem({
         >
           🗑️
         </button>
+
+        <button
+          type="button"
+          className="folder-item__action"
+          onClick={(event) => handleAction(event, onContextMenu)}
+          title="Thêm thao tác"
+          aria-label={`Thêm thao tác cho ${folder.name || "thư mục"}`}
+        >
+          ⋯
+        </button>
       </div>
     </div>
   );
+}
+
+function formatFolderDate(date) {
+  if (!date) {
+    return "-";
+  }
+
+  return new Date(date).toLocaleString("vi-VN");
 }

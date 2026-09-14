@@ -1223,3 +1223,358 @@
     padding: 12px;
   }
 }
+
+/* =========================================================
+   UNIFIED FILE TABLE
+   ========================================================= */
+.files-unified-table {
+  width: 100%;
+  overflow: hidden;
+  border: 1px solid #dfe7f4;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+/* =========================
+   HEADER
+   ========================= */
+.files-unified-table__header {
+  min-height: 48px;
+  display: grid;
+  grid-template-columns:
+    40px
+    46px
+    minmax(180px, 1fr)
+    130px
+    170px
+    250px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 13px;
+  color: #49658e;
+  background: linear-gradient(180deg, #f0f4fc 0%, #edf2fb 100%);
+  border-bottom: 1px solid #dfe7f3;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.files-unified-table__header > div {
+  min-width: 0;
+}
+
+.files-unified-table__checkbox {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.files-unified-table__checkbox span {
+  width: 17px;
+  height: 17px;
+  display: block;
+  border: 1.5px solid #aebfd9;
+  border-radius: 4px;
+  background: #ffffff;
+}
+
+.files-unified-table__icon {
+  width: 100%;
+}
+
+/* =========================
+   FOLDERS
+   ========================= */
+.files-unified-table__folders {
+  width: 100%;
+}
+
+.files-unified-table__folders:empty {
+  display: none;
+}
+
+/* =========================
+   FILES
+   ========================= */
+.files-unified-table__files {
+  width: 100%;
+}
+
+.files-unified-table__files .file-list {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.files-unified-table__files .file-list__header {
+  display: none;
+}
+
+.files-unified-table__files .file-item {
+  min-height: 55px;
+  display: grid;
+  grid-template-columns:
+    40px
+    46px
+    minmax(180px, 1fr)
+    130px
+    170px
+    250px;
+  align-items: center;
+  gap: 7px;
+  padding: 0 13px;
+  border-bottom: 1px solid #e6ecf5;
+  background: #ffffff;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.files-unified-table__files .file-item:hover {
+  background: #f8fbff;
+}
+
+.files-unified-table__files .file-item__select {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.files-unified-table__files .file-item__icon {
+  width: 36px;
+  height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;
+}
+
+.files-unified-table__files .file-item__name {
+  min-width: 0;
+  overflow: hidden;
+  color: #244a84;
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.files-unified-table__files .file-item__size,
+.files-unified-table__files .file-item__date {
+  color: #7890b5;
+  font-family: inherit;
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.files-unified-table__files .file-item__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: flex-start;
+}
+
+.files-unified-table__files .file-item__actions .btn-sm {
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 1px solid #e1e9f6;
+  border-radius: 8px;
+  background: #ffffff;
+  font-size: 15px;
+}
+
+.files-unified-table__files .file-item__actions .btn-sm:hover {
+  color: #347ee4;
+  background: #edf4ff;
+  border-color: #cfe0f8;
+}
+
+/* =========================
+   EMPTY FILE STATE
+   ========================= */
+.files-unified-table__files .file-list__empty {
+  min-height: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #7890b5;
+  font-size: 14px;
+}
+
+/* =========================
+   HIDE UPLOAD DROPZONE
+   ========================= */
+.files-page .file-upload {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.files-page .file-upload input[type="file"] {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+}
+
+/* =========================
+   HEADER / PAGE
+   ========================= */
+.files-page__header {
+  align-items: flex-start;
+}
+
+.files-page__header h1 {
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 32px;
+  font-weight: 750;
+  color: #163b75;
+}
+
+.files-page__subtitle {
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  color: #7186aa;
+}
+
+/* =========================
+   SIDEBAR
+   ========================= */
+.folder-manager__sidebar {
+  background: linear-gradient(180deg, #fbfcff 0%, #f7f9fd 100%);
+}
+
+.folder-manager__title {
+  color: #173b76;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.folder-manager__root {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+}
+
+.folder-manager__root-icon {
+  font-size: 17px;
+}
+
+/* =========================
+   CONTENT
+   ========================= */
+.folder-manager__content {
+  padding: 17px 13px 14px;
+  background: #ffffff;
+}
+
+.folder-manager__content-header {
+  min-height: 52px;
+  margin-bottom: 2px;
+  padding: 0 9px;
+}
+
+.folder-manager__content-header h2 {
+  color: #173b76;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 21px;
+  font-weight: 750;
+}
+
+/* =========================
+   VIEW TOGGLE
+   ========================= */
+.folder-manager__view-toggle {
+  display: flex;
+  align-items: center;
+  padding: 3px;
+  border: 1px solid #dce5f5;
+  border-radius: 9px;
+  background: #ffffff;
+}
+
+.folder-manager__view-button {
+  width: 40px;
+  height: 35px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 7px;
+  background: transparent;
+  color: #7890b5;
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.folder-manager__view-button--active {
+  background: #e9f2ff;
+  color: #347ee4;
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+@media (max-width: 1250px) {
+  .files-unified-table__header {
+    grid-template-columns:
+      36px
+      42px
+      minmax(150px, 1fr)
+      110px
+      145px
+      205px;
+  }
+
+  .files-unified-table__files .file-item {
+    grid-template-columns:
+      36px
+      42px
+      minmax(150px, 1fr)
+      110px
+      145px
+      205px;
+  }
+}
+
+@media (max-width: 1050px) {
+  .files-unified-table__header {
+    grid-template-columns:
+      36px
+      42px
+      minmax(140px, 1fr)
+      100px
+      145px
+      170px;
+  }
+
+  .files-unified-table__files .file-item {
+    grid-template-columns:
+      36px
+      42px
+      minmax(140px, 1fr)
+      100px
+      145px
+      170px;
+  }
+}
+
+@media (max-width: 850px) {
+  .files-unified-table {
+    overflow-x: auto;
+  }
+
+  .files-unified-table__header {
+    min-width: 820px;
+  }
+
+  .files-unified-table__folders,
+  .files-unified-table__files {
+    min-width: 820px;
+  }
+}

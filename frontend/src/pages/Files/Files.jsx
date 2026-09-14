@@ -325,7 +325,9 @@ export default function Files() {
               }`}
               onClick={() => navigate("/files")}
             >
-              🏠 Tất cả tệp
+              <span className="folder-manager__root-icon">🏠</span>
+
+              <span>Tất cả tệp</span>
             </button>
 
             <FolderTree
@@ -360,44 +362,58 @@ export default function Files() {
               </div>
             </div>
 
-            {loading ? (
-              <Loading message="Đang tải thư mục..." />
-            ) : folders.length === 0 ? (
-              <div className="folder-list__empty">Chưa có thư mục.</div>
-            ) : (
-              <div className="folder-list">
-                {folders.map((folder) => (
-                  <FolderItem
-                    key={folder._id}
-                    folder={folder}
-                    onOpen={handleOpenFolder}
-                    onDropFile={handleDropFile}
-                    onRename={openRenameModal}
-                    onMove={openMoveModal}
-                    onCopy={openCopyModal}
-                    onDelete={openDeleteModal}
-                    onShare={(item) =>
-                      setShareFolder({
-                        ...item,
-                        type: "folder",
-                      })
-                    }
-                    onContextMenu={openContextMenu}
-                  />
-                ))}
+            <div className="files-unified-table">
+              <div className="files-unified-table__header">
+                <div className="files-unified-table__checkbox">
+                  <span />
+                </div>
+
+                <div className="files-unified-table__icon">
+                  <span />
+                </div>
+
+                <div>Tên</div>
+                <div>Dung lượng</div>
+                <div>Cập nhật</div>
+                <div>Thao tác</div>
               </div>
-            )}
+
+              <div className="files-unified-table__folders">
+                {loading ? (
+                  <Loading message="Đang tải thư mục..." />
+                ) : folders.length === 0 ? null : (
+                  folders.map((folder) => (
+                    <FolderItem
+                      key={folder._id}
+                      folder={folder}
+                      onOpen={handleOpenFolder}
+                      onDropFile={handleDropFile}
+                      onRename={openRenameModal}
+                      onMove={openMoveModal}
+                      onCopy={openCopyModal}
+                      onDelete={openDeleteModal}
+                      onShare={(item) =>
+                        setShareFolder({
+                          ...item,
+                          type: "folder",
+                        })
+                      }
+                      onContextMenu={openContextMenu}
+                    />
+                  ))
+                )}
+              </div>
+
+              <div className="files-unified-table__files">
+                <FileList />
+              </div>
+            </div>
+
+            <FileUpload
+              folderId={currentFolderId}
+              onUploaded={refreshFolders}
+            />
           </section>
-        </div>
-
-        <div className="files-page__section">
-          <div className="files-page__section-header">
-            <h2>File</h2>
-          </div>
-
-          <FileUpload folderId={currentFolderId} onUploaded={refreshFolders} />
-
-          <FileList />
         </div>
       </div>
 

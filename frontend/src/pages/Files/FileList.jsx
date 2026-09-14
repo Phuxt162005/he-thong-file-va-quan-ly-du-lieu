@@ -436,26 +436,10 @@ export default function FileList() {
       )}
 
       <div className="file-list">
-        <div className="file-list__header">
-          <div>
-            <input
-              type="checkbox"
-              checked={isAllSelected()}
-              onChange={(event) => handleSelectAll(event.target.checked)}
-              aria-label="Chọn tất cả file"
-            />
-          </div>
-
-          <div className="file-list__header-icon" aria-hidden="true" />
-
-          <div>Tên</div>
-          <div>Dung lượng</div>
-          <div>Cập nhật</div>
-          <div>Thao tác</div>
-        </div>
-
         {files.length === 0 ? (
-          <div className="file-list__empty">Chưa có file.</div>
+          <div className="file-list__empty">
+            {loading ? "Đang tải file..." : ""}
+          </div>
         ) : (
           files.map((file) => (
             <FileItem
