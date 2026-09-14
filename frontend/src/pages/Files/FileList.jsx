@@ -442,10 +442,12 @@ export default function FileList() {
               type="checkbox"
               checked={isAllSelected()}
               onChange={(event) => handleSelectAll(event.target.checked)}
+              aria-label="Chọn tất cả file"
             />
           </div>
 
-          <div>File</div>
+          <div className="file-list__header-icon" aria-hidden="true" />
+
           <div>Tên</div>
           <div>Dung lượng</div>
           <div>Cập nhật</div>

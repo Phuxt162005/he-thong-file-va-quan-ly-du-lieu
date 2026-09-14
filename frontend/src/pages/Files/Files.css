@@ -473,3 +473,753 @@
     flex-wrap: wrap;
   }
 }
+
+/* =========================================================
+   FILE MANAGER - UI REDESIGN
+   ========================================================= */
+
+.files-page {
+  width: 100%;
+  max-width: none;
+
+  color: #173b76;
+
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* =========================================================
+   PAGE HEADER
+   ========================================================= */
+
+.files-page__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 24px;
+
+  margin-bottom: 25px;
+}
+
+.files-page__header h1 {
+  margin: 0;
+
+  color: #163b75;
+
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  font-size: 32px;
+  font-weight: 750;
+  line-height: 1.15;
+}
+
+.files-page__subtitle {
+  margin: 7px 0 0;
+
+  color: #7186aa;
+
+  font-family: inherit;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+/* =========================================================
+   TOP BUTTONS
+   ========================================================= */
+
+.files-page__toolbar {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+}
+
+.files-page__new-folder,
+.files-page__upload {
+  height: 56px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  gap: 9px;
+
+  padding: 0 22px;
+
+  border-radius: 11px;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 650;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.files-page__new-folder {
+  min-width: 177px;
+
+  color: #ffffff;
+
+  background: linear-gradient(135deg, #2f82e8 0%, #2876df 100%);
+
+  border: 1px solid #2f82e8;
+
+  box-shadow: 0 6px 16px rgba(47, 128, 228, 0.18);
+}
+
+.files-page__new-folder:hover {
+  transform: translateY(-1px);
+
+  box-shadow: 0 8px 20px rgba(47, 128, 228, 0.25);
+}
+
+.files-page__button-icon {
+  font-size: 25px;
+  font-weight: 300;
+  line-height: 1;
+}
+
+.files-page__upload {
+  min-width: 168px;
+
+  color: #3779d7;
+
+  background: rgba(255, 255, 255, 0.88);
+
+  border: 1px solid #cbdafa;
+
+  box-shadow: 0 3px 10px rgba(83, 118, 172, 0.05);
+}
+
+.files-page__upload:hover {
+  background: #f7faff;
+}
+
+.files-page__upload-icon {
+  font-size: 18px;
+}
+
+.files-page__upload-chevron {
+  margin-left: 4px;
+
+  font-size: 19px;
+  line-height: 1;
+}
+
+/* =========================================================
+   FOLDER MANAGER
+   ========================================================= */
+
+.folder-manager {
+  display: grid;
+
+  grid-template-columns: 255px minmax(0, 1fr);
+
+  margin-top: 24px;
+
+  overflow: hidden;
+
+  border: 1px solid #dfe8f7;
+  border-radius: 13px;
+
+  background: #ffffff;
+
+  box-shadow: 0 5px 18px rgba(76, 108, 157, 0.06);
+}
+
+/* =========================================================
+   FOLDER SIDEBAR
+   ========================================================= */
+
+.folder-manager__sidebar {
+  min-width: 0;
+
+  padding: 20px 14px 22px;
+
+  background: linear-gradient(180deg, #fbfcff 0%, #f7f9fd 100%);
+
+  border-right: 1px solid #e1e8f4;
+}
+
+.folder-manager__title {
+  margin: 0 8px 13px;
+
+  color: #173b76;
+
+  font-family: inherit;
+  font-size: 17px;
+  font-weight: 700;
+}
+
+.folder-manager__root {
+  width: 100%;
+  min-height: 48px;
+
+  display: flex;
+  align-items: center;
+
+  padding: 0 15px;
+
+  color: #326fca;
+
+  background: transparent;
+
+  border: 1px solid transparent;
+  border-radius: 10px;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+
+  text-align: left;
+
+  cursor: pointer;
+}
+
+.folder-manager__root:hover {
+  background: #eef4ff;
+}
+
+.folder-manager__root--selected {
+  color: #337ce1;
+
+  background: linear-gradient(135deg, #edf4ff 0%, #e8f1ff 100%);
+
+  border-color: #b9d2fa;
+
+  font-weight: 700;
+}
+
+/* =========================================================
+   FOLDER TREE
+   ========================================================= */
+
+.folder-manager__sidebar .folder-tree {
+  margin-top: 7px;
+}
+
+.folder-manager__sidebar .folder-tree__item {
+  min-height: 42px;
+
+  gap: 6px;
+
+  padding: 0 8px;
+
+  border-radius: 8px;
+
+  color: #49658e;
+
+  font-family: inherit;
+  font-size: 15px;
+}
+
+.folder-manager__sidebar .folder-tree__item:hover {
+  background: #eef4ff;
+}
+
+.folder-manager__sidebar .folder-tree__item--selected {
+  color: #317bdd;
+
+  background: #edf4ff;
+}
+
+.folder-manager__sidebar .folder-tree__expand {
+  width: 18px;
+
+  color: #173b76;
+
+  font-size: 11px;
+}
+
+.folder-manager__sidebar .folder-tree__icon {
+  width: 28px;
+
+  font-size: 22px;
+}
+
+.folder-manager__sidebar .folder-tree__name {
+  color: inherit;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+/* =========================================================
+   MAIN FILE CONTENT
+   ========================================================= */
+
+.folder-manager__content {
+  min-width: 0;
+
+  padding: 17px 13px 14px;
+
+  background: #ffffff;
+}
+
+.folder-manager__content-header {
+  min-height: 52px;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  gap: 16px;
+
+  margin-bottom: 2px;
+
+  padding: 0 9px;
+}
+
+.folder-manager__content-header h2 {
+  margin: 0;
+
+  color: #173b76;
+
+  font-family: inherit;
+  font-size: 21px;
+  font-weight: 750;
+}
+
+/* =========================================================
+   VIEW TOGGLE
+   ========================================================= */
+
+.folder-manager__view-toggle {
+  display: flex;
+  align-items: center;
+
+  padding: 3px;
+
+  border: 1px solid #dce5f5;
+  border-radius: 9px;
+
+  background: #ffffff;
+}
+
+.folder-manager__view-button {
+  width: 40px;
+  height: 35px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #7890b5;
+
+  background: transparent;
+
+  border: none;
+  border-radius: 7px;
+
+  font-size: 20px;
+
+  cursor: pointer;
+}
+
+.folder-manager__view-button:hover {
+  background: #f1f5fc;
+}
+
+.folder-manager__view-button--active {
+  color: #347ee4;
+
+  background: #e9f2ff;
+}
+
+/* =========================================================
+   FOLDER LIST
+   ========================================================= */
+
+.folder-manager__content .folder-list {
+  margin-top: 0;
+
+  border: 1px solid #e1e8f4;
+  border-radius: 10px;
+
+  background: #ffffff;
+
+  box-shadow: none;
+}
+
+.folder-manager__content .folder-item {
+  min-height: 55px;
+
+  padding: 0 15px;
+
+  border-bottom: 1px solid #e8edf5;
+
+  background: #ffffff;
+}
+
+.folder-manager__content .folder-item:hover {
+  background: #f7faff;
+}
+
+.folder-manager__content .folder-item__main {
+  gap: 13px;
+}
+
+.folder-manager__content .folder-item__icon {
+  width: 34px;
+
+  color: #ffbf2f;
+
+  font-size: 26px;
+}
+
+.folder-manager__content .folder-item__name {
+  color: #244a84;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.folder-manager__content .folder-item__actions {
+  gap: 4px;
+}
+
+.folder-manager__content .folder-item__action {
+  width: 35px;
+  height: 35px;
+
+  color: #7290ba;
+
+  border-radius: 8px;
+}
+
+.folder-manager__content .folder-item__action:hover {
+  color: #347ee4;
+
+  background: #edf4ff;
+  border-color: #d8e6fb;
+}
+
+/* =========================================================
+   FILE SECTION
+   ========================================================= */
+
+.files-page__section {
+  width: 100%;
+
+  margin-top: 24px;
+
+  padding: 18px;
+
+  border: 1px solid #dfe8f7;
+  border-radius: 13px;
+
+  background: #ffffff;
+
+  box-shadow: 0 5px 18px rgba(76, 108, 157, 0.06);
+}
+
+.files-page__section-header {
+  min-height: 42px;
+
+  margin-bottom: 12px;
+}
+
+.files-page__section-header h2 {
+  margin: 0;
+
+  color: #173b76;
+
+  font-family: inherit;
+  font-size: 20px;
+  font-weight: 750;
+}
+
+/* =========================================================
+   FILE LIST
+   ========================================================= */
+
+.files-page .file-list {
+  width: 100%;
+
+  overflow: hidden;
+
+  border: 1px solid #dfe7f4;
+  border-radius: 10px;
+
+  background: #ffffff;
+}
+
+.files-page .file-list__header {
+  min-height: 48px;
+
+  display: grid;
+
+  /*
+   * checkbox
+   * icon
+   * name
+   * size
+   * date
+   * actions
+   */
+  grid-template-columns:
+    40px
+    46px
+    minmax(180px, 1fr)
+    130px
+    170px
+    250px;
+
+  align-items: center;
+
+  gap: 7px;
+
+  padding: 0 13px;
+
+  color: #49658e;
+
+  background: linear-gradient(180deg, #f0f4fc 0%, #edf2fb 100%);
+
+  border-bottom: 1px solid #dfe7f3;
+
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.files-page .file-list__header > div {
+  min-width: 0;
+}
+
+.files-page .file-list__header input {
+  width: 17px;
+  height: 17px;
+
+  accent-color: #347ee4;
+
+  cursor: pointer;
+}
+
+/* =========================================================
+   FILE ITEMS
+   ========================================================= */
+
+.files-page .file-item {
+  min-height: 55px;
+
+  grid-template-columns:
+    40px
+    46px
+    minmax(180px, 1fr)
+    130px
+    170px
+    250px;
+
+  gap: 7px;
+
+  padding: 0 13px;
+
+  background: #ffffff;
+
+  border-bottom: 1px solid #e6ecf5;
+
+  font-family: inherit;
+}
+
+.files-page .file-item:hover {
+  background: #f8fbff;
+}
+
+.files-page .file-item__icon {
+  width: 36px;
+  height: 36px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  background: transparent;
+
+  border-radius: 7px;
+
+  font-size: 25px;
+}
+
+.files-page .file-item__name span {
+  color: #244a84;
+
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.files-page .file-item__size,
+.files-page .file-item__date {
+  color: #7590b7;
+
+  font-family: inherit;
+  font-size: 14px;
+}
+
+.files-page .file-item__actions {
+  justify-content: flex-start;
+
+  gap: 7px;
+}
+
+.files-page .file-item__actions .btn-sm {
+  width: 37px;
+  min-width: 37px;
+  height: 37px;
+
+  padding: 0;
+
+  border: 1px solid #e2eafa;
+  border-radius: 8px;
+
+  background: #ffffff;
+
+  font-size: 16px;
+}
+
+.files-page .file-item__actions .btn-sm:hover {
+  background: #eef5ff;
+
+  border-color: #cfe0fa;
+}
+
+/* =========================================================
+   SELECTED FILE
+   ========================================================= */
+
+.files-page .file-item--selected {
+  background: #eef5ff;
+}
+
+.files-page .file-item__select input {
+  width: 17px;
+  height: 17px;
+
+  accent-color: #347ee4;
+}
+
+/* =========================================================
+   EMPTY STATE
+   ========================================================= */
+
+.files-page .folder-list__empty,
+.files-page .file-list__empty {
+  min-height: 130px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  color: #7c91b2;
+
+  font-family: inherit;
+  font-size: 14px;
+}
+
+/* =========================================================
+   ERROR
+   ========================================================= */
+
+.files-page .error-message {
+  margin-bottom: 12px;
+
+  border-radius: 9px;
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+
+@media (max-width: 1250px) {
+  .files-page .file-list__header,
+  .files-page .file-item {
+    grid-template-columns:
+      36px
+      42px
+      minmax(150px, 1fr)
+      110px
+      145px
+      205px;
+  }
+}
+
+@media (max-width: 1050px) {
+  .folder-manager {
+    grid-template-columns: 220px minmax(0, 1fr);
+  }
+
+  .files-page .file-list__header,
+  .files-page .file-item {
+    grid-template-columns:
+      36px
+      42px
+      minmax(140px, 1fr)
+      100px
+      145px
+      170px;
+  }
+}
+
+@media (max-width: 850px) {
+  .files-page__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .files-page__toolbar {
+    width: 100%;
+  }
+
+  .files-page__new-folder,
+  .files-page__upload {
+    flex: 1;
+  }
+
+  .folder-manager {
+    grid-template-columns: 1fr;
+  }
+
+  .folder-manager__sidebar {
+    border-right: none;
+    border-bottom: 1px solid #e1e8f4;
+  }
+
+  .files-page .file-list {
+    overflow-x: auto;
+  }
+
+  .files-page .file-list__header,
+  .files-page .file-item {
+    min-width: 820px;
+  }
+}
+
+@media (max-width: 600px) {
+  .files-page__header h1 {
+    font-size: 27px;
+  }
+
+  .files-page__subtitle {
+    font-size: 14px;
+  }
+
+  .files-page__toolbar {
+    flex-direction: column;
+  }
+
+  .files-page__new-folder,
+  .files-page__upload {
+    width: 100%;
+  }
+
+  .files-page__section {
+    padding: 12px;
+  }
+}

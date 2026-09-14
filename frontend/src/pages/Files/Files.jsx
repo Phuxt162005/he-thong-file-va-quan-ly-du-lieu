@@ -281,22 +281,29 @@ export default function Files() {
           <div className="files-page__toolbar">
             <button
               type="button"
-              className="btn btn-primary"
+              className="files-page__new-folder"
               onClick={() => {
                 setError("");
                 setFolderName("");
                 setCreateModal(true);
               }}
             >
-              + Thư mục mới
+              <span className="files-page__button-icon">＋</span>
+              <span>Thư mục mới</span>
             </button>
 
             <button
               type="button"
-              className="btn btn-secondary"
-              onClick={refreshFolders}
+              className="files-page__upload"
+              onClick={() => {
+                document
+                  .querySelector(".file-upload input[type='file']")
+                  ?.click();
+              }}
             >
-              ↻ Làm mới
+              <span className="files-page__upload-icon">▤</span>
+              <span>Tải lên</span>
+              <span className="files-page__upload-chevron">⌄</span>
             </button>
           </div>
         </div>
@@ -330,15 +337,27 @@ export default function Files() {
 
           <section className="folder-manager__content">
             <div className="folder-manager__content-header">
-              <h2>Thư mục</h2>
+              <h2>Tất cả tệp</h2>
 
-              <button
-                type="button"
-                className="btn btn-secondary"
-                onClick={refreshFolders}
-              >
-                ↻ Làm mới
-              </button>
+              <div className="folder-manager__view-toggle">
+                <button
+                  type="button"
+                  className="folder-manager__view-button folder-manager__view-button--active"
+                  aria-label="Xem dạng danh sách"
+                  title="Danh sách"
+                >
+                  ☷
+                </button>
+
+                <button
+                  type="button"
+                  className="folder-manager__view-button"
+                  aria-label="Xem dạng lưới"
+                  title="Lưới"
+                >
+                  ▦
+                </button>
+              </div>
             </div>
 
             {loading ? (
