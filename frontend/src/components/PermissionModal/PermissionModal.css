@@ -230,6 +230,7 @@
 
 .permission-item__actions .btn-sm {
   min-width: 76px;
+  height: 34px;
 }
 
 /* =========================
@@ -301,4 +302,17 @@
   .permission-item--owner {
     padding: var(--spacing-sm);
   }
+}
+
+.permission-option--disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+.permission-option--disabled:hover {
+  background-color: transparent;
+}
+
+.permission-option--disabled input {
+  cursor: not-allowed;
 }

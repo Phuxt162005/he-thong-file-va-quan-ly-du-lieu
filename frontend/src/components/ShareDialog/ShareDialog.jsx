@@ -138,8 +138,16 @@ export default function ShareDialog({ resource, isOpen, onClose, onCreated }) {
             <input className="input" value={shareUrl} readOnly />
 
             <button
+              type="button"
               className="btn btn-secondary"
-              onClick={() => navigator.clipboard.writeText(shareUrl)}
+              onClick={async () => {
+                try {
+                  await navigator.clipboard.writeText(shareUrl);
+                  setError("");
+                } catch {
+                  setError("Không thể sao chép Share Link.");
+                }
+              }}
             >
               Sao chép
             </button>

@@ -363,6 +363,7 @@ function PermissionItem({ permission, saving, isOwner, onUpdate, onRevoke }) {
       if (prev.includes(permissionName)) {
         return prev.filter((item) => item !== permissionName);
       }
+
       return [...prev, permissionName];
     });
   };
@@ -380,10 +381,14 @@ function PermissionItem({ permission, saving, isOwner, onUpdate, onRevoke }) {
       <div className="permission-item__permissions">
         {PERMISSION_OPTIONS.map((option) => {
           const ownerOnly = option.value === "permission_management";
-          const disabled = saving;
+
+          const disabled = saving || (ownerOnly && !isOwner);
 
           return (
-            <label key={option.value}>
+            <label
+              key={option.value}
+              className={disabled ? "permission-option--disabled" : ""}
+            >
               <input
                 type="checkbox"
                 checked={selected.includes(option.value)}
@@ -391,7 +396,7 @@ function PermissionItem({ permission, saving, isOwner, onUpdate, onRevoke }) {
                 disabled={disabled}
               />
 
-              {option.label}
+              <span>{option.label}</span>
 
               {ownerOnly && (
                 <span className="permission-option__owner-only">
@@ -406,16 +411,16 @@ function PermissionItem({ permission, saving, isOwner, onUpdate, onRevoke }) {
       <div className="permission-item__actions">
         <button
           type="button"
-          className="btn btn-secondary"
+          className="btn btn-secondary btn-sm"
           onClick={() => onUpdate(permission._id, selected)}
           disabled={saving || selected.length === 0}
         >
-          Lưu
+          {saving ? "Đang lưu..." : "Lưu"}
         </button>
 
         <button
           type="button"
-          className="btn btn-danger"
+          className="btn btn-danger btn-sm"
           onClick={() => onRevoke(permission)}
           disabled={saving}
         >

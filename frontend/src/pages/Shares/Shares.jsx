@@ -69,8 +69,12 @@ export default function Shares() {
   };
 
   const handleChange = (event) => {
-    const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = event.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
   };
 
   const handleUpdate = async () => {
@@ -312,7 +316,7 @@ export default function Shares() {
           />
 
           <div className="share-edit-form__group">
-            <label>
+            <label className="share-edit-form__checkbox">
               <input
                 type="checkbox"
                 name="removePassword"
@@ -320,7 +324,8 @@ export default function Shares() {
                 onChange={handleChange}
                 disabled={saving}
               />
-              Xóa mật khẩu hiện tại
+
+              <span>Xóa mật khẩu hiện tại</span>
             </label>
           </div>
 
@@ -361,10 +366,14 @@ function ShareItem({ share, onEdit, onRevoke, onCopy }) {
   return (
     <div className="share-item">
       <div className="share-item__resource">
-        <span className="share-item__icon">🔗</span>
+        <span className="share-item__icon" aria-hidden="true">
+          🔗
+        </span>
 
-        <div>
-          <strong>{share.resourceName || share.name || "Tài nguyên"}</strong>
+        <div className="share-item__resource-info">
+          <strong title={share.resourceName || share.name || "Tài nguyên"}>
+            {share.resourceName || share.name || "Tài nguyên"}
+          </strong>
 
           <span>{share.resourceType === "folder" ? "Folder" : "File"}</span>
         </div>
@@ -387,41 +396,52 @@ function ShareItem({ share, onEdit, onRevoke, onCopy }) {
       </div>
 
       <div className="share-item__downloads">
-        {share.downloadCount || 0}
-        {" / "}
-        {share.maxDownloads !== null && share.maxDownloads !== undefined
-          ? share.maxDownloads
-          : "∞"}
+        <strong>{share.downloadCount || 0}</strong>
+
+        <span>
+          /
+          {share.maxDownloads !== null && share.maxDownloads !== undefined
+            ? share.maxDownloads
+            : "∞"}
+        </span>
       </div>
 
-      <div>
+      <div className="share-item__status">
         <span className={`share-status share-status--${status}`}>
           {getStatusText(status)}
         </span>
       </div>
 
-      <button
-        className="btn btn-secondary btn-sm"
-        onClick={() => onCopy(share)}
-      >
-        Sao chép
-      </button>
+      <div className="share-item__actions">
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={() => onCopy(share)}
+          title="Sao chép Share Link"
+        >
+          Sao chép
+        </button>
 
-      <button
-        className="btn btn-secondary btn-sm"
-        onClick={() => onEdit(share)}
-        disabled={status === "revoked"}
-      >
-        Sửa
-      </button>
+        <button
+          type="button"
+          className="btn btn-secondary btn-sm"
+          onClick={() => onEdit(share)}
+          disabled={status === "revoked"}
+          title="Chỉnh sửa Share Link"
+        >
+          Sửa
+        </button>
 
-      <button
-        className="btn btn-danger btn-sm"
-        onClick={() => onRevoke(share)}
-        disabled={status === "revoked"}
-      >
-        Thu hồi
-      </button>
+        <button
+          type="button"
+          className="btn btn-danger btn-sm"
+          onClick={() => onRevoke(share)}
+          disabled={status === "revoked"}
+          title="Thu hồi Share Link"
+        >
+          Thu hồi
+        </button>
+      </div>
     </div>
   );
 }
