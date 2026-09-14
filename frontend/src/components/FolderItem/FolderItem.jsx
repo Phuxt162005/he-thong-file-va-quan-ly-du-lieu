@@ -130,7 +130,11 @@ export default function FolderItem({
         <button
           type="button"
           className="folder-item__action"
-          onClick={(event) => handleAction(event, onContextMenu)}
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onContextMenu?.(event, folder);
+          }}
           title="Thêm thao tác"
           aria-label={`Thêm thao tác cho ${folder.name || "thư mục"}`}
         >

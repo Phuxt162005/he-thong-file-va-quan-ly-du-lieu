@@ -110,50 +110,6 @@ function FileItem({
 
         <button
           type="button"
-          className="btn btn-ghost btn-sm"
-          onClick={(event) => handleAction(event, onMove)}
-          title="Di chuyển"
-          aria-label={`Di chuyển ${file.name || "file"}`}
-          disabled={downloading}
-        >
-          📂
-        </button>
-
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm"
-          onClick={(event) => handleAction(event, onCopy)}
-          title="Sao chép"
-          aria-label={`Sao chép ${file.name || "file"}`}
-          disabled={downloading}
-        >
-          📋
-        </button>
-
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm"
-          onClick={(event) => handleAction(event, onPermission)}
-          title="Quản lý quyền"
-          aria-label={`Quản lý quyền ${file.name || "file"}`}
-          disabled={downloading}
-        >
-          🔐
-        </button>
-
-        <button
-          type="button"
-          className="btn btn-ghost btn-sm"
-          onClick={(event) => handleAction(event, onShare)}
-          title="Chia sẻ"
-          aria-label={`Chia sẻ ${file.name || "file"}`}
-          disabled={downloading}
-        >
-          🔗
-        </button>
-
-        <button
-          type="button"
           className="btn btn-ghost btn-sm file-item__action--danger"
           onClick={(event) => handleAction(event, onDelete)}
           title="Xóa"
@@ -161,6 +117,21 @@ function FileItem({
           disabled={downloading}
         >
           🗑️
+        </button>
+
+        <button
+          type="button"
+          className="btn btn-ghost btn-sm file-item__action-more"
+          onClick={(event) => {
+            event.preventDefault();
+            event.stopPropagation();
+            onContextMenu?.(event, file);
+          }}
+          title="Thêm thao tác"
+          aria-label={`Thêm thao tác cho ${file.name || "file"}`}
+          disabled={downloading}
+        >
+          ⋯
         </button>
       </div>
     </div>
