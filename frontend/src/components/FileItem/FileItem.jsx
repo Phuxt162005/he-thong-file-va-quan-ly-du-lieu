@@ -36,6 +36,12 @@ function FileItem({
     onDragStart?.(file);
   }
 
+  function handleAction(event, callback) {
+    event.preventDefault();
+    event.stopPropagation();
+    callback?.(file);
+  }
+
   return (
     <div
       className={selected ? "file-item file-item--selected" : "file-item"}
@@ -50,13 +56,16 @@ function FileItem({
           checked={selected}
           onChange={handleSelect}
           onClick={(event) => event.stopPropagation()}
+          aria-label={`Chọn ${file.name || "file"}`}
         />
       </div>
 
-      <div className="file-item__icon">{getFileIcon(file)}</div>
+      <div className="file-item__icon" aria-hidden="true">
+        {getFileIcon(file)}
+      </div>
 
       <div className="file-item__name">
-        <span title={file.name}>{file.name}</span>
+        <span title={file.name}>{file.name || "Không có tên"}</span>
       </div>
 
       <div className="file-item__size">{formatFileSize(file.size)}</div>
@@ -68,8 +77,10 @@ function FileItem({
       <div className="file-item__actions">
         <button
           type="button"
-          onClick={() => onPreview?.(file)}
-          title="Preview"
+          className="btn btn-ghost btn-sm"
+          onClick={(event) => handleAction(event, onPreview)}
+          title="Xem trước"
+          aria-label={`Xem trước ${file.name || "file"}`}
           disabled={downloading}
         >
           👁
@@ -77,8 +88,10 @@ function FileItem({
 
         <button
           type="button"
-          onClick={() => onDownload?.(file)}
-          title="Download"
+          className="btn btn-ghost btn-sm"
+          onClick={(event) => handleAction(event, onDownload)}
+          title="Tải xuống"
+          aria-label={`Tải xuống ${file.name || "file"}`}
           disabled={downloading}
         >
           {downloading ? "⏳" : "⬇"}
@@ -86,8 +99,10 @@ function FileItem({
 
         <button
           type="button"
-          onClick={() => onRename?.(file)}
+          className="btn btn-ghost btn-sm"
+          onClick={(event) => handleAction(event, onRename)}
           title="Đổi tên"
+          aria-label={`Đổi tên ${file.name || "file"}`}
           disabled={downloading}
         >
           ✏️
@@ -95,8 +110,10 @@ function FileItem({
 
         <button
           type="button"
-          onClick={() => onMove?.(file)}
+          className="btn btn-ghost btn-sm"
+          onClick={(event) => handleAction(event, onMove)}
           title="Di chuyển"
+          aria-label={`Di chuyển ${file.name || "file"}`}
           disabled={downloading}
         >
           📂
@@ -104,8 +121,10 @@ function FileItem({
 
         <button
           type="button"
-          onClick={() => onCopy?.(file)}
+          className="btn btn-ghost btn-sm"
+          onClick={(event) => handleAction(event, onCopy)}
           title="Sao chép"
+          aria-label={`Sao chép ${file.name || "file"}`}
           disabled={downloading}
         >
           📋
@@ -113,8 +132,10 @@ function FileItem({
 
         <button
           type="button"
-          onClick={() => onPermission?.(file)}
+          className="btn btn-ghost btn-sm"
+          onClick={(event) => handleAction(event, onPermission)}
           title="Quản lý quyền"
+          aria-label={`Quản lý quyền ${file.name || "file"}`}
           disabled={downloading}
         >
           🔐
@@ -122,8 +143,10 @@ function FileItem({
 
         <button
           type="button"
-          onClick={() => onShare?.(file)}
+          className="btn btn-ghost btn-sm"
+          onClick={(event) => handleAction(event, onShare)}
           title="Chia sẻ"
+          aria-label={`Chia sẻ ${file.name || "file"}`}
           disabled={downloading}
         >
           🔗
@@ -131,8 +154,10 @@ function FileItem({
 
         <button
           type="button"
-          onClick={() => onDelete?.(file)}
+          className="btn btn-ghost btn-sm file-item__action--danger"
+          onClick={(event) => handleAction(event, onDelete)}
           title="Xóa"
+          aria-label={`Xóa ${file.name || "file"}`}
           disabled={downloading}
         >
           🗑️
@@ -144,6 +169,7 @@ function FileItem({
 
 function getFileIcon(file) {
   const extension = file?.extension || getExtension(file?.name);
+
   const ext = extension.toLowerCase();
 
   if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) {
