@@ -12,16 +12,17 @@
    ========================================================= */
 .dashboard-welcome {
   margin-bottom: 28px;
+  padding: 0;
 }
 
 .dashboard-welcome h1 {
-  margin: 0 0 5px;
+  margin: 0 0 6px;
   color: #173b76;
   font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 32px;
+  font-size: 30px;
   font-weight: 750;
   line-height: 1.2;
-  letter-spacing: -0.5px;
+  letter-spacing: -0.4px;
 }
 
 .dashboard-welcome p {
@@ -54,10 +55,10 @@
   display: flex;
   align-items: center;
   gap: 17px;
-  padding: 20px;
-  border: 1px solid rgba(255, 255, 255, 0.65);
+  padding: 19px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.7);
   border-radius: 12px;
-  box-shadow: 0 7px 20px rgba(91, 97, 178, 0.08);
+  box-shadow: 0 6px 18px rgba(91, 97, 178, 0.08);
   transition:
     transform 0.18s ease,
     box-shadow 0.18s ease;
@@ -159,11 +160,17 @@
    ========================================================= */
 .dashboard-content {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns:
+    minmax(0, 1fr)
+    minmax(0, 1fr);
   gap: 18px;
   margin-bottom: 20px;
 }
 
+.dashboard-storage-card,
+.dashboard-recent-card {
+  min-height: 312px;
+}
 /* =========================================================
    CARD
    ========================================================= */
@@ -666,4 +673,18 @@
     align-items: flex-start;
     flex-direction: column;
   }
+}
+
+.dashboard-page,
+.dashboard-page *,
+.dashboard-page h1,
+.dashboard-page h2,
+.dashboard-page h3,
+.dashboard-page p,
+.dashboard-page span,
+.dashboard-page strong,
+.dashboard-page small,
+.dashboard-page a,
+.dashboard-page button {
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
