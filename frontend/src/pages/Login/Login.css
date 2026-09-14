@@ -10,7 +10,7 @@
 
   background-image:
     linear-gradient(rgba(238, 246, 255, 0.08), rgba(238, 246, 255, 0.08)),
-    url("../../../../cloud_backround.png");
+    url("cloud_backround.png");
 
   background-position: center;
   background-size: cover;
