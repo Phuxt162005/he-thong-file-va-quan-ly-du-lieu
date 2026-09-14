@@ -416,14 +416,14 @@ function TrashFolderItem({ folder, onRestore, onPermanentDelete }) {
       <div className="trash-item__actions">
         <button
           className="btn btn-primary btn-sm"
-          onClick={() => onRestore(file)}
+          onClick={() => onRestore(folder)}
         >
           Khôi phục
         </button>
 
         <button
           className="btn btn-danger btn-sm"
-          onClick={() => onPermanentDelete(file)}
+          onClick={() => onPermanentDelete(folder)}
         >
           Xóa vĩnh viễn
         </button>
