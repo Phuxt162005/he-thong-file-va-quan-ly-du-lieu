@@ -11,16 +11,86 @@ import {
 
 import "./Login.css";
 
+function FolderIcon() {
+  return (
+    <svg className="login-brand__icon" viewBox="0 0 64 64" aria-hidden="true">
+      <defs>
+        <linearGradient id="folderGradient" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stopColor="#6d8cff" />
+          <stop offset="100%" stopColor="#3f9cf5" />
+        </linearGradient>
+      </defs>
+
+      <path
+        d="M7 18.5C7 14.91 9.91 12 13.5 12H27l6 7h17.5c3.59 0 6.5 2.91 6.5 6.5v20C57 49.09 54.09 52 50.5 52h-37C9.91 52 7 49.09 7 45.5v-27Z"
+        fill="url(#folderGradient)"
+      />
+
+      <path
+        d="M7 24.5C7 21.46 9.46 19 12.5 19h39c3.59 0 6.5 2.91 6.5 6.5v20C58 49.09 55.09 52 51.5 52h-38C9.91 52 7 49.09 7 45.5v-21Z"
+        fill="#4d9cf5"
+        opacity="0.9"
+      />
+
+      <path
+        d="M9 25h47v20.5c0 3.59-2.91 6.5-6.5 6.5h-37C9.91 52 7 49.09 7 45.5V27c0-1.1.9-2 2-2Z"
+        fill="url(#folderGradient)"
+      />
+    </svg>
+  );
+}
+
+function LoginArrowIcon() {
+  return (
+    <svg className="login-submit__icon" viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M10 17l5-5-5-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="M15 12H4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M20 5v14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
 export default function Login() {
   const navigate = useNavigate();
   const location = useLocation();
-  const [formData, setFormData] = useState({ username: "", password: "" });
+
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
     setError("");
   };
 
@@ -42,19 +112,25 @@ export default function Login() {
       });
 
       const data = response?.data || response;
+
       if (!data?.token || !data?.refreshToken) {
         throw new Error(
           "Đăng nhập thành công nhưng máy chủ không trả về token.",
         );
       }
+
       setAccessToken(data.token);
       setRefreshToken(data.refreshToken);
+
       if (data.user) {
         setCurrentUser(data.user);
       }
+
       const redirectPath = location.state?.from || "/files";
 
-      navigate(redirectPath, { replace: true });
+      navigate(redirectPath, {
+        replace: true,
+      });
     } catch (err) {
       if (err?.response?.status === 401) {
         setError("Tên đăng nhập hoặc mật khẩu không chính xác.");
@@ -69,18 +145,27 @@ export default function Login() {
   };
 
   return (
-    <div className="auth-page">
-      <div className="auth-card">
+    <main className="auth-page">
+      <section className="auth-card">
         <div className="auth-card__header">
-          <h1>Đăng nhập</h1>
+          <div className="login-brand">
+            <FolderIcon />
+          </div>
 
-          <p>Đăng nhập vào hệ thống</p>
+          <h1>File Manager</h1>
+
+          <p>Quản lý file và dữ liệu của bạn</p>
         </div>
 
-        {error && <div className="error-message">{error}</div>}
+        {error && (
+          <div className="error-message" role="alert">
+            {error}
+          </div>
+        )}
 
         <form className="auth-form" onSubmit={handleSubmit}>
           <FormInput
+            variant="login"
             label="Tên đăng nhập"
             name="username"
             value={formData.username}
@@ -91,6 +176,7 @@ export default function Login() {
           />
 
           <FormInput
+            variant="login"
             label="Mật khẩu"
             name="password"
             type="password"
@@ -106,11 +192,13 @@ export default function Login() {
           </div>
 
           <button
-            className="btn btn-primary auth-form__submit"
+            className="auth-form__submit"
             type="submit"
             disabled={loading}
           >
-            {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+            <LoginArrowIcon />
+
+            <span>{loading ? "Đang đăng nhập..." : "Đăng nhập"}</span>
           </button>
         </form>
 
@@ -119,7 +207,7 @@ export default function Login() {
 
           <Link to="/register">Đăng ký</Link>
         </div>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

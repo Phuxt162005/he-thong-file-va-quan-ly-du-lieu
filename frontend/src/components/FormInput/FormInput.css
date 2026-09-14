@@ -1,29 +1,36 @@
 .form-input {
   width: 100%;
+
   display: flex;
   flex-direction: column;
+
   gap: var(--spacing-xs);
 }
 
 .form-input__label {
-  margin-left: var(--spacing-xs);
+  margin-left: 0;
+
   font-size: var(--font-size-sm);
   font-weight: 600;
+
   color: var(--color-text);
 }
 
 .form-input__required {
   margin-left: 3px;
+
   color: var(--color-danger);
 }
 
 .form-input__control {
   position: relative;
+
   width: 100%;
 }
 
 .form-input__field {
   width: 100%;
+  box-sizing: border-box;
 }
 
 .form-input__control .form-input__field {
@@ -36,34 +43,44 @@
 
 .form-input__password-toggle {
   position: absolute;
+
   top: 50%;
-  right: var(--spacing-xs);
-  width: 36px;
-  height: 36px;
+  right: 9px;
+
+  width: 34px;
+  height: 34px;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   transform: translateY(-50%);
+
   padding: 0;
-  border: var(--border-width) solid transparent;
-  border-radius: var(--radius-sm);
+
+  border: 1px solid transparent;
+  border-radius: 6px;
+
   background: transparent;
-  color: var(--color-text-secondary);
-  font-size: 18px;
-  line-height: 1;
+
+  color: #7890bc;
+
   cursor: pointer;
+
   transition:
-    background-color var(--transition-fast),
-    color var(--transition-fast);
+    background-color 0.15s ease,
+    color 0.15s ease;
 }
 
 .form-input__password-toggle:hover:not(:disabled) {
-  background-color: var(--color-platinum);
-  color: var(--color-secondary);
+  background-color: rgba(47, 128, 228, 0.07);
+
+  color: #2f80e4;
 }
 
 .form-input__password-toggle:focus-visible {
   outline: 2px solid var(--color-primary);
+
   outline-offset: 1px;
 }
 
@@ -72,7 +89,120 @@
   opacity: 0.55;
 }
 
+.form-input__password-icon {
+  width: 20px;
+  height: 20px;
+
+  display: block;
+}
+
+/* =========================================================
+   LOGIN VARIANT
+   ========================================================= */
+
+.form-input--login {
+  gap: 7px;
+}
+
+.form-input--login .form-input__label {
+  margin-left: 0;
+
+  color: #173d7c;
+
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.form-input--login .form-input__control {
+  min-height: 49px;
+}
+
+.form-input--login .form-input__field {
+  height: 49px;
+
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 50px;
+  padding-right: 48px;
+
+  border: 1px solid #dce6f5;
+  border-radius: 9px;
+
+  background: rgba(255, 255, 255, 0.9);
+
+  color: #304a78;
+
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  font-size: 16px;
+
+  box-shadow: inset 0 1px 2px rgba(56, 83, 137, 0.025);
+
+  outline: none;
+
+  transition:
+    border-color 0.18s ease,
+    box-shadow 0.18s ease,
+    background-color 0.18s ease;
+}
+
+.form-input--login .form-input__field::placeholder {
+  color: #91a5c8;
+
+  opacity: 1;
+}
+
+.form-input--login .form-input__field:hover:not(:disabled) {
+  border-color: #c8d8ef;
+}
+
+.form-input--login .form-input__field:focus {
+  border-color: #6da0e1;
+
+  background: #ffffff;
+
+  box-shadow: 0 0 0 3px rgba(47, 128, 228, 0.1);
+}
+
+.form-input--login .form-input__field:disabled {
+  cursor: not-allowed;
+  opacity: 0.7;
+}
+
+.form-input--login .form-input__icon {
+  position: absolute;
+
+  z-index: 2;
+
+  top: 50%;
+  left: 16px;
+
+  width: 20px;
+  height: 20px;
+
+  transform: translateY(-50%);
+
+  color: #8ca2c8;
+
+  pointer-events: none;
+}
+
+.form-input--login .form-input__password-toggle {
+  right: 10px;
+
+  color: #8ca2c8;
+}
+
+.form-input--login .form-input__password-toggle:hover:not(:disabled) {
+  color: #2f80e4;
+}
+
+.form-input--login .form-input__field--error {
+  border-color: var(--color-danger);
+}
+
 .form-input__error {
   color: var(--color-danger);
+
   font-size: var(--font-size-xs);
 }
