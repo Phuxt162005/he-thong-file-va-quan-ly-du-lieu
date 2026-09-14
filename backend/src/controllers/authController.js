@@ -75,3 +75,48 @@ exports.register = asyncHandler(async (req, res) => {
 
   return res.status(201).json({ message: "Registration successful", user });
 });
+
+exports.forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (typeof email !== "string" || !email.trim()) {
+    return res.status(400).json({
+      message: "Email is required",
+    });
+  }
+
+  const normalizedEmail = email.trim().toLowerCase();
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail)) {
+    return res.status(400).json({
+      message: "Invalid email",
+    });
+  }
+
+  const result = await authService.forgotPassword(normalizedEmail);
+
+  return res.status(200).json({
+    message: "Password reset request created",
+    ...result,
+  });
+});
+
+exports.resetPassword = asyncHandler(async (req, res) => {
+  const { resetToken, newPassword, confirmPassword } = req.body;
+
+  if (typeof resetToken !== "string" || !resetToken.trim()) {
+    return res.status(400).json({ message: "Reset token is required" });
+  }
+  if (typeof newPassword !== "string") {
+    return res.status(400).json({ message: "New password is required" });
+  }
+  if (typeof confirmPassword !== "string") {
+    return res.status(400).json({ message: "Confirm password is required" });
+  }
+
+  const result = await authService.resetPassword(
+    resetToken.trim(),
+    newPassword,
+    confirmPassword,
+  );
+
+  return res.status(200).json(result);
+});

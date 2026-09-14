@@ -97,3 +97,72 @@ exports.register = async (username, email, password) => {
     throw error;
   }
 };
+
+exports.forgotPassword = async (email) => {
+  const normalizedEmail = email.trim().toLowerCase();
+  const user = await User.findOne({
+    email: normalizedEmail,
+  }).select("+resetPasswordTokenHash +resetPasswordExpiresAt");
+  if (!user) {
+    throw httpError("Account not found", 404);
+  }
+
+  const resetToken = crypto.randomBytes(32).toString("hex");
+  const resetTokenHash = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+
+  user.resetPasswordTokenHash = resetTokenHash;
+  user.resetPasswordExpiresAt = new Date(Date.now() + 15 * 60 * 1000);
+
+  await user.save();
+
+  // Không gửi email thật.
+  // Frontend sẽ sử dụng token này để chuyển sang trang reset.
+  return { resetToken, expiresIn: 15 * 60 };
+};
+
+exports.resetPassword = async (resetToken, newPassword, confirmPassword) => {
+  if (!resetToken) {
+    throw httpError("Reset token is required", 400);
+  }
+  if (!newPassword) {
+    throw httpError("New password is required", 400);
+  }
+  if (newPassword.length < 8) {
+    throw httpError("Password must be at least 8 characters", 400);
+  }
+  if (newPassword !== confirmPassword) {
+    throw httpError("Passwords do not match", 400);
+  }
+
+  const resetTokenHash = crypto
+    .createHash("sha256")
+    .update(resetToken)
+    .digest("hex");
+  const user = await User.findOne({
+    resetPasswordTokenHash: resetTokenHash,
+    resetPasswordExpiresAt: {
+      $gt: new Date(),
+    },
+  }).select("+password +resetPasswordTokenHash +resetPasswordExpiresAt");
+
+  if (!user) {
+    throw httpError("Reset token is invalid or expired", 400);
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+  user.password = hashedPassword;
+  user.resetPasswordTokenHash = null;
+  user.resetPasswordExpiresAt = null;
+
+  await user.save();
+  await auditLogService.log({
+    userId: user._id,
+    action: "PASSWORD_RESET",
+    result: "SUCCESS",
+  });
+
+  return { message: "Password reset successful" };
+};
