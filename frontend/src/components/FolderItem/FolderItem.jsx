@@ -57,9 +57,7 @@ export default function FolderItem({
       onDrop={handleDrop}
     >
       {/* Checkbox */}
-      <div className="folder-item__select">
-        <span />
-      </div>
+      <div className="folder-item__select" aria-hidden="true" />
 
       {/* Icon */}
       <button

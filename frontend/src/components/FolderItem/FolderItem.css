@@ -91,6 +91,11 @@
   gap: 6px;
 }
 
+.folder-item__select {
+  width: 17px;
+  height: 17px;
+}
+
 .folder-item__action {
   width: 36px;
   height: 36px;
