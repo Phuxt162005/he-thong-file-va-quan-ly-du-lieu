@@ -1,5 +1,3 @@
-import { useState } from "react";
-
 import "./FolderItem.css";
 
 export default function FolderItem({
@@ -13,8 +11,6 @@ export default function FolderItem({
   onContextMenu,
   onDropFile,
 }) {
-  const [dragOver, setDragOver] = useState(false);
-
   const handleContextMenu = (event) => {
     event.preventDefault();
     onContextMenu?.(event, folder);
@@ -22,30 +18,44 @@ export default function FolderItem({
 
   const handleDragOver = (event) => {
     event.preventDefault();
+    event.stopPropagation();
+
     event.dataTransfer.dropEffect = "move";
-    setDragOver(true);
+    event.currentTarget.classList.add("folder-item--drag-over");
   };
 
-  const handleDragLeave = () => {
-    setDragOver(false);
+  const handleDragLeave = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    event.currentTarget.classList.remove("folder-item--drag-over");
   };
 
   const handleDrop = (event) => {
     event.preventDefault();
-    setDragOver(false);
+    event.stopPropagation();
+
+    event.currentTarget.classList.remove("folder-item--drag-over");
 
     const fileId = event.dataTransfer.getData("application/x-file-id");
+
     if (!fileId) {
       return;
     }
+
     onDropFile?.(fileId, folder);
+  };
+
+  const handleAction = (event, callback) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    callback?.(folder);
   };
 
   return (
     <div
-      className={
-        dragOver ? "folder-item folder-item--drag-over" : "folder-item"
-      }
+      className="folder-item"
       onContextMenu={handleContextMenu}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
@@ -55,18 +65,24 @@ export default function FolderItem({
         type="button"
         className="folder-item__main"
         onDoubleClick={() => onOpen?.(folder)}
+        title={`Mở thư mục ${folder.name || "Không có tên"}`}
       >
-        <span className="folder-item__icon">📁</span>
+        <span className="folder-item__icon" aria-hidden="true">
+          📁
+        </span>
 
-        <span className="folder-item__name">{folder.name}</span>
+        <span className="folder-item__name">
+          {folder.name || "Không có tên"}
+        </span>
       </button>
 
       <div className="folder-item__actions">
         <button
           type="button"
           className="folder-item__action"
-          onClick={() => onRename?.(folder)}
+          onClick={(event) => handleAction(event, onRename)}
           title="Đổi tên"
+          aria-label={`Đổi tên ${folder.name || "thư mục"}`}
         >
           ✏️
         </button>
@@ -74,8 +90,9 @@ export default function FolderItem({
         <button
           type="button"
           className="folder-item__action"
-          onClick={() => onMove?.(folder)}
+          onClick={(event) => handleAction(event, onMove)}
           title="Di chuyển"
+          aria-label={`Di chuyển ${folder.name || "thư mục"}`}
         >
           📂
         </button>
@@ -83,8 +100,9 @@ export default function FolderItem({
         <button
           type="button"
           className="folder-item__action"
-          onClick={() => onCopy?.(folder)}
+          onClick={(event) => handleAction(event, onCopy)}
           title="Sao chép"
+          aria-label={`Sao chép ${folder.name || "thư mục"}`}
         >
           📋
         </button>
@@ -92,17 +110,19 @@ export default function FolderItem({
         <button
           type="button"
           className="folder-item__action"
-          onClick={() => onShare?.(folder)}
+          onClick={(event) => handleAction(event, onShare)}
           title="Chia sẻ"
+          aria-label={`Chia sẻ ${folder.name || "thư mục"}`}
         >
           🔗
         </button>
 
         <button
           type="button"
-          className="folder-item__action"
-          onClick={() => onDelete?.(folder)}
+          className="folder-item__action folder-item__action--danger"
+          onClick={(event) => handleAction(event, onDelete)}
           title="Xóa"
+          aria-label={`Xóa ${folder.name || "thư mục"}`}
         >
           🗑️
         </button>
