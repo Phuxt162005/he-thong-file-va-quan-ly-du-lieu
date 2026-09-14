@@ -2,7 +2,10 @@
   width: 100%;
 }
 
-/* Header */
+/* =========================
+   Header
+   ========================= */
+
 .trash-page__header {
   display: flex;
   align-items: center;
@@ -12,40 +15,56 @@
 }
 
 .trash-page__header h1 {
-  margin-bottom: var(--spacing-xs);
+  margin: 0 0 var(--spacing-xs);
   font-size: var(--font-size-xl);
+  line-height: 1.2;
 }
 
 .trash-page__header p {
+  margin: 0;
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
 
-/* Card */
+/* =========================
+   Card
+   ========================= */
+
 .trash-card {
+  width: 100%;
   overflow: hidden;
   background-color: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-sm);
 }
 
-/* List */
+/* =========================
+   List
+   ========================= */
+
+.trash-list {
+  width: 100%;
+}
+
 .trash-list__header,
 .trash-item {
   display: grid;
   grid-template-columns:
-    minmax(240px, 1.5fr) 120px minmax(180px, 1fr)
-    180px 130px;
+    minmax(240px, 1.7fr)
+    minmax(100px, 0.7fr)
+    minmax(170px, 1fr)
+    minmax(150px, 0.9fr)
+    minmax(250px, 1.3fr);
   align-items: center;
   gap: var(--spacing-md);
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: var(--spacing-sm) var(--spacing-lg);
 }
 
 .trash-list__header {
   min-height: 48px;
-  background-color: var(--color-background);
-  color: var(--color-text-secondary);
+  background-color: var(--color-platinum);
+  color: var(--color-secondary);
   font-size: var(--font-size-xs);
   font-weight: 600;
   border-bottom: var(--border-width) solid var(--color-border);
@@ -54,6 +73,7 @@
 .trash-item {
   min-height: 72px;
   border-bottom: var(--border-width) solid var(--color-border);
+  transition: background-color 0.15s ease;
 }
 
 .trash-item:last-child {
@@ -61,10 +81,13 @@
 }
 
 .trash-item:hover {
-  background-color: var(--color-hover);
+  background-color: var(--color-background-soft);
 }
 
-/* File */
+/* =========================
+   Name
+   ========================= */
+
 .trash-item__name {
   min-width: 0;
   display: flex;
@@ -75,28 +98,33 @@
 .trash-item__icon {
   width: 40px;
   height: 40px;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
   font-size: 22px;
+  background-color: var(--color-background-soft);
+  border-radius: var(--radius-md);
 }
 
 .trash-item__info {
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: var(--spacing-xs);
 }
 
 .trash-item__info strong {
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: var(--font-size-sm);
+  line-height: 1.4;
 }
 
 .trash-item__info span {
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -104,10 +132,14 @@
   font-size: var(--font-size-xs);
 }
 
-/* Other */
+/* =========================
+   Metadata
+   ========================= */
+
 .trash-item__size,
 .trash-item__folder,
 .trash-item__date {
+  min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -115,16 +147,27 @@
   font-size: var(--font-size-sm);
 }
 
+/* =========================
+   Actions
+   ========================= */
+
 .trash-item__actions {
+  min-width: 0;
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: var(--spacing-sm);
 }
 
 .trash-item__actions .btn {
+  flex-shrink: 0;
   white-space: nowrap;
 }
 
-/* Empty */
+/* =========================
+   Empty state
+   ========================= */
+
 .trash-empty {
   min-height: 360px;
   display: flex;
@@ -142,40 +185,69 @@
 }
 
 .trash-empty h2 {
+  margin: 0;
   font-size: var(--font-size-lg);
 }
 
 .trash-empty p {
+  margin: 0;
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
 
-/* Responsive */
-@media (max-width: 1100px) {
+/* =========================
+   Responsive
+   ========================= */
+
+@media (max-width: 1200px) {
+  .trash-list__header,
+  .trash-item {
+    grid-template-columns:
+      minmax(200px, 1.5fr)
+      minmax(90px, 0.7fr)
+      minmax(140px, 1fr)
+      minmax(130px, 0.9fr)
+      minmax(220px, 1.3fr);
+    gap: var(--spacing-sm);
+    padding-left: var(--spacing-md);
+    padding-right: var(--spacing-md);
+  }
+
+  .trash-item__actions {
+    gap: var(--spacing-xs);
+  }
+
+  .trash-item__actions .btn {
+    padding-left: var(--spacing-sm);
+    padding-right: var(--spacing-sm);
+  }
+}
+
+@media (max-width: 1000px) {
   .trash-list__header {
     display: none;
   }
 
   .trash-item {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(130px, 0.7fr);
+    gap: var(--spacing-md);
     padding: var(--spacing-md);
   }
 
   .trash-item__name {
-    width: 100%;
+    grid-column: 1 / -1;
   }
 
   .trash-item__size,
   .trash-item__folder,
   .trash-item__date {
-    flex: 1;
-    min-width: 150px;
+    min-width: 0;
   }
 
   .trash-item__actions {
-    flex-shrink: 0;
+    grid-column: 1 / -1;
+    justify-content: flex-start;
   }
 }
 
@@ -190,23 +262,36 @@
   }
 
   .trash-item {
+    display: flex;
     flex-direction: column;
     align-items: stretch;
     gap: var(--spacing-sm);
+  }
+
+  .trash-item__name {
+    width: 100%;
   }
 
   .trash-item__size,
   .trash-item__folder,
   .trash-item__date {
     width: 100%;
-    min-width: 0;
   }
 
   .trash-item__actions {
     width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--spacing-sm);
   }
 
   .trash-item__actions .btn {
     width: 100%;
+  }
+}
+
+@media (max-width: 420px) {
+  .trash-item__actions {
+    grid-template-columns: 1fr;
   }
 }

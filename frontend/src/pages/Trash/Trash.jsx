@@ -406,16 +406,21 @@ function TrashFolderItem({ folder, onRestore, onPermanentDelete }) {
 
       <div className="trash-item__folder">Thư mục</div>
 
-      <div className="trash-item__date">{formatDate(folder.updatedAt)}</div>
+      <div className="trash-item__date">
+        {formatDate(folder.deletedAt || folder.updatedAt)}
+      </div>
 
       <div className="trash-item__actions">
-        <button className="btn btn-primary" onClick={() => onRestore(folder)}>
+        <button
+          className="btn btn-primary btn-sm"
+          onClick={() => onRestore(file)}
+        >
           Khôi phục
         </button>
 
         <button
-          className="btn btn-danger"
-          onClick={() => onPermanentDelete(folder)}
+          className="btn btn-danger btn-sm"
+          onClick={() => onPermanentDelete(file)}
         >
           Xóa vĩnh viễn
         </button>
