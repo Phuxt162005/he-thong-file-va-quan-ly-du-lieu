@@ -36,6 +36,10 @@ export default function ShareDialog({ resource, isOpen, onClose, onCreated }) {
       setError("Giới hạn Download phải lớn hơn 0.");
       return;
     }
+    if (formData.password && formData.password.length < 4) {
+      setError("Mật khẩu Share Link phải có ít nhất 4 ký tự.");
+      return;
+    }
     if (formData.expiresAt) {
       const expiresAt = new Date(formData.expiresAt);
       if (Number.isNaN(expiresAt.getTime()) || expiresAt <= new Date()) {
@@ -132,7 +136,9 @@ export default function ShareDialog({ resource, isOpen, onClose, onCreated }) {
 
       {createdShare ? (
         <div className="share-created">
-          <div className="success-message">Tạo Share Link thành công.</div>
+          <div className="share-created__success">
+            ✓ Tạo Share Link thành công.
+          </div>
 
           <div className="share-created__url">
             <input className="input" value={shareUrl} readOnly />

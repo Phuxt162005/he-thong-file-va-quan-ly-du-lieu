@@ -89,3 +89,16 @@
     width: 100%;
   }
 }
+
+.share-created__success {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  color: var(--color-secondary);
+  background-color: var(--color-thistle);
+  border: var(--border-width) solid var(--color-border);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+}

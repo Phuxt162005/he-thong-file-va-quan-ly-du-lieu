@@ -12,12 +12,14 @@
 
 .shares-page__header h1 {
   margin: 0 0 var(--spacing-xs);
+  color: var(--color-text);
   font-size: var(--font-size-xl);
   line-height: 1.2;
   white-space: nowrap;
 }
 
 .shares-page__header p {
+  margin: 0;
   color: var(--color-text-secondary);
   font-size: var(--font-size-sm);
 }
@@ -26,9 +28,13 @@
   width: 180px;
 }
 
-/* List */
+/* =========================
+   LIST
+   ========================= */
+
 .shares-list {
   overflow: hidden;
+  width: 100%;
   background-color: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
@@ -66,9 +72,17 @@
   transition: background-color 0.15s ease;
 }
 
+.share-item:last-child {
+  border-bottom: none;
+}
+
 .share-item:hover {
   background-color: var(--color-background-soft);
 }
+
+/* =========================
+   RESOURCE
+   ========================= */
 
 .share-item__resource {
   display: flex;
@@ -84,6 +98,7 @@
   align-items: center;
   justify-content: center;
   flex-shrink: 0;
+  font-size: 22px;
   background-color: var(--color-thistle);
   border-radius: var(--radius-md);
 }
@@ -91,7 +106,7 @@
 .share-item__resource-info {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-xs);
+  gap: 2px;
   min-width: 0;
 }
 
@@ -100,6 +115,7 @@
   color: var(--color-text);
   font-size: var(--font-size-sm);
   font-weight: 600;
+  line-height: 1.4;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -108,6 +124,10 @@
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
 }
+
+/* =========================
+   ACCESS
+   ========================= */
 
 .share-item__access {
   display: flex;
@@ -124,11 +144,22 @@
   white-space: nowrap;
 }
 
+/* =========================
+   EXPIRY
+   ========================= */
+
 .share-item__expiry {
+  overflow: hidden;
   color: var(--color-text-secondary);
   font-size: var(--font-size-xs);
   line-height: 1.4;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
+
+/* =========================
+   DOWNLOADS
+   ========================= */
 
 .share-item__downloads {
   display: flex;
@@ -143,6 +174,10 @@
   color: var(--color-text);
   font-weight: 700;
 }
+
+/* =========================
+   STATUS
+   ========================= */
 
 .share-item__status {
   display: flex;
@@ -176,6 +211,10 @@
   background-color: #f9e7ea;
 }
 
+/* =========================
+   ACTIONS
+   ========================= */
+
 .share-item__actions {
   display: flex;
   align-items: center;
@@ -192,126 +231,20 @@
   min-width: 78px;
 }
 
-.share-item:last-child {
-  border-bottom: none;
-}
+/* =========================
+   EMPTY
+   ========================= */
 
-.share-item:hover {
-  background-color: var(--color-hover);
-}
-
-/* Resource */
-.share-item__resource {
-  min-width: 0;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-}
-
-.share-item__icon {
-  flex-shrink: 0;
-  font-size: 22px;
-}
-
-.share-item__resource > div {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.share-item__resource strong {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: var(--font-size-sm);
-}
-
-.share-item__resource span {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-xs);
-}
-
-/* Other fields */
-.share-item__type,
-.share-item__expiry,
-.share-item__downloads {
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
-}
-
-.share-item__expiry {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-/* Status */
-.share-status {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 28px;
-  padding: 0 var(--spacing-sm);
-  border-radius: var(--radius-xl);
-  font-size: var(--font-size-xs);
-  font-weight: 600;
-  white-space: nowrap;
-}
-
-/* Access */
-.share-item__access {
-  min-width: 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-xs);
-}
-
-.share-item__access span {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.share-status--active {
-  color: var(--color-secondary);
-  background-color: var(--color-accent);
-}
-
-.share-status--expired {
-  color: var(--color-warning);
-  background-color: var(--color-platinum);
-}
-
-.share-status--revoked {
-  color: var(--color-danger);
-  background-color: #f9e7ea;
-}
-
-/* Actions */
-
-.share-item__actions {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: var(--spacing-xs);
-  flex-wrap: nowrap;
-}
-
-.share-item__actions .btn {
-  flex-shrink: 0;
-}
-
-/* Empty */
 .shares-list__empty {
   padding: var(--spacing-xl);
-  text-align: center;
   color: var(--color-text-secondary);
+  text-align: center;
 }
 
-/* Edit */
+/* =========================
+   EDIT FORM
+   ========================= */
+
 .share-edit-form {
   display: flex;
   flex-direction: column;
@@ -324,12 +257,33 @@
   gap: var(--spacing-xs);
 }
 
-.share-edit-form__group label {
+.share-edit-form__group > label {
+  color: var(--color-text);
   font-size: var(--font-size-sm);
-  font-weight: 500;
+  font-weight: 600;
 }
 
-/* Responsive */
+.share-edit-form__checkbox {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
+  cursor: pointer;
+}
+
+.share-edit-form__checkbox input {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--color-primary);
+}
+
+/* =========================
+   RESPONSIVE
+   ========================= */
+
 @media (max-width: 1200px) {
   .shares-list__header,
   .share-item {
@@ -340,7 +294,6 @@
       90px
       120px
       minmax(220px, 1.2fr);
-
     gap: var(--spacing-sm);
   }
 
@@ -371,6 +324,15 @@
 }
 
 @media (max-width: 650px) {
+  .shares-page__header {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .shares-page__filter {
+    width: 100%;
+  }
+
   .share-item {
     grid-template-columns: 1fr;
   }
@@ -395,26 +357,11 @@
   }
 
   .share-item__actions {
+    align-items: stretch;
     flex-direction: column;
   }
 
   .share-item__actions .btn {
     width: 100%;
   }
-}
-
-.share-edit-form__checkbox {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-sm);
-  color: var(--color-text);
-  font-size: var(--font-size-sm);
-  cursor: pointer;
-}
-
-.share-edit-form__checkbox input {
-  width: 16px;
-  height: 16px;
-  margin: 0;
-  accent-color: var(--color-primary);
 }
