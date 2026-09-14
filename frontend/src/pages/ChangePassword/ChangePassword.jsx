@@ -9,24 +9,33 @@ import "./ChangePassword.css";
 
 export default function ChangePassword() {
   const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     currentPassword: "",
     newPassword: "",
     confirmPassword: "",
   });
+
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [changed, setChanged] = useState(false);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
     setError("");
     setMessage("");
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
+
     setError("");
     setMessage("");
 
@@ -34,22 +43,27 @@ export default function ChangePassword() {
       setError("Vui lòng nhập mật khẩu hiện tại.");
       return;
     }
+
     if (!formData.newPassword) {
       setError("Vui lòng nhập mật khẩu mới.");
       return;
     }
+
     if (formData.newPassword.length < 8) {
       setError("Mật khẩu mới phải có ít nhất 8 ký tự.");
       return;
     }
+
     if (!formData.confirmPassword) {
       setError("Vui lòng xác nhận mật khẩu mới.");
       return;
     }
+
     if (formData.newPassword !== formData.confirmPassword) {
       setError("Mật khẩu xác nhận không khớp.");
       return;
     }
+
     if (formData.currentPassword === formData.newPassword) {
       setError("Mật khẩu mới không được giống mật khẩu cũ.");
       return;
@@ -57,6 +71,7 @@ export default function ChangePassword() {
 
     try {
       setLoading(true);
+
       await authService.changePassword({
         currentPassword: formData.currentPassword,
         newPassword: formData.newPassword,
@@ -64,6 +79,8 @@ export default function ChangePassword() {
       });
 
       setMessage("Đổi mật khẩu thành công!");
+      setChanged(true);
+
       setFormData({
         currentPassword: "",
         newPassword: "",
@@ -85,11 +102,33 @@ export default function ChangePassword() {
           {error && <div className="error-message">{error}</div>}
 
           {message && <div className="success-message">{message}</div>}
+        </div>
 
+        {changed ? (
+          <div className="change-password-success">
+            <div className="change-password-success__icon">✓</div>
+
+            <h2>Đổi mật khẩu thành công</h2>
+
+            <p>
+              Mật khẩu của bạn đã được cập nhật. Bạn có thể quay lại trang thông
+              tin cá nhân.
+            </p>
+
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => navigate("/profile")}
+            >
+              Quay lại
+            </button>
+          </div>
+        ) : (
           <form className="change-password-form" onSubmit={handleSubmit}>
             <FormInput
               label="Mật khẩu hiện tại"
               name="currentPassword"
+              type="password"
               value={formData.currentPassword}
               onChange={handleChange}
               required
@@ -135,7 +174,7 @@ export default function ChangePassword() {
               </button>
             </div>
           </form>
-        </div>
+        )}
       </div>
     </div>
   );
