@@ -325,12 +325,15 @@ function TrashItem({ file, onRestore, onPermanentDelete }) {
       <div className="trash-item__date">{formatDate(file.deletedAt)}</div>
 
       <div className="trash-item__actions">
-        <button className="btn btn-primary" onClick={() => onRestore(file)}>
+        <button
+          className="btn btn-primary btn-sm"
+          onClick={() => onRestore(file)}
+        >
           Khôi phục
         </button>
 
         <button
-          className="btn btn-danger"
+          className="btn btn-danger btn-sm"
           onClick={() => onPermanentDelete(file)}
         >
           Xóa vĩnh viễn
