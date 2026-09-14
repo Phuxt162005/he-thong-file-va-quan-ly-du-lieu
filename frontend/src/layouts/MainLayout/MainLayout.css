@@ -14,6 +14,7 @@
 /* =========================================================
    HEADER
    ========================================================= */
+
 .main-layout__header {
   grid-column: 1 / -1;
   grid-row: 1;
@@ -21,10 +22,16 @@
   height: 82px;
   display: flex;
   align-items: center;
-  background: linear-gradient(100deg, #dfeaff 0%, #eef0fb 30%, #d8e8ff 100%);
-  border-bottom: 1px solid #dbe4f3;
   position: relative;
   z-index: 20;
+  background-image:
+    linear-gradient(90deg, rgba(117, 177, 245, 0.12), rgba(72, 145, 236, 0.04)),
+    url("/cloud_backround.png");
+  background-position: center 42%;
+  background-size: cover;
+  background-repeat: no-repeat;
+  border-bottom: 1px solid rgba(180, 205, 238, 0.7);
+  box-shadow: 0 2px 10px rgba(74, 112, 175, 0.06);
 }
 
 /* ---------------------------------------------------------
@@ -39,8 +46,8 @@
   flex-shrink: 0;
   padding: 0 30px;
   color: #173b76;
-  background: rgba(255, 255, 255, 0.24);
-  border-right: 1px solid rgba(175, 194, 226, 0.5);
+  background: rgba(255, 255, 255, 0.28);
+  border-right: 1px solid rgba(255, 255, 255, 0.42);
   text-decoration: none;
 }
 
@@ -107,10 +114,11 @@
   display: flex;
   align-items: center;
   color: #8ba0c3;
-  background: rgba(255, 255, 255, 0.82);
-  border: 1px solid rgba(205, 218, 239, 0.8);
+  background: rgba(255, 255, 255, 0.86);
+  border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 24px;
-  box-shadow: 0 4px 12px rgba(71, 100, 158, 0.05);
+  box-shadow: 0 4px 15px rgba(70, 110, 175, 0.08);
+  overflow: hidden;
 }
 
 .main-layout__search > svg {
@@ -118,6 +126,7 @@
   height: 21px;
   margin-left: 18px;
   flex-shrink: 0;
+  color: #86a0c9;
 }
 
 .main-layout__search input {
@@ -128,7 +137,7 @@
   background: transparent;
   border: none;
   outline: none;
-  font-family: inherit;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 14px;
 }
 
@@ -176,7 +185,7 @@
   top: 7px;
   right: 7px;
   background: #f35d87;
-  border: 2px solid #b4d0f4;
+  border: 2px solid rgba(115, 177, 239, 0.8);
   border-radius: 50%;
 }
 
@@ -204,11 +213,12 @@
   align-items: center;
   justify-content: center;
   color: #20477e;
-  background: #dff0ff;
-  border: 1px solid rgba(255, 255, 255, 0.7);
+  background: linear-gradient(135deg, #e4f3ff, #cfe9ff);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   border-radius: 50%;
   font-size: 19px;
   font-weight: 750;
+  box-shadow: 0 3px 10px rgba(58, 105, 164, 0.08);
 }
 
 .main-layout__username {
