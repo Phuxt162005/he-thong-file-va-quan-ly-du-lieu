@@ -11,8 +11,10 @@
 }
 
 .shares-page__header h1 {
-  margin-bottom: var(--spacing-xs);
+  margin: 0 0 var(--spacing-xs);
   font-size: var(--font-size-xl);
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .shares-page__header p {
@@ -35,10 +37,13 @@
 .shares-list__header,
 .share-item {
   display: grid;
-  grid-template-columns: minmax(200px, 1.5fr) 100px 180px 120px 130px minmax(
-      260px,
-      auto
-    );
+  grid-template-columns:
+    minmax(180px, 1.7fr)
+    minmax(150px, 1.1fr)
+    minmax(140px, 1fr)
+    110px
+    140px
+    minmax(220px, 1.2fr);
   align-items: center;
   gap: var(--spacing-md);
   padding: var(--spacing-sm) var(--spacing-md);
@@ -46,8 +51,10 @@
 
 .shares-list__header {
   min-height: 48px;
-  background-color: var(--color-background);
-  color: var(--color-text-secondary);
+  padding-top: var(--spacing-sm);
+  padding-bottom: var(--spacing-sm);
+  background-color: var(--color-platinum);
+  color: var(--color-secondary);
   font-size: var(--font-size-xs);
   font-weight: 600;
   border-bottom: var(--border-width) solid var(--color-border);
@@ -115,25 +122,45 @@
 /* Status */
 .share-status {
   display: inline-flex;
-  padding: 4px 8px;
-  border-radius: 20px;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 var(--spacing-sm);
+  border-radius: var(--radius-xl);
   font-size: var(--font-size-xs);
-  font-weight: 500;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+/* Access */
+.share-item__access {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  color: var(--color-text-secondary);
+  font-size: var(--font-size-xs);
+}
+
+.share-item__access span {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .share-status--active {
-  color: var(--color-success);
-  background-color: #f0fdf4;
+  color: var(--color-secondary);
+  background-color: var(--color-accent);
 }
 
 .share-status--expired {
   color: var(--color-warning);
-  background-color: #fffbeb;
+  background-color: var(--color-platinum);
 }
 
 .share-status--revoked {
   color: var(--color-danger);
-  background-color: #fef2f2;
+  background-color: #f9e7ea;
 }
 
 /* Actions */
@@ -143,13 +170,11 @@
   align-items: center;
   justify-content: flex-end;
   gap: var(--spacing-xs);
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
 }
 
 .share-item__actions .btn {
-  min-height: 34px;
-  padding: 6px 10px;
-  font-size: var(--font-size-xs);
+  flex-shrink: 0;
 }
 
 /* Empty */
@@ -181,10 +206,14 @@
 @media (max-width: 1200px) {
   .shares-list__header,
   .share-item {
-    grid-template-columns: minmax(180px, 1.5fr) 90px 150px 100px 120px minmax(
-        220px,
-        auto
-      );
+    grid-template-columns:
+      minmax(160px, 1.6fr)
+      minmax(130px, 1fr)
+      minmax(130px, 1fr)
+      90px
+      120px
+      minmax(200px, 1.1fr);
+    gap: var(--spacing-sm);
   }
 }
 

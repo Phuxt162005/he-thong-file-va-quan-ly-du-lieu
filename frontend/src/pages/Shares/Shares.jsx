@@ -201,6 +201,7 @@ export default function Shares() {
         <div className="shares-list">
           <div className="shares-list__header">
             <span>Tài nguyên</span>
+            <span>Quyền truy cập</span>
             <span>Hết hạn</span>
             <span>Download</span>
             <span>Trạng thái</span>
@@ -399,27 +400,28 @@ function ShareItem({ share, onEdit, onRevoke, onCopy }) {
         </span>
       </div>
 
-      <div className="share-item__actions">
-        <button className="btn btn-secondary" onClick={() => onCopy(share)}>
-          Sao chép
-        </button>
+      <button
+        className="btn btn-secondary btn-sm"
+        onClick={() => onCopy(share)}
+      >
+        Sao chép
+      </button>
 
-        <button
-          className="btn btn-secondary"
-          onClick={() => onEdit(share)}
-          disabled={status === "revoked"}
-        >
-          Sửa
-        </button>
+      <button
+        className="btn btn-secondary btn-sm"
+        onClick={() => onEdit(share)}
+        disabled={status === "revoked"}
+      >
+        Sửa
+      </button>
 
-        <button
-          className="btn btn-danger"
-          onClick={() => onRevoke(share)}
-          disabled={status === "revoked"}
-        >
-          Thu hồi
-        </button>
-      </div>
+      <button
+        className="btn btn-danger btn-sm"
+        onClick={() => onRevoke(share)}
+        disabled={status === "revoked"}
+      >
+        Thu hồi
+      </button>
     </div>
   );
 }
