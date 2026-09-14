@@ -312,8 +312,6 @@ export default function Files() {
 
         {dragError && <div className="error-message">{dragError}</div>}
 
-        <Breadcrumb items={breadcrumbItems} />
-
         <div className="folder-manager">
           <aside className="folder-manager__sidebar">
             <div className="folder-manager__title">Thư mục</div>
