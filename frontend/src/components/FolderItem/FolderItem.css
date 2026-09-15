@@ -4,13 +4,12 @@
   grid-template-columns:
     42px
     48px
-    minmax(190px, 1fr)
+    minmax(180px, 1fr)
     100px
     125px
     165px
     220px;
   align-items: center;
-  gap: 0;
   padding: 0 14px;
   background: #ffffff;
   border-bottom: 1px solid #e4ebf5;
@@ -21,14 +20,17 @@
   background: #f7faff;
 }
 
+/* ================= CHECKBOX ================= */
 .folder-item__select {
   width: 17px;
   height: 17px;
-  margin: auto;
+  justify-self: center;
   border: 1.5px solid #b9c7da;
   border-radius: 4px;
+  background: #ffffff;
 }
 
+/* ================= NAME ================= */
 .folder-item__main {
   grid-column: 2 / 4;
   min-width: 0;
@@ -36,8 +38,11 @@
   align-items: center;
   gap: 12px;
   padding: 0;
-  text-align: left;
+  border: none;
   background: transparent;
+  color: #234b87;
+  text-align: left;
+  cursor: pointer;
 }
 
 .folder-item__icon {
@@ -48,7 +53,7 @@
   justify-content: center;
   flex-shrink: 0;
   font-size: 27px;
-  background: transparent;
+  line-height: 1;
 }
 
 .folder-item__name {
@@ -57,113 +62,111 @@
   color: #234b87;
   font-size: 14px;
   font-weight: 600;
-
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+/* ================= TYPE ================= */
 .folder-item__type {
   grid-column: 4;
   color: #7186aa;
   font-size: 14px;
+  white-space: nowrap;
 }
 
+/* ================= SIZE ================= */
 .folder-item__size {
   grid-column: 5;
   color: #7186aa;
   font-size: 14px;
+  white-space: nowrap;
 }
 
+/* ================= DATE ================= */
 .folder-item__date {
   grid-column: 6;
+  min-width: 0;
+  overflow: hidden;
   color: #7186aa;
   font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
+/* ================= ACTIONS ================= */
 .folder-item__actions {
   grid-column: 7;
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-
-  gap: 7px;
-}
-
-.folder-item--drag-over {
-  background: #edf5ff;
-  box-shadow: inset 0 0 0 2px #6da5ee;
-}
-
-.folder-item__select span {
-  width: 16px;
-  height: 16px;
-  display: block;
-  border: 1.5px solid #b8c7df;
-  border-radius: 4px;
-  background: #ffffff;
-}
-
-.folder-item__size,
-.folder-item__date {
-  color: #7890b5;
-  font-family: inherit;
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-.folder-item__actions {
-  display: flex;
-  align-items: center;
   justify-content: flex-start;
-  gap: 6px;
-}
-
-.folder-item__select {
-  width: 17px;
-  height: 17px;
+  gap: 7px;
+  min-width: 0;
 }
 
 .folder-item__action {
   width: 36px;
   height: 36px;
+  min-width: 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
   padding: 0;
-  border: 1px solid #e1e9f6;
-  border-radius: 8px;
-  background: #ffffff;
-  color: #6f8bb5;
+  border: 1px solid #dce6f5;
+  border-radius: 9px;
+  background: #f7faff;
+  color: #6684b1;
   font-size: 15px;
+  line-height: 1;
   cursor: pointer;
   transition:
-    color 0.15s ease,
     background-color 0.15s ease,
-    border-color 0.15s ease;
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .folder-item__action:hover {
   color: #347ee4;
   background: #edf4ff;
-  border-color: #cfe0f8;
+  border-color: #c8daf3;
+  transform: translateY(-1px);
+}
+
+.folder-item__action--danger {
+  color: #ef5b68;
+  background: #fff4f5;
+  border-color: #f4dce0;
 }
 
 .folder-item__action--danger:hover {
-  color: #ef5350;
-  background: #fff2f2;
-  border-color: #ffd5d5;
+  color: #e94354;
+  background: #ffe9ed;
+  border-color: #f2c8d0;
 }
 
+/* ================= DRAG ================= */
+.folder-item--drag-over {
+  background: #edf5ff;
+  box-shadow: inset 0 0 0 2px #6da5ee;
+}
+
+/* ================= RESPONSIVE ================= */
 @media (max-width: 1250px) {
   .folder-item {
     grid-template-columns:
       36px
       42px
       minmax(150px, 1fr)
-      110px
-      145px
+      90px
+      115px
+      150px
       205px;
+  }
+
+  .folder-item__action {
+    width: 34px;
+    min-width: 34px;
+    height: 34px;
   }
 }
 
@@ -173,9 +176,14 @@
       36px
       42px
       minmax(140px, 1fr)
-      100px
-      145px
-      170px;
+      80px
+      105px
+      140px
+      185px;
+  }
+
+  .folder-item__actions {
+    gap: 4px;
   }
 }
 
