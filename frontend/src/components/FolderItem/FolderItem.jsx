@@ -60,6 +60,10 @@ export default function FolderItem({
       <div className="folder-item__select" aria-hidden="true" />
 
       {/* Icon */}
+      <div className="folder-item__select">
+        <span />
+      </div>
+
       <button
         type="button"
         className="folder-item__main"
@@ -82,6 +86,8 @@ export default function FolderItem({
       <div className="folder-item__date">
         {formatFolderDate(folder.updatedAt || folder.createdAt)}
       </div>
+
+      <div className="folder-item__actions">...</div>
 
       {/* Actions */}
       <div className="folder-item__actions">

@@ -1,24 +1,43 @@
 /* =========================================================
    FILE ITEM
    ========================================================= */
+
 .file-item {
   width: 100%;
   min-width: 0;
-  min-height: 57px;
+  height: 57px;
+
   display: grid;
+
+  /*
+    6 CỘT:
+
+    1. Checkbox
+    2. Tên + icon
+    3. Loại
+    4. Dung lượng
+    5. Cập nhật
+    6. Thao tác
+  */
   grid-template-columns:
     40px
-    minmax(220px, 1fr)
-    105px
-    125px
-    165px
-    215px;
+    minmax(260px, 1fr)
+    100px
+    120px
+    170px
+    220px;
+
   align-items: center;
+
   padding: 0 12px;
+
   box-sizing: border-box;
+
   background: #ffffff;
+
   border-bottom: 1px solid #e5ebf4;
-  transition: background-color 0.15s ease;
+
+  white-space: nowrap;
 }
 
 .file-item:hover {
@@ -32,7 +51,10 @@
 /* =========================================================
    CHECKBOX
    ========================================================= */
+
 .file-item__select {
+  width: 100%;
+
   display: flex;
   align-items: center;
   justify-content: center;
@@ -41,56 +63,55 @@
 .file-item__select input {
   width: 16px;
   height: 16px;
+
   margin: 0;
-  accent-color: #3978d5;
+
   cursor: pointer;
+
+  accent-color: #3978d5;
 }
 
 /* =========================================================
-   ICON
+   NAME + ICON
    ========================================================= */
-.file-item__icon {
-  width: 34px;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  border-radius: 8px;
-  background: transparent;
-  font-size: 23px;
-  line-height: 1;
-}
 
-/* =========================================================
-   NAME
-   ========================================================= */
 .file-item__name {
   min-width: 0;
+
   display: flex;
   align-items: center;
+
   gap: 12px;
+
   overflow: hidden;
 }
 
 .file-item__icon {
   width: 34px;
   height: 34px;
-  display: inline-flex;
+
+  display: flex;
   align-items: center;
   justify-content: center;
-  flex-shrink: 0;
+
+  flex: 0 0 34px;
+
   font-size: 23px;
   line-height: 1;
 }
 
 .file-item__name span {
-  display: block;
   min-width: 0;
+
+  display: block;
+
   overflow: hidden;
+
   color: #234b87;
+
   font-size: 14px;
   font-weight: 600;
+
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -98,12 +119,17 @@
 /* =========================================================
    TYPE
    ========================================================= */
+
 .file-item__type {
   min-width: 0;
+
   overflow: hidden;
+
   color: #7186aa;
+
   font-size: 14px;
   font-weight: 400;
+
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -111,12 +137,17 @@
 /* =========================================================
    SIZE
    ========================================================= */
+
 .file-item__size {
   min-width: 0;
+
   overflow: hidden;
+
   color: #7186aa;
+
   font-size: 14px;
   font-weight: 400;
+
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -124,12 +155,17 @@
 /* =========================================================
    DATE
    ========================================================= */
+
 .file-item__date {
   min-width: 0;
+
   overflow: hidden;
+
   color: #7186aa;
+
   font-size: 14px;
   font-weight: 400;
+
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -137,64 +173,73 @@
 /* =========================================================
    ACTIONS
    ========================================================= */
+
 .file-item__actions {
   min-width: 0;
+
   display: flex;
   align-items: center;
-  justify-content: flex-start;
+
   gap: 6px;
+
   flex-wrap: nowrap;
+
   white-space: nowrap;
 }
 
 .file-item__actions .btn {
   width: 36px;
   height: 36px;
+
   min-width: 36px;
+
+  flex: 0 0 36px;
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
+
   padding: 0;
+
   background: #f7faff;
+
   border: 1px solid #dce6f5;
+
   border-radius: 9px;
+
   color: #6684b1;
+
   font-size: 15px;
+
   line-height: 1;
+
   cursor: pointer;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease,
-    color 0.15s ease,
-    transform 0.15s ease;
 }
 
 .file-item__actions .btn:hover {
   color: #347ee4;
+
   background: #edf4ff;
+
   border-color: #c8daf3;
-  transform: translateY(-1px);
 }
 
-/* =========================================================
-   DELETE
-   ========================================================= */
 .file-item__actions .file-item__action--danger {
   color: #ef5b68;
+
   background: #fff4f5;
+
   border-color: #f4dce0;
 }
 
 .file-item__actions .file-item__action--danger:hover {
   color: #e94354;
+
   background: #ffe9ed;
+
   border-color: #f2c8d0;
-  transform: translateY(-1px);
 }
 
-/* =========================================================
-   MORE
-   ========================================================= */
 .file-item__actions .file-item__action-more {
   color: #6684b1;
 }
@@ -202,6 +247,7 @@
 /* =========================================================
    FOCUS
    ========================================================= */
+
 .file-item__actions .btn:focus-visible {
   outline: 2px solid #397fdc;
   outline-offset: 2px;
@@ -210,44 +256,32 @@
 /* =========================================================
    RESPONSIVE
    ========================================================= */
+
 @media (max-width: 1250px) {
   .file-item {
+    /*
+      VẪN 6 CỘT.
+      Không được quay lại 7 cột.
+    */
     grid-template-columns:
-      36px
-      42px
-      minmax(150px, 1fr)
-      90px
-      115px
+      40px
+      minmax(230px, 1fr)
+      95px
+      110px
       150px
-      190px;
+      205px;
   }
 
   .file-item__actions .btn {
     width: 34px;
     height: 34px;
     min-width: 34px;
+    flex-basis: 34px;
   }
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 900px) {
   .file-item {
-    grid-template-columns:
-      36px
-      42px
-      minmax(140px, 1fr)
-      80px
-      105px
-      140px
-      180px;
-  }
-
-  .file-item__actions {
-    gap: 4px;
-  }
-}
-
-@media (max-width: 850px) {
-  .file-item {
-    min-width: 820px;
+    min-width: 900px;
   }
 }

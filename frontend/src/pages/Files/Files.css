@@ -865,34 +865,52 @@
   }
 }
 
-/* ========================================================= UNIFIED FILE TABLE ========================================================= */
+/* =========================================================
+   UNIFIED FILE TABLE — FINAL
+   ========================================================= */
 
 .files-unified-table {
   width: 100%;
-  overflow: hidden;
-  background: #ffffff;
+  min-width: 0;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: #fff;
   border: 1px solid #dce6f5;
   border-radius: 10px;
+  box-sizing: border-box;
 }
 
-.files-unified-table__header {
-  width: 100%;
-  min-height: 46px;
+/*
+  ALL ROWS USE THE SAME 6 COLUMNS:
+  checkbox | name | type | size | updated | actions
+*/
+.files-unified-table__header,
+.files-unified-table__folders .folder-item,
+.files-unified-table__files .file-item {
   display: grid;
   grid-template-columns:
     40px
-    48px
-    minmax(180px, 1fr)
-    105px
-    125px
-    165px
-    215px;
+    minmax(260px, 1fr)
+    100px
+    120px
+    170px
+    220px;
   align-items: center;
-  padding: 0 12px;
+  box-sizing: border-box;
+  column-gap: 0;
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+/* HEADER */
+.files-unified-table__header {
+  width: 100%;
+  min-width: 910px;
+  height: 46px;
   background: linear-gradient(180deg, #edf3fd 0%, #e8effb 100%);
   border-bottom: 1px solid #d9e4f3;
   color: #31538d;
-  font-family: inherit;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 14px;
   font-weight: 700;
   white-space: nowrap;
@@ -903,63 +921,6 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-}
-
-.files-unified-table__checkbox,
-.files-unified-table__icon {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.files-unified-table__checkbox span {
-  width: 16px;
-  height: 16px;
-  display: block;
-  background: #ffffff;
-  border: 1.5px solid #b9c7da;
-  border-radius: 4px;
-}
-
-.files-unified-table__folders,
-.files-unified-table__files {
-  width: 100%;
-}
-
-.files-unified-table__header,
-.folder-item,
-.file-item {
-  display: grid;
-  grid-template-columns:
-    42px
-    48px
-    minmax(190px, 1fr)
-    100px
-    125px
-    165px
-    220px;
-  align-items: center;
-}
-
-/* ========================= HEADER ========================= */
-
-.files-unified-table__header {
-  min-height: 48px;
-  display: grid;
-  grid-template-columns: 40px 46px minmax(180px, 1fr) 130px 170px 250px;
-  align-items: center;
-  gap: 7px;
-  padding: 0 13px;
-  color: #49658e;
-  background: linear-gradient(180deg, #f0f4fc 0%, #edf2fb 100%);
-  border-bottom: 1px solid #dfe7f3;
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.files-unified-table__header > div {
-  min-width: 0;
 }
 
 .files-unified-table__checkbox {
@@ -972,38 +933,143 @@
   width: 17px;
   height: 17px;
   display: block;
+  box-sizing: border-box;
+  background: #fff;
   border: 1.5px solid #aebfd9;
   border-radius: 4px;
-  background: #ffffff;
 }
 
-.files-unified-table__icon {
-  width: 100%;
-  display: flex;
-  align-items: center;
-}
-
-/* ========================= FOLDERS ========================= */
-
+/* FOLDER ROWS */
 .files-unified-table__folders {
   width: 100%;
+  min-width: 910px;
 }
 
 .files-unified-table__folders:empty {
   display: none;
 }
 
-/* ========================= FILES ========================= */
+.files-unified-table__folders .folder-item {
+  width: 100%;
+  min-width: 910px;
+  height: 55px;
+  margin: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  background: #fff;
+  border-bottom: 1px solid #e6ecf5;
+}
 
+.files-unified-table__folders .folder-item:hover {
+  background: #f8fbff;
+}
+
+.files-unified-table__folders .folder-item__select {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.files-unified-table__folders .folder-item__main {
+  min-width: 0;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+  padding: 0;
+  margin: 0;
+  border: 0;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+
+.files-unified-table__folders .folder-item__icon {
+  width: 34px;
+  height: 34px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 34px;
+  font-size: 25px;
+  line-height: 1;
+}
+
+.files-unified-table__folders .folder-item__name {
+  min-width: 0;
+  overflow: hidden;
+  color: #244a84;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.files-unified-table__folders .folder-item__type,
+.files-unified-table__folders .folder-item__size,
+.files-unified-table__folders .folder-item__date {
+  min-width: 0;
+  overflow: hidden;
+  color: #7890b5;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 14px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.files-unified-table__folders .folder-item__actions {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.files-unified-table__folders .folder-item__action {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  flex: 0 0 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: 1px solid #e1e9f6;
+  border-radius: 8px;
+  background: #fff;
+  color: #6f8bb5;
+  font-size: 15px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.files-unified-table__folders .folder-item__action:hover {
+  color: #347ee4;
+  background: #edf4ff;
+  border-color: #cfe0f8;
+}
+
+/* FILE ROWS */
 .files-unified-table__files {
   width: 100%;
+  min-width: 910px;
 }
 
 .files-unified-table__files .file-list {
-  border: none;
+  width: 100%;
+  min-width: 910px;
+  margin: 0;
+  padding: 0;
+  border: 0;
   border-radius: 0;
   box-shadow: none;
-  margin: 0;
+  background: transparent;
 }
 
 .files-unified-table__files .file-list__header {
@@ -1011,15 +1077,14 @@
 }
 
 .files-unified-table__files .file-item {
-  min-height: 55px;
-  display: grid;
-  grid-template-columns: 40px 46px minmax(180px, 1fr) 130px 170px 250px;
-  align-items: center;
-  gap: 7px;
-  padding: 0 13px;
+  width: 100%;
+  min-width: 910px;
+  height: 57px;
+  margin: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  background: #fff;
   border-bottom: 1px solid #e6ecf5;
-  background: #ffffff;
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .files-unified-table__files .file-item:hover {
@@ -1032,230 +1097,82 @@
   justify-content: center;
 }
 
+.files-unified-table__files .file-item__name {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  overflow: hidden;
+}
+
 .files-unified-table__files .file-item__icon {
-  width: 36px;
-  height: 36px;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 25px;
+  font-size: 23px;
+  line-height: 1;
 }
 
-.files-unified-table__files .file-item__name {
+.files-unified-table__files .file-item__name span {
   min-width: 0;
   overflow: hidden;
   color: #244a84;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 15px;
   font-weight: 600;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
+.files-unified-table__files .file-item__type,
 .files-unified-table__files .file-item__size,
 .files-unified-table__files .file-item__date {
-  color: #7890b5;
-  font-family: inherit;
-  font-size: 14px;
-  white-space: nowrap;
-}
-
-.files-unified-table__files .file-item__actions {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  justify-content: flex-start;
-}
-
-.files-unified-table__files .file-item__actions .btn-sm {
-  width: 36px;
-  min-width: 36px;
-  height: 36px;
-  padding: 0;
-  border: 1px solid #e1e9f6;
-  border-radius: 8px;
-  background: #ffffff;
-  font-size: 15px;
-}
-
-.files-unified-table__files .file-item__actions .btn-sm:hover {
-  color: #347ee4;
-  background: #edf4ff;
-  border-color: #cfe0f8;
-}
-
-/* ========================= EMPTY FILE STATE ========================= */
-
-.files-unified-table__files .file-list__empty {
-  min-height: 100px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #7890b5;
-  font-size: 14px;
-}
-
-/* ========================= HIDE UPLOAD DROPZONE ========================= */
-
-.files-page .file-upload {
-  position: absolute;
-  width: 1px;
-  height: 1px;
+  min-width: 0;
   overflow: hidden;
-  opacity: 0;
-  pointer-events: none;
-}
-
-.files-page .file-upload input[type="file"] {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-}
-
-/* ========================= HEADER / PAGE ========================= */
-
-/* ========================= SIDEBAR ========================= */
-
-.folder-manager__root-icon {
-  font-size: 17px;
-}
-
-/* ========================= CONTENT ========================= */
-
-/* ========================= VIEW TOGGLE ========================= */
-
-/* ========================= RESPONSIVE ========================= */
-
-@media (max-width: 1250px) {
-  .files-unified-table__header {
-    grid-template-columns: 36px 42px minmax(150px, 1fr) 110px 145px 205px;
-  }
-
-  .files-unified-table__files .file-item {
-    grid-template-columns: 36px 42px minmax(150px, 1fr) 110px 145px 205px;
-  }
-}
-
-@media (max-width: 1050px) {
-  .files-unified-table__header {
-    grid-template-columns: 36px 42px minmax(140px, 1fr) 100px 145px 170px;
-  }
-
-  .files-unified-table__files .file-item {
-    grid-template-columns: 36px 42px minmax(140px, 1fr) 100px 145px 170px;
-  }
-}
-
-@media (max-width: 850px) {
-  .files-unified-table {
-    overflow-x: auto;
-  }
-
-  .files-unified-table__header {
-    min-width: 820px;
-  }
-
-  .files-unified-table__folders,
-  .files-unified-table__files {
-    min-width: 820px;
-  }
-}
-
-/* ========================================================= FILE MANAGER - FINAL LAYOUT ALIGNMENT ========================================================= */
-
-/* * Hai khu vực "Thư mục" và "Tất cả tệp" được hiển thị * như hai card riêng biệt giống screenshot. */
-
-/* ========================================================= LEFT FOLDER CARD ========================================================= */
-
-/* ========================================================= RIGHT FILE CARD ========================================================= */
-
-/* ========================================================= TABLE ========================================================= */
-
-/* ========================================================= TABLE HEADER ========================================================= */
-
-/* ========================================================= FOLDER + FILE SAME GRID ========================================================= */
-
-.files-unified-table__folders .folder-item,
-.files-unified-table__files .file-item {
-  display: grid;
-  grid-template-columns: 40px 46px minmax(180px, 1fr) 130px 170px 250px;
-  align-items: center;
-  gap: 7px;
-  min-height: 55px;
-  padding: 0 13px;
-}
-
-/* ========================================================= FILE LIST ========================================================= */
-
-/* ========================================================= FOLDER LIST ========================================================= */
-
-.files-unified-table__folders .folder-item {
-  background: #ffffff;
-  border-bottom: 1px solid #e6ecf5;
-}
-
-.files-unified-table__folders .folder-item:hover {
-  background: #f8fbff;
-}
-
-/* ========================================================= FILE LIST ROW ========================================================= */
-
-/* ========================================================= NAMES ========================================================= */
-
-.files-unified-table__folders .folder-item__name,
-.files-unified-table__files .file-item__name span {
-  color: #244a84;
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 15px;
-  font-weight: 600;
-}
-
-/* ========================================================= SIZE + DATE ========================================================= */
-
-.files-unified-table__folders .folder-item__size,
-.files-unified-table__folders .folder-item__date,
-.files-unified-table__files .file-item__size,
-.files-unified-table__files .file-item__date {
   color: #7890b5;
   font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
   font-size: 14px;
+  text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-/* ========================================================= ACTION BUTTONS ========================================================= */
-
-.files-unified-table__folders .folder-item__actions,
 .files-unified-table__files .file-item__actions {
+  min-width: 0;
   display: flex;
   align-items: center;
   justify-content: flex-start;
   gap: 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
-.files-unified-table__folders .folder-item__action,
 .files-unified-table__files .file-item__actions .btn-sm {
   width: 36px;
-  min-width: 36px;
   height: 36px;
+  min-width: 36px;
+  flex: 0 0 36px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   border: 1px solid #e1e9f6;
   border-radius: 8px;
-  background: #ffffff;
+  background: #fff;
   color: #6f8bb5;
   font-size: 15px;
+  line-height: 1;
 }
 
-.files-unified-table__folders .folder-item__action:hover,
 .files-unified-table__files .file-item__actions .btn-sm:hover {
   color: #347ee4;
   background: #edf4ff;
   border-color: #cfe0f8;
 }
 
-/* ========================================================= HIDDEN UPLOAD AREA ========================================================= */
-
+/* HIDDEN UPLOAD AREA */
 .files-page > .file-upload,
 .folder-manager__content > .file-upload {
   position: absolute;
@@ -1276,15 +1193,45 @@
   height: 1px;
 }
 
-/* ========================================================= PAGE SPACING ========================================================= */
+/* FINAL SPACING */
+.folder-manager {
+  grid-template-columns: 268px minmax(0, 1fr);
+  gap: 20px;
+  margin-top: 18px;
+}
 
-/* ========================================================= RESPONSIVE ========================================================= */
+.folder-manager__sidebar,
+.folder-manager__content {
+  min-height: 604px;
+}
 
+/* RESPONSIVE */
 @media (max-width: 1250px) {
+  .files-unified-table__header,
+  .files-unified-table__folders,
+  .files-unified-table__files {
+    min-width: 860px;
+  }
+
   .files-unified-table__header,
   .files-unified-table__folders .folder-item,
   .files-unified-table__files .file-item {
-    grid-template-columns: 36px 42px minmax(150px, 1fr) 110px 145px 205px;
+    min-width: 860px;
+    grid-template-columns:
+      40px
+      minmax(230px, 1fr)
+      95px
+      110px
+      150px
+      205px;
+  }
+
+  .files-unified-table__folders .folder-item__action,
+  .files-unified-table__files .file-item__actions .btn-sm {
+    width: 34px;
+    height: 34px;
+    min-width: 34px;
+    flex-basis: 34px;
   }
 }
 
@@ -1294,22 +1241,46 @@
   }
 
   .files-unified-table__header,
+  .files-unified-table__folders,
+  .files-unified-table__files {
+    min-width: 820px;
+  }
+
+  .files-unified-table__header,
   .files-unified-table__folders .folder-item,
   .files-unified-table__files .file-item {
-    grid-template-columns: 36px 42px minmax(140px, 1fr) 100px 145px 170px;
+    min-width: 820px;
+    grid-template-columns:
+      38px
+      minmax(205px, 1fr)
+      90px
+      105px
+      140px
+      185px;
   }
 }
 
 @media (max-width: 850px) {
+  .files-page__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .files-page__toolbar {
+    width: 100%;
+  }
+
+  .files-page__new-folder,
+  .files-page__upload {
+    flex: 1;
+  }
+
   .folder-manager {
     grid-template-columns: 1fr;
     gap: 14px;
   }
 
-  .folder-manager__sidebar {
-    min-height: auto;
-  }
-
+  .folder-manager__sidebar,
   .folder-manager__content {
     min-height: auto;
   }
@@ -1325,6 +1296,30 @@
   }
 }
 
+@media (max-width: 600px) {
+  .files-page__header h1 {
+    font-size: 27px;
+  }
+
+  .files-page__subtitle {
+    font-size: 14px;
+  }
+
+  .files-page__toolbar {
+    flex-direction: column;
+  }
+
+  .files-page__new-folder,
+  .files-page__upload {
+    width: 100%;
+  }
+
+  .files-page__section {
+    padding: 12px;
+  }
+}
+
+/* UPLOAD CHEVRON */
 .files-page__upload-chevron {
   width: 18px;
   height: 18px;
@@ -1333,4 +1328,10 @@
   justify-content: center;
   margin-left: 1px;
   flex-shrink: 0;
+}
+
+.files-page__upload-chevron svg {
+  width: 14px;
+  height: 14px;
+  display: block;
 }
