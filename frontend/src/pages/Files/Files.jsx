@@ -50,9 +50,22 @@ export default function Files() {
     function handleDocumentClick() {
       setContextMenu(null);
     }
+    function handleOtherContextMenu() {
+      setContextMenu(null);
+    }
+
     document.addEventListener("click", handleDocumentClick);
+    window.addEventListener(
+      "file-manager-context-menu-open",
+      handleOtherContextMenu,
+    );
+
     return () => {
       document.removeEventListener("click", handleDocumentClick);
+      window.removeEventListener(
+        "file-manager-context-menu-open",
+        handleOtherContextMenu,
+      );
     };
   }, []);
 
@@ -240,6 +253,9 @@ export default function Files() {
 
   function openContextMenu(event, folder) {
     event.preventDefault();
+    event.stopPropagation();
+
+    window.dispatchEvent(new CustomEvent("file-manager-context-menu-open"));
 
     setContextMenu({
       folder,
@@ -561,7 +577,7 @@ export default function Files() {
 
       {contextMenu && (
         <div
-          className="folder-context-menu"
+          className="file-context-menu"
           style={{
             position: "fixed",
             left: contextMenu.x,
@@ -614,7 +630,7 @@ export default function Files() {
 
           <button
             type="button"
-            className="folder-context-menu__danger"
+            className="file-context-menu__danger"
             onClick={() => {
               openDeleteModal(contextMenu.folder);
               setContextMenu(null);

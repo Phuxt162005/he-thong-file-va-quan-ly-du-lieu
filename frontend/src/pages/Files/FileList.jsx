@@ -54,10 +54,22 @@ export default function FileList() {
     function closeContextMenu() {
       setContextMenu(null);
     }
+    function closeWhenAnotherContextMenuOpens() {
+      setContextMenu(null);
+    }
+
     document.addEventListener("click", closeContextMenu);
+    window.addEventListener(
+      "file-manager-context-menu-open",
+      closeWhenAnotherContextMenuOpens,
+    );
 
     return () => {
       document.removeEventListener("click", closeContextMenu);
+      window.removeEventListener(
+        "file-manager-context-menu-open",
+        closeWhenAnotherContextMenuOpens,
+      );
     };
   }, []);
 
@@ -337,6 +349,9 @@ export default function FileList() {
 
   function openContextMenu(event, file) {
     event.preventDefault();
+    event.stopPropagation();
+
+    window.dispatchEvent(new CustomEvent("file-manager-context-menu-open"));
 
     setContextMenu({
       file,

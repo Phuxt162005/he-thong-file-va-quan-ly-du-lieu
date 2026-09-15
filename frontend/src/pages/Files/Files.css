@@ -1,212 +1,34 @@
 .files-page {
   width: 100%;
+  max-width: none;
+  color: #173b76;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 }
 
 .files-page__header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-lg);
+  gap: 24px;
+  margin-bottom: 24px;
 }
 
 .files-page__header h1 {
-  font-size: var(--font-size-xl);
-}
-
-.folder-list {
-  display: flex;
-  flex-direction: column;
-  background-color: var(--color-surface);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-md);
-  overflow: hidden;
-}
-
-.folder-item {
-  min-height: 56px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-md);
-  padding: var(--spacing-sm) var(--spacing-md);
-  border-bottom: var(--border-width) solid var(--color-border);
-}
-
-.folder-item:last-child {
-  border-bottom: none;
-}
-
-.folder-item:hover {
-  background-color: var(--color-hover);
-}
-
-.folder-item__main {
-  min-width: 0;
-  flex: 1;
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-md);
-  text-align: left;
-  background: transparent;
-}
-
-.folder-item__icon {
-  width: 32px;
-  flex-shrink: 0;
-  font-size: 24px;
-}
-
-.folder-item__name {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  color: var(--color-text);
-  font-size: var(--font-size-sm);
-}
-
-.folder-item__actions {
-  display: flex;
-  align-items: center;
-  gap: var(--spacing-xs);
-}
-
-.folder-item__action {
-  width: 34px;
-  height: 34px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: var(--border-width) solid transparent;
-  background: transparent;
-  border-radius: var(--radius-sm);
-}
-
-.folder-item__action:hover {
-  background-color: var(--color-border);
-}
-
-.folder-list__empty {
-  padding: var(--spacing-xl);
-  text-align: center;
-  color: var(--color-text-secondary);
-}
-
-.files-page__section {
-  width: 100%;
-  margin-top: var(--spacing-xl);
-}
-
-.files-page__section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-}
-
-.files-page__section-header h2 {
-  font-size: var(--font-size-lg);
-  font-weight: 600;
-}
-
-/* =========================================================
-   GROUP 05 - FOLDER MANAGEMENT
-   ========================================================= */
-.folder-manager {
-  display: grid;
-  grid-template-columns: 240px minmax(0, 1fr);
-  gap: 0;
-  margin-top: var(--spacing-lg);
-  overflow: hidden;
-
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-lg);
-  background-color: var(--color-surface);
-  box-shadow: var(--shadow-sm);
-}
-
-/* =========================
-   FOLDER SIDEBAR
-   ========================= */
-.folder-manager__sidebar {
-  min-width: 0;
-  padding: var(--spacing-md);
-
-  border-right: var(--border-width) solid var(--color-border);
-  background-color: var(--color-surface-soft);
-}
-
-.folder-manager__title {
-  margin-bottom: var(--spacing-sm);
-
-  color: var(--color-text);
-  font-size: var(--font-size-sm);
-  font-weight: 600;
-}
-
-.folder-manager__root {
-  width: 100%;
-  min-height: 40px;
-  padding: 0 var(--spacing-sm);
-  border: var(--border-width) solid transparent;
-  border-radius: var(--radius-sm);
-  background: transparent;
-  color: var(--color-text);
-  text-align: left;
-  cursor: pointer;
-  transition:
-    background-color 0.15s ease,
-    border-color 0.15s ease;
-}
-
-.folder-manager__root:hover {
-  background-color: var(--color-surface);
-  border-color: var(--color-border);
-}
-
-.folder-manager__root--selected {
-  background-color: var(--color-primary-soft);
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-  font-weight: 600;
-}
-
-/* =========================
-   FOLDER CONTENT
-   ========================= */
-.folder-manager__content {
-  min-width: 0;
-  padding: var(--spacing-md);
-  background-color: var(--color-surface);
-}
-
-.folder-manager__content-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: var(--spacing-md);
-  margin-bottom: var(--spacing-md);
-}
-
-.folder-manager__content-header h2 {
+  font-size: 32px;
   margin: 0;
-  color: var(--color-text);
-  font-size: var(--font-size-lg);
-  font-weight: 600;
+  color: #163b75;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-weight: 750;
+  line-height: 1.15;
 }
 
-/* =========================
-   FOLDER LIST
-   ========================= */
 .folder-list {
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  background-color: var(--color-surface);
   border: var(--border-width) solid var(--color-border);
   border-radius: var(--radius-md);
-  background-color: var(--color-surface);
+  overflow: hidden;
 }
 
 .folder-item {
@@ -246,10 +68,10 @@
 
 .folder-item__name {
   overflow: hidden;
-  color: var(--color-text);
-  font-size: var(--font-size-sm);
   text-overflow: ellipsis;
   white-space: nowrap;
+  color: var(--color-text);
+  font-size: var(--font-size-sm);
 }
 
 .folder-item__actions {
@@ -264,9 +86,10 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  padding: 0;
   border: var(--border-width) solid transparent;
-  border-radius: var(--radius-sm);
   background: transparent;
+  border-radius: var(--radius-sm);
   color: var(--color-text-secondary);
   cursor: pointer;
   transition:
@@ -283,55 +106,161 @@
 
 .folder-list__empty {
   padding: var(--spacing-xl);
-  color: var(--color-text-secondary);
   text-align: center;
+  color: var(--color-text-secondary);
 }
 
-/* =========================
-   FILE SECTION
-   ========================= */
 .files-page__section {
-  margin-top: var(--spacing-lg);
-  padding: var(--spacing-lg);
-  border: var(--border-width) solid var(--color-border);
-  border-radius: var(--radius-lg);
+  width: 100%;
+  margin-top: 24px;
+  padding: 18px;
+  border: 1px solid #dfe8f7;
+  border-radius: 13px;
   background-color: var(--color-surface);
-  box-shadow: var(--shadow-sm);
+  box-shadow: 0 5px 18px rgba(76, 108, 157, 0.06);
+  background: #ffffff;
 }
 
 .files-page__section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: var(--spacing-md);
+  gap: var(--spacing-md);
+  margin-bottom: 12px;
+  min-height: 42px;
 }
 
 .files-page__section-header h2 {
+  font-size: 20px;
+  font-weight: 750;
   margin: 0;
-  color: var(--color-text);
-  font-size: var(--font-size-lg);
-  font-weight: 600;
+  color: #173b76;
+  font-family: inherit;
 }
+
+/* ========================================================= GROUP 05 - FOLDER MANAGEMENT ========================================================= */
+
+.folder-manager {
+  display: grid;
+  grid-template-columns: 255px minmax(0, 1fr);
+  gap: 16px;
+  margin-top: 24px;
+  overflow: visible;
+  border: none;
+  border-radius: 0;
+  background-color: var(--color-surface);
+  box-shadow: none;
+  background: transparent;
+}
+
+/* ========================= FOLDER SIDEBAR ========================= */
+
+.folder-manager__sidebar {
+  min-width: 0;
+  padding: 20px 14px;
+  border-right: 1px solid #e1e8f4;
+  background-color: var(--color-surface-soft);
+  background: #ffffff;
+  min-height: 636px;
+  border: 1px solid #dfe8f7;
+  border-radius: 13px;
+  box-shadow: 0 5px 18px rgba(76, 108, 157, 0.06);
+}
+
+.folder-manager__title {
+  margin-bottom: var(--spacing-sm);
+  color: #173b76;
+  font-size: 17px;
+  font-weight: 700;
+  margin: 0 8px 13px;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+.folder-manager__root {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 15px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: transparent;
+  color: #326fca;
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+  display: flex;
+  align-items: center;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 15px;
+  font-weight: 600;
+  gap: 9px;
+}
+
+.folder-manager__root:hover {
+  background-color: var(--color-surface);
+  border-color: var(--color-border);
+  background: #eef4ff;
+}
+
+.folder-manager__root--selected {
+  background-color: var(--color-primary-soft);
+  border-color: #b9d2fa;
+  color: #337ce1;
+  font-weight: 700;
+  background: linear-gradient(135deg, #edf4ff 0%, #e8f1ff 100%);
+}
+
+/* ========================= FOLDER CONTENT ========================= */
+
+.folder-manager__content {
+  min-width: 0;
+  padding: 17px 13px 14px;
+  background-color: var(--color-surface);
+  background: #ffffff;
+  min-height: 636px;
+  border: 1px solid #dfe8f7;
+  border-radius: 13px;
+  box-shadow: 0 5px 18px rgba(76, 108, 157, 0.06);
+}
+
+.folder-manager__content-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 2px;
+  min-height: 52px;
+  padding: 0 9px;
+}
+
+.folder-manager__content-header h2 {
+  margin: 0;
+  color: #173b76;
+  font-size: 21px;
+  font-weight: 750;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+/* ========================= FOLDER LIST ========================= */
+
+/* ========================= FILE SECTION ========================= */
 
 @media (max-width: 768px) {
   .folder-manager {
     grid-template-columns: 1fr;
   }
-
   .folder-manager__sidebar {
     border-right: none;
     border-bottom: var(--border-width) solid var(--color-border);
   }
-
   .folder-manager__content {
     padding: var(--spacing-md);
   }
-
   .folder-manager__content-header {
     align-items: flex-start;
     flex-direction: column;
   }
-
   .folder-manager__content-header .btn {
     width: 100%;
   }
@@ -434,15 +363,18 @@
 }
 
 .files-page__subtitle {
-  margin-top: 4px;
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-sm);
+  margin-top: 7px;
+  color: #7186aa;
+  font-size: 16px;
+  margin: 7px 0 0;
+  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  line-height: 1.4;
 }
 
 .files-page__toolbar {
   display: flex;
   align-items: center;
-  gap: var(--spacing-sm);
+  gap: 12px;
 }
 
 .file-list__toolbar-info {
@@ -474,86 +406,25 @@
   }
 }
 
-/* =========================================================
-   FILE MANAGER - UI REDESIGN
-   ========================================================= */
+/* ========================================================= FILE MANAGER - UI REDESIGN ========================================================= */
 
-.files-page {
-  width: 100%;
-  max-width: none;
+/* ========================================================= PAGE HEADER ========================================================= */
 
-  color: #173b76;
-
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-}
-
-/* =========================================================
-   PAGE HEADER
-   ========================================================= */
-
-.files-page__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-
-  gap: 24px;
-
-  margin-bottom: 25px;
-}
-
-.files-page__header h1 {
-  margin: 0;
-
-  color: #163b75;
-
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-  font-size: 32px;
-  font-weight: 750;
-  line-height: 1.15;
-}
-
-.files-page__subtitle {
-  margin: 7px 0 0;
-
-  color: #7186aa;
-
-  font-family: inherit;
-  font-size: 16px;
-  line-height: 1.4;
-}
-
-/* =========================================================
-   TOP BUTTONS
-   ========================================================= */
-
-.files-page__toolbar {
-  display: flex;
-  align-items: center;
-
-  gap: 12px;
-}
+/* ========================================================= TOP BUTTONS ========================================================= */
 
 .files-page__new-folder,
 .files-page__upload {
   height: 56px;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   gap: 9px;
-
   padding: 0 22px;
-
   border-radius: 11px;
-
   font-family: inherit;
   font-size: 15px;
   font-weight: 650;
-
   cursor: pointer;
-
   transition:
     transform 0.15s ease,
     box-shadow 0.15s ease,
@@ -562,19 +433,14 @@
 
 .files-page__new-folder {
   min-width: 177px;
-
   color: #ffffff;
-
   background: linear-gradient(135deg, #2f82e8 0%, #2876df 100%);
-
   border: 1px solid #2f82e8;
-
   box-shadow: 0 6px 16px rgba(47, 128, 228, 0.18);
 }
 
 .files-page__new-folder:hover {
   transform: translateY(-1px);
-
   box-shadow: 0 8px 20px rgba(47, 128, 228, 0.25);
 }
 
@@ -586,14 +452,14 @@
 
 .files-page__upload {
   min-width: 168px;
-
   color: #3779d7;
-
   background: rgba(255, 255, 255, 0.88);
-
   border: 1px solid #cbdafa;
-
   box-shadow: 0 3px 10px rgba(83, 118, 172, 0.05);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .files-page__upload:hover {
@@ -605,99 +471,22 @@
 }
 
 .files-page__upload-chevron {
-  margin-left: 4px;
-
-  font-size: 19px;
-  line-height: 1;
-}
-
-/* =========================================================
-   FOLDER MANAGER
-   ========================================================= */
-
-.folder-manager {
-  display: grid;
-
-  grid-template-columns: 255px minmax(0, 1fr);
-
-  margin-top: 24px;
-
-  overflow: hidden;
-
-  border: 1px solid #dfe8f7;
-  border-radius: 13px;
-
-  background: #ffffff;
-
-  box-shadow: 0 5px 18px rgba(76, 108, 157, 0.06);
-}
-
-/* =========================================================
-   FOLDER SIDEBAR
-   ========================================================= */
-
-.folder-manager__sidebar {
-  min-width: 0;
-
-  padding: 20px 14px 22px;
-
-  background: linear-gradient(180deg, #fbfcff 0%, #f7f9fd 100%);
-
-  border-right: 1px solid #e1e8f4;
-}
-
-.folder-manager__title {
-  margin: 0 8px 13px;
-
-  color: #173b76;
-
-  font-family: inherit;
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.folder-manager__root {
-  width: 100%;
-  min-height: 48px;
-
-  display: flex;
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
   align-items: center;
-
-  padding: 0 15px;
-
-  color: #326fca;
-
-  background: transparent;
-
-  border: 1px solid transparent;
-  border-radius: 10px;
-
-  font-family: inherit;
-  font-size: 15px;
-  font-weight: 600;
-
-  text-align: left;
-
-  cursor: pointer;
+  justify-content: center;
+  margin-left: 2px;
+  font-size: 16px;
+  line-height: 1;
+  transform: translateY(-1px);
 }
 
-.folder-manager__root:hover {
-  background: #eef4ff;
-}
+/* ========================================================= FOLDER MANAGER ========================================================= */
 
-.folder-manager__root--selected {
-  color: #337ce1;
+/* ========================================================= FOLDER SIDEBAR ========================================================= */
 
-  background: linear-gradient(135deg, #edf4ff 0%, #e8f1ff 100%);
-
-  border-color: #b9d2fa;
-
-  font-weight: 700;
-}
-
-/* =========================================================
-   FOLDER TREE
-   ========================================================= */
+/* ========================================================= FOLDER TREE ========================================================= */
 
 .folder-manager__sidebar .folder-tree {
   margin-top: 7px;
@@ -705,15 +494,10 @@
 
 .folder-manager__sidebar .folder-tree__item {
   min-height: 42px;
-
   gap: 6px;
-
   padding: 0 8px;
-
   border-radius: 8px;
-
   color: #49658e;
-
   font-family: inherit;
   font-size: 15px;
 }
@@ -724,101 +508,51 @@
 
 .folder-manager__sidebar .folder-tree__item--selected {
   color: #317bdd;
-
   background: #edf4ff;
 }
 
 .folder-manager__sidebar .folder-tree__expand {
   width: 18px;
-
   color: #173b76;
-
   font-size: 11px;
 }
 
 .folder-manager__sidebar .folder-tree__icon {
   width: 28px;
-
   font-size: 22px;
 }
 
 .folder-manager__sidebar .folder-tree__name {
   color: inherit;
-
   font-family: inherit;
   font-size: 15px;
   font-weight: 500;
 }
 
-/* =========================================================
-   MAIN FILE CONTENT
-   ========================================================= */
+/* ========================================================= MAIN FILE CONTENT ========================================================= */
 
-.folder-manager__content {
-  min-width: 0;
-
-  padding: 17px 13px 14px;
-
-  background: #ffffff;
-}
-
-.folder-manager__content-header {
-  min-height: 52px;
-
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-
-  gap: 16px;
-
-  margin-bottom: 2px;
-
-  padding: 0 9px;
-}
-
-.folder-manager__content-header h2 {
-  margin: 0;
-
-  color: #173b76;
-
-  font-family: inherit;
-  font-size: 21px;
-  font-weight: 750;
-}
-
-/* =========================================================
-   VIEW TOGGLE
-   ========================================================= */
+/* ========================================================= VIEW TOGGLE ========================================================= */
 
 .folder-manager__view-toggle {
   display: flex;
   align-items: center;
-
   padding: 3px;
-
   border: 1px solid #dce5f5;
   border-radius: 9px;
-
   background: #ffffff;
 }
 
 .folder-manager__view-button {
   width: 40px;
   height: 35px;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   color: #7890b5;
-
   background: transparent;
-
   border: none;
   border-radius: 7px;
-
   font-size: 20px;
-
   cursor: pointer;
 }
 
@@ -828,32 +562,23 @@
 
 .folder-manager__view-button--active {
   color: #347ee4;
-
   background: #e9f2ff;
 }
 
-/* =========================================================
-   FOLDER LIST
-   ========================================================= */
+/* ========================================================= FOLDER LIST ========================================================= */
 
 .folder-manager__content .folder-list {
   margin-top: 0;
-
   border: 1px solid #e1e8f4;
   border-radius: 10px;
-
   background: #ffffff;
-
   box-shadow: none;
 }
 
 .folder-manager__content .folder-item {
   min-height: 55px;
-
   padding: 0 15px;
-
   border-bottom: 1px solid #e8edf5;
-
   background: #ffffff;
 }
 
@@ -867,15 +592,12 @@
 
 .folder-manager__content .folder-item__icon {
   width: 34px;
-
   color: #ffbf2f;
-
   font-size: 26px;
 }
 
 .folder-manager__content .folder-item__name {
   color: #244a84;
-
   font-family: inherit;
   font-size: 15px;
   font-weight: 600;
@@ -888,102 +610,38 @@
 .folder-manager__content .folder-item__action {
   width: 35px;
   height: 35px;
-
   color: #7290ba;
-
   border-radius: 8px;
 }
 
 .folder-manager__content .folder-item__action:hover {
   color: #347ee4;
-
   background: #edf4ff;
   border-color: #d8e6fb;
 }
 
-/* =========================================================
-   FILE SECTION
-   ========================================================= */
+/* ========================================================= FILE SECTION ========================================================= */
 
-.files-page__section {
-  width: 100%;
-
-  margin-top: 24px;
-
-  padding: 18px;
-
-  border: 1px solid #dfe8f7;
-  border-radius: 13px;
-
-  background: #ffffff;
-
-  box-shadow: 0 5px 18px rgba(76, 108, 157, 0.06);
-}
-
-.files-page__section-header {
-  min-height: 42px;
-
-  margin-bottom: 12px;
-}
-
-.files-page__section-header h2 {
-  margin: 0;
-
-  color: #173b76;
-
-  font-family: inherit;
-  font-size: 20px;
-  font-weight: 750;
-}
-
-/* =========================================================
-   FILE LIST
-   ========================================================= */
+/* ========================================================= FILE LIST ========================================================= */
 
 .files-page .file-list {
   width: 100%;
-
   overflow: hidden;
-
   border: 1px solid #dfe7f4;
   border-radius: 10px;
-
   background: #ffffff;
 }
 
 .files-page .file-list__header {
   min-height: 48px;
-
   display: grid;
-
-  /*
-   * checkbox
-   * icon
-   * name
-   * size
-   * date
-   * actions
-   */
-  grid-template-columns:
-    40px
-    46px
-    minmax(180px, 1fr)
-    130px
-    170px
-    250px;
-
+  grid-template-columns: 40px 46px minmax(180px, 1fr) 130px 170px 250px;
   align-items: center;
-
   gap: 7px;
-
   padding: 0 13px;
-
   color: #49658e;
-
   background: linear-gradient(180deg, #f0f4fc 0%, #edf2fb 100%);
-
   border-bottom: 1px solid #dfe7f3;
-
   font-family: inherit;
   font-size: 14px;
   font-weight: 700;
@@ -996,35 +654,19 @@
 .files-page .file-list__header input {
   width: 17px;
   height: 17px;
-
   accent-color: #347ee4;
-
   cursor: pointer;
 }
 
-/* =========================================================
-   FILE ITEMS
-   ========================================================= */
+/* ========================================================= FILE ITEMS ========================================================= */
 
 .files-page .file-item {
   min-height: 55px;
-
-  grid-template-columns:
-    40px
-    46px
-    minmax(180px, 1fr)
-    130px
-    170px
-    250px;
-
+  grid-template-columns: 40px 46px minmax(180px, 1fr) 130px 170px 250px;
   gap: 7px;
-
   padding: 0 13px;
-
   background: #ffffff;
-
   border-bottom: 1px solid #e6ecf5;
-
   font-family: inherit;
 }
 
@@ -1035,21 +677,16 @@
 .files-page .file-item__icon {
   width: 36px;
   height: 36px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   background: transparent;
-
   border-radius: 7px;
-
   font-size: 25px;
 }
 
 .files-page .file-item__name span {
   color: #244a84;
-
   font-family: inherit;
   font-size: 15px;
   font-weight: 600;
@@ -1058,14 +695,12 @@
 .files-page .file-item__size,
 .files-page .file-item__date {
   color: #7590b7;
-
   font-family: inherit;
   font-size: 14px;
 }
 
 .files-page .file-item__actions {
   justify-content: flex-start;
-
   gap: 7px;
 }
 
@@ -1073,26 +708,19 @@
   width: 37px;
   min-width: 37px;
   height: 37px;
-
   padding: 0;
-
   border: 1px solid #e2eafa;
   border-radius: 8px;
-
   background: #ffffff;
-
   font-size: 16px;
 }
 
 .files-page .file-item__actions .btn-sm:hover {
   background: #eef5ff;
-
   border-color: #cfe0fa;
 }
 
-/* =========================================================
-   SELECTED FILE
-   ========================================================= */
+/* ========================================================= SELECTED FILE ========================================================= */
 
 .files-page .file-item--selected {
   background: #eef5ff;
@@ -1101,52 +729,35 @@
 .files-page .file-item__select input {
   width: 17px;
   height: 17px;
-
   accent-color: #347ee4;
 }
 
-/* =========================================================
-   EMPTY STATE
-   ========================================================= */
+/* ========================================================= EMPTY STATE ========================================================= */
 
 .files-page .folder-list__empty,
 .files-page .file-list__empty {
   min-height: 130px;
-
   display: flex;
   align-items: center;
   justify-content: center;
-
   color: #7c91b2;
-
   font-family: inherit;
   font-size: 14px;
 }
 
-/* =========================================================
-   ERROR
-   ========================================================= */
+/* ========================================================= ERROR ========================================================= */
 
 .files-page .error-message {
   margin-bottom: 12px;
-
   border-radius: 9px;
 }
 
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
+/* ========================================================= RESPONSIVE ========================================================= */
 
 @media (max-width: 1250px) {
   .files-page .file-list__header,
   .files-page .file-item {
-    grid-template-columns:
-      36px
-      42px
-      minmax(150px, 1fr)
-      110px
-      145px
-      205px;
+    grid-template-columns: 36px 42px minmax(150px, 1fr) 110px 145px 205px;
   }
 }
 
@@ -1157,13 +768,7 @@
 
   .files-page .file-list__header,
   .files-page .file-item {
-    grid-template-columns:
-      36px
-      42px
-      minmax(140px, 1fr)
-      100px
-      145px
-      170px;
+    grid-template-columns: 36px 42px minmax(140px, 1fr) 100px 145px 170px;
   }
 }
 
@@ -1224,9 +829,8 @@
   }
 }
 
-/* =========================================================
-   UNIFIED FILE TABLE
-   ========================================================= */
+/* ========================================================= UNIFIED FILE TABLE ========================================================= */
+
 .files-unified-table {
   width: 100%;
   overflow: hidden;
@@ -1235,19 +839,12 @@
   background: #ffffff;
 }
 
-/* =========================
-   HEADER
-   ========================= */
+/* ========================= HEADER ========================= */
+
 .files-unified-table__header {
   min-height: 48px;
   display: grid;
-  grid-template-columns:
-    40px
-    46px
-    minmax(180px, 1fr)
-    130px
-    170px
-    250px;
+  grid-template-columns: 40px 46px minmax(180px, 1fr) 130px 170px 250px;
   align-items: center;
   gap: 7px;
   padding: 0 13px;
@@ -1280,11 +877,12 @@
 
 .files-unified-table__icon {
   width: 100%;
+  display: flex;
+  align-items: center;
 }
 
-/* =========================
-   FOLDERS
-   ========================= */
+/* ========================= FOLDERS ========================= */
+
 .files-unified-table__folders {
   width: 100%;
 }
@@ -1293,17 +891,17 @@
   display: none;
 }
 
-/* =========================
-   FILES
-   ========================= */
+/* ========================= FILES ========================= */
+
 .files-unified-table__files {
   width: 100%;
 }
 
 .files-unified-table__files .file-list {
-  border: 0;
+  border: none;
   border-radius: 0;
   box-shadow: none;
+  margin: 0;
 }
 
 .files-unified-table__files .file-list__header {
@@ -1313,13 +911,7 @@
 .files-unified-table__files .file-item {
   min-height: 55px;
   display: grid;
-  grid-template-columns:
-    40px
-    46px
-    minmax(180px, 1fr)
-    130px
-    170px
-    250px;
+  grid-template-columns: 40px 46px minmax(180px, 1fr) 130px 170px 250px;
   align-items: center;
   gap: 7px;
   padding: 0 13px;
@@ -1389,9 +981,8 @@
   border-color: #cfe0f8;
 }
 
-/* =========================
-   EMPTY FILE STATE
-   ========================= */
+/* ========================= EMPTY FILE STATE ========================= */
+
 .files-unified-table__files .file-list__empty {
   min-height: 100px;
   display: flex;
@@ -1401,9 +992,8 @@
   font-size: 14px;
 }
 
-/* =========================
-   HIDE UPLOAD DROPZONE
-   ========================= */
+/* ========================= HIDE UPLOAD DROPZONE ========================= */
+
 .files-page .file-upload {
   position: absolute;
   width: 1px;
@@ -1419,148 +1009,36 @@
   height: 1px;
 }
 
-/* =========================
-   HEADER / PAGE
-   ========================= */
-.files-page__header {
-  align-items: flex-start;
-}
+/* ========================= HEADER / PAGE ========================= */
 
-.files-page__header h1 {
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 32px;
-  font-weight: 750;
-  color: #163b75;
-}
-
-.files-page__subtitle {
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 16px;
-  color: #7186aa;
-}
-
-/* =========================
-   SIDEBAR
-   ========================= */
-.folder-manager__sidebar {
-  background: linear-gradient(180deg, #fbfcff 0%, #f7f9fd 100%);
-}
-
-.folder-manager__title {
-  color: #173b76;
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 17px;
-  font-weight: 700;
-}
-
-.folder-manager__root {
-  display: flex;
-  align-items: center;
-  gap: 9px;
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 15px;
-}
+/* ========================= SIDEBAR ========================= */
 
 .folder-manager__root-icon {
   font-size: 17px;
 }
 
-/* =========================
-   CONTENT
-   ========================= */
-.folder-manager__content {
-  padding: 17px 13px 14px;
-  background: #ffffff;
-}
+/* ========================= CONTENT ========================= */
 
-.folder-manager__content-header {
-  min-height: 52px;
-  margin-bottom: 2px;
-  padding: 0 9px;
-}
+/* ========================= VIEW TOGGLE ========================= */
 
-.folder-manager__content-header h2 {
-  color: #173b76;
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-  font-size: 21px;
-  font-weight: 750;
-}
+/* ========================= RESPONSIVE ========================= */
 
-/* =========================
-   VIEW TOGGLE
-   ========================= */
-.folder-manager__view-toggle {
-  display: flex;
-  align-items: center;
-  padding: 3px;
-  border: 1px solid #dce5f5;
-  border-radius: 9px;
-  background: #ffffff;
-}
-
-.folder-manager__view-button {
-  width: 40px;
-  height: 35px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  border-radius: 7px;
-  background: transparent;
-  color: #7890b5;
-  font-size: 20px;
-  cursor: pointer;
-}
-
-.folder-manager__view-button--active {
-  background: #e9f2ff;
-  color: #347ee4;
-}
-
-/* =========================
-   RESPONSIVE
-   ========================= */
 @media (max-width: 1250px) {
   .files-unified-table__header {
-    grid-template-columns:
-      36px
-      42px
-      minmax(150px, 1fr)
-      110px
-      145px
-      205px;
+    grid-template-columns: 36px 42px minmax(150px, 1fr) 110px 145px 205px;
   }
-
   .files-unified-table__files .file-item {
-    grid-template-columns:
-      36px
-      42px
-      minmax(150px, 1fr)
-      110px
-      145px
-      205px;
+    grid-template-columns: 36px 42px minmax(150px, 1fr) 110px 145px 205px;
   }
 }
 
 @media (max-width: 1050px) {
   .files-unified-table__header {
-    grid-template-columns:
-      36px
-      42px
-      minmax(140px, 1fr)
-      100px
-      145px
-      170px;
+    grid-template-columns: 36px 42px minmax(140px, 1fr) 100px 145px 170px;
   }
 
   .files-unified-table__files .file-item {
-    grid-template-columns:
-      36px
-      42px
-      minmax(140px, 1fr)
-      100px
-      145px
-      170px;
+    grid-template-columns: 36px 42px minmax(140px, 1fr) 100px 145px 170px;
   }
 }
 
@@ -1579,201 +1057,36 @@
   }
 }
 
-/* =========================================================
-   FILE MANAGER - FINAL LAYOUT ALIGNMENT
-   ========================================================= */
+/* ========================================================= FILE MANAGER - FINAL LAYOUT ALIGNMENT ========================================================= */
 
-/*
- * Hai khu vực "Thư mục" và "Tất cả tệp" được hiển thị
- * như hai card riêng biệt giống screenshot.
- */
-.folder-manager {
-  display: grid;
+/* * Hai khu vực "Thư mục" và "Tất cả tệp" được hiển thị * như hai card riêng biệt giống screenshot. */
 
-  grid-template-columns:
-    255px
-    minmax(0, 1fr);
+/* ========================================================= LEFT FOLDER CARD ========================================================= */
 
-  gap: 16px;
+/* ========================================================= RIGHT FILE CARD ========================================================= */
 
-  margin-top: 24px;
+/* ========================================================= TABLE ========================================================= */
 
-  overflow: visible;
+/* ========================================================= TABLE HEADER ========================================================= */
 
-  border: none;
-  border-radius: 0;
-
-  background: transparent;
-
-  box-shadow: none;
-}
-
-/* =========================================================
-   LEFT FOLDER CARD
-   ========================================================= */
-
-.folder-manager__sidebar {
-  min-width: 0;
-  min-height: 636px;
-
-  padding: 20px 14px;
-
-  background: #ffffff;
-
-  border: 1px solid #dfe8f7;
-  border-radius: 13px;
-
-  box-shadow: 0 5px 18px rgba(76, 108, 157, 0.06);
-}
-
-/* =========================================================
-   RIGHT FILE CARD
-   ========================================================= */
-
-.folder-manager__content {
-  min-width: 0;
-  min-height: 636px;
-
-  padding: 17px 13px 14px;
-
-  background: #ffffff;
-
-  border: 1px solid #dfe8f7;
-  border-radius: 13px;
-
-  box-shadow: 0 5px 18px rgba(76, 108, 157, 0.06);
-}
-
-/* =========================================================
-   TABLE
-   ========================================================= */
-
-.files-unified-table {
-  width: 100%;
-
-  overflow: hidden;
-
-  border: 1px solid #dfe7f4;
-  border-radius: 10px;
-
-  background: #ffffff;
-}
-
-/* =========================================================
-   TABLE HEADER
-   ========================================================= */
-
-.files-unified-table__header {
-  min-height: 48px;
-
-  display: grid;
-
-  grid-template-columns:
-    40px
-    46px
-    minmax(180px, 1fr)
-    130px
-    170px
-    250px;
-
-  align-items: center;
-
-  gap: 7px;
-
-  padding: 0 13px;
-
-  color: #49658e;
-
-  background: linear-gradient(180deg, #f0f4fc 0%, #edf2fb 100%);
-
-  border-bottom: 1px solid #dfe7f3;
-
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.files-unified-table__header > div {
-  min-width: 0;
-}
-
-.files-unified-table__checkbox {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.files-unified-table__checkbox span {
-  width: 17px;
-  height: 17px;
-
-  display: block;
-
-  border: 1.5px solid #aebfd9;
-  border-radius: 4px;
-
-  background: #ffffff;
-}
-
-.files-unified-table__icon {
-  display: flex;
-  align-items: center;
-}
-
-/* =========================================================
-   FOLDER + FILE SAME GRID
-   ========================================================= */
+/* ========================================================= FOLDER + FILE SAME GRID ========================================================= */
 
 .files-unified-table__folders .folder-item,
 .files-unified-table__files .file-item {
   display: grid;
-
-  grid-template-columns:
-    40px
-    46px
-    minmax(180px, 1fr)
-    130px
-    170px
-    250px;
-
+  grid-template-columns: 40px 46px minmax(180px, 1fr) 130px 170px 250px;
   align-items: center;
-
   gap: 7px;
-
   min-height: 55px;
-
   padding: 0 13px;
 }
 
-/* =========================================================
-   FILE LIST
-   ========================================================= */
+/* ========================================================= FILE LIST ========================================================= */
 
-.files-unified-table__files .file-list {
-  margin: 0;
-
-  border: none;
-  border-radius: 0;
-
-  box-shadow: none;
-}
-
-.files-unified-table__files .file-list__header {
-  display: none;
-}
-
-/* =========================================================
-   FOLDER LIST
-   ========================================================= */
-
-.files-unified-table__folders {
-  width: 100%;
-}
+/* ========================================================= FOLDER LIST ========================================================= */
 
 .files-unified-table__folders .folder-item {
   background: #ffffff;
-
   border-bottom: 1px solid #e6ecf5;
 }
 
@@ -1781,62 +1094,37 @@
   background: #f8fbff;
 }
 
-/* =========================================================
-   FILE LIST ROW
-   ========================================================= */
+/* ========================================================= FILE LIST ROW ========================================================= */
 
-.files-unified-table__files .file-item {
-  background: #ffffff;
-
-  border-bottom: 1px solid #e6ecf5;
-}
-
-.files-unified-table__files .file-item:hover {
-  background: #f8fbff;
-}
-
-/* =========================================================
-   NAMES
-   ========================================================= */
+/* ========================================================= NAMES ========================================================= */
 
 .files-unified-table__folders .folder-item__name,
 .files-unified-table__files .file-item__name span {
   color: #244a84;
-
   font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
   font-size: 15px;
   font-weight: 600;
 }
 
-/* =========================================================
-   SIZE + DATE
-   ========================================================= */
+/* ========================================================= SIZE + DATE ========================================================= */
 
 .files-unified-table__folders .folder-item__size,
 .files-unified-table__folders .folder-item__date,
 .files-unified-table__files .file-item__size,
 .files-unified-table__files .file-item__date {
   color: #7890b5;
-
   font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
   font-size: 14px;
-
   white-space: nowrap;
 }
 
-/* =========================================================
-   ACTION BUTTONS
-   ========================================================= */
+/* ========================================================= ACTION BUTTONS ========================================================= */
 
 .files-unified-table__folders .folder-item__actions,
 .files-unified-table__files .file-item__actions {
   display: flex;
   align-items: center;
-
   justify-content: flex-start;
-
   gap: 6px;
 }
 
@@ -1845,54 +1133,37 @@
   width: 36px;
   min-width: 36px;
   height: 36px;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
-
   padding: 0;
-
   border: 1px solid #e1e9f6;
   border-radius: 8px;
-
   background: #ffffff;
-
   color: #6f8bb5;
-
   font-size: 15px;
 }
 
 .files-unified-table__folders .folder-item__action:hover,
 .files-unified-table__files .file-item__actions .btn-sm:hover {
   color: #347ee4;
-
   background: #edf4ff;
-
   border-color: #cfe0f8;
 }
 
-/* =========================================================
-   HIDDEN UPLOAD AREA
-   ========================================================= */
+/* ========================================================= HIDDEN UPLOAD AREA ========================================================= */
 
 .files-page > .file-upload,
 .folder-manager__content > .file-upload {
   position: absolute;
-
   width: 1px;
   height: 1px;
-
   margin: -1px;
   padding: 0;
-
   overflow: hidden;
-
   clip: rect(0, 0, 0, 0);
-
   white-space: nowrap;
-
   border: 0;
-
   opacity: 0;
 }
 
@@ -1902,79 +1173,33 @@
   height: 1px;
 }
 
-/* =========================================================
-   PAGE SPACING
-   ========================================================= */
+/* ========================================================= PAGE SPACING ========================================================= */
 
-.files-page__header {
-  margin-bottom: 24px;
-}
-
-.files-page__header h1 {
-  margin: 0;
-
-  color: #163b75;
-
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-  font-size: 32px;
-  font-weight: 750;
-
-  line-height: 1.15;
-}
-
-.files-page__subtitle {
-  margin-top: 7px;
-
-  color: #7186aa;
-
-  font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-  font-size: 16px;
-}
-
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
+/* ========================================================= RESPONSIVE ========================================================= */
 
 @media (max-width: 1250px) {
   .files-unified-table__header,
   .files-unified-table__folders .folder-item,
   .files-unified-table__files .file-item {
-    grid-template-columns:
-      36px
-      42px
-      minmax(150px, 1fr)
-      110px
-      145px
-      205px;
+    grid-template-columns: 36px 42px minmax(150px, 1fr) 110px 145px 205px;
   }
 }
 
 @media (max-width: 1050px) {
   .folder-manager {
-    grid-template-columns:
-      220px
-      minmax(0, 1fr);
+    grid-template-columns: 220px minmax(0, 1fr);
   }
 
   .files-unified-table__header,
   .files-unified-table__folders .folder-item,
   .files-unified-table__files .file-item {
-    grid-template-columns:
-      36px
-      42px
-      minmax(140px, 1fr)
-      100px
-      145px
-      170px;
+    grid-template-columns: 36px 42px minmax(140px, 1fr) 100px 145px 170px;
   }
 }
 
 @media (max-width: 850px) {
   .folder-manager {
     grid-template-columns: 1fr;
-
     gap: 14px;
   }
 
