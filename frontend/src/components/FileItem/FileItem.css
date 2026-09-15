@@ -1,68 +1,48 @@
-/* =========================================================
-   FILE ITEM
-   ========================================================= */
-
 .file-item {
-  width: 100%;
-  min-width: 0;
-  height: 57px;
+  min-height: 58px;
 
   display: grid;
 
-  /*
-    6 CỘT:
-
-    1. Checkbox
-    2. Tên + icon
-    3. Loại
-    4. Dung lượng
-    5. Cập nhật
-    6. Thao tác
-  */
   grid-template-columns:
-    40px
+    42px
     minmax(260px, 1fr)
-    100px
-    120px
-    170px
+    115px
+    125px
+    165px
     220px;
 
   align-items: center;
 
-  padding: 0 12px;
-
-  box-sizing: border-box;
+  padding: 0 14px;
 
   background: #ffffff;
 
-  border-bottom: 1px solid #e5ebf4;
+  border-bottom: 1px solid #e7edf6;
 
-  white-space: nowrap;
+  transition:
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
 .file-item:hover {
-  background: #f8fbff;
+  background: #fbfdff;
 }
 
 .file-item--selected {
   background: #edf4ff;
 }
 
-/* =========================================================
-   CHECKBOX
-   ========================================================= */
+/* ================= CHECKBOX ================= */
 
 .file-item__select {
-  width: 100%;
-
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
 .file-item__select input {
-  width: 16px;
-  height: 16px;
+  width: 17px;
+  height: 17px;
 
   margin: 0;
 
@@ -71,54 +51,65 @@
   accent-color: #3978d5;
 }
 
-/* =========================================================
-   NAME + ICON
-   ========================================================= */
+/* ================= NAME CELL ================= */
 
-.file-item__name {
+.file-item__name-cell {
   min-width: 0;
+
+  width: 100%;
 
   display: flex;
   align-items: center;
 
-  gap: 12px;
-
-  overflow: hidden;
+  gap: 13px;
 }
+
+/* ================= ICON ================= */
 
 .file-item__icon {
   width: 34px;
   height: 34px;
 
-  display: flex;
+  flex: 0 0 34px;
+
+  display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  flex: 0 0 34px;
+  border-radius: 7px;
 
   font-size: 23px;
+
   line-height: 1;
 }
 
-.file-item__name span {
+/* ================= NAME ================= */
+
+.file-item__name {
   min-width: 0;
 
+  overflow: hidden;
+}
+
+.file-item__name span {
   display: block;
 
   overflow: hidden;
 
   color: #234b87;
 
-  font-size: 14px;
+  font-size: 15px;
+
   font-weight: 600;
 
+  line-height: 1.3;
+
   text-overflow: ellipsis;
+
   white-space: nowrap;
 }
 
-/* =========================================================
-   TYPE
-   ========================================================= */
+/* ================= TYPE ================= */
 
 .file-item__type {
   min-width: 0;
@@ -128,15 +119,15 @@
   color: #7186aa;
 
   font-size: 14px;
-  font-weight: 400;
+
+  font-weight: 500;
 
   text-overflow: ellipsis;
+
   white-space: nowrap;
 }
 
-/* =========================================================
-   SIZE
-   ========================================================= */
+/* ================= SIZE ================= */
 
 .file-item__size {
   min-width: 0;
@@ -146,15 +137,15 @@
   color: #7186aa;
 
   font-size: 14px;
-  font-weight: 400;
+
+  font-weight: 500;
 
   text-overflow: ellipsis;
+
   white-space: nowrap;
 }
 
-/* =========================================================
-   DATE
-   ========================================================= */
+/* ================= DATE ================= */
 
 .file-item__date {
   min-width: 0;
@@ -164,27 +155,26 @@
   color: #7186aa;
 
   font-size: 14px;
-  font-weight: 400;
+
+  font-weight: 500;
 
   text-overflow: ellipsis;
+
   white-space: nowrap;
 }
 
-/* =========================================================
-   ACTIONS
-   ========================================================= */
+/* ================= ACTIONS ================= */
 
 .file-item__actions {
   min-width: 0;
 
   display: flex;
+
   align-items: center;
 
-  gap: 6px;
+  justify-content: flex-start;
 
-  flex-wrap: nowrap;
-
-  white-space: nowrap;
+  gap: 7px;
 }
 
 .file-item__actions .btn {
@@ -193,19 +183,17 @@
 
   min-width: 36px;
 
-  flex: 0 0 36px;
+  padding: 0;
 
   display: inline-flex;
   align-items: center;
   justify-content: center;
 
-  padding: 0;
-
-  background: #f7faff;
-
   border: 1px solid #dce6f5;
 
   border-radius: 9px;
+
+  background: #f7faff;
 
   color: #6684b1;
 
@@ -214,6 +202,12 @@
   line-height: 1;
 
   cursor: pointer;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease,
+    color 0.15s ease,
+    transform 0.15s ease;
 }
 
 .file-item__actions .btn:hover {
@@ -222,6 +216,24 @@
   background: #edf4ff;
 
   border-color: #c8daf3;
+
+  transform: translateY(-1px);
+}
+
+.file-item__actions .file-item__action--download {
+  color: #6f63ba;
+
+  background: #f5effb;
+
+  border-color: #e7daf3;
+}
+
+.file-item__actions .file-item__action--download:hover {
+  color: #5f54ad;
+
+  background: #eee5f8;
+
+  border-color: #dacbed;
 }
 
 .file-item__actions .file-item__action--danger {
@@ -244,44 +256,51 @@
   color: #6684b1;
 }
 
-/* =========================================================
-   FOCUS
-   ========================================================= */
-
 .file-item__actions .btn:focus-visible {
   outline: 2px solid #397fdc;
   outline-offset: 2px;
 }
 
-/* =========================================================
-   RESPONSIVE
-   ========================================================= */
+/* ================= RESPONSIVE ================= */
 
 @media (max-width: 1250px) {
   .file-item {
-    /*
-      VẪN 6 CỘT.
-      Không được quay lại 7 cột.
-    */
     grid-template-columns:
       40px
-      minmax(230px, 1fr)
-      95px
+      minmax(220px, 1fr)
+      100px
       110px
-      150px
+      145px
       205px;
+  }
+
+  .file-item__actions {
+    gap: 5px;
   }
 
   .file-item__actions .btn {
     width: 34px;
     height: 34px;
     min-width: 34px;
-    flex-basis: 34px;
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1050px) {
   .file-item {
-    min-width: 900px;
+    min-width: 850px;
+
+    grid-template-columns:
+      40px
+      minmax(190px, 1fr)
+      90px
+      100px
+      135px
+      190px;
+  }
+}
+
+@media (max-width: 850px) {
+  .file-item {
+    min-width: 850px;
   }
 }

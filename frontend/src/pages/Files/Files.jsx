@@ -373,7 +373,15 @@ export default function Files() {
                   aria-label="Xem dạng danh sách"
                   title="Danh sách"
                 >
-                  ☷
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path
+                      d="M4 6h3M10 6h10M4 12h3M10 12h10M4 18h3M10 18h10"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                    />
+                  </svg>
                 </button>
 
                 <button
@@ -382,7 +390,40 @@ export default function Files() {
                   aria-label="Xem dạng lưới"
                   title="Lưới"
                 >
-                  ▦
+                  <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <rect
+                      x="4"
+                      y="4"
+                      width="6"
+                      height="6"
+                      rx="1"
+                      fill="currentColor"
+                    />
+                    <rect
+                      x="14"
+                      y="4"
+                      width="6"
+                      height="6"
+                      rx="1"
+                      fill="currentColor"
+                    />
+                    <rect
+                      x="4"
+                      y="14"
+                      width="6"
+                      height="6"
+                      rx="1"
+                      fill="currentColor"
+                    />
+                    <rect
+                      x="14"
+                      y="14"
+                      width="6"
+                      height="6"
+                      rx="1"
+                      fill="currentColor"
+                    />
+                  </svg>
                 </button>
               </div>
             </div>
@@ -428,6 +469,66 @@ export default function Files() {
 
               <div className="files-unified-table__files">
                 <FileList />
+              </div>
+            </div>
+
+            <div className="files-page__table-footer">
+              <span>Hiển thị danh sách tệp của bạn</span>
+
+              <div className="files-page__pagination">
+                <button
+                  type="button"
+                  className="files-page__pagination-button"
+                  aria-label="Trang trước"
+                  disabled
+                >
+                  ‹
+                </button>
+
+                <button
+                  type="button"
+                  className="files-page__pagination-button files-page__pagination-button--active"
+                  aria-current="page"
+                >
+                  1
+                </button>
+
+                <button
+                  type="button"
+                  className="files-page__pagination-button"
+                  aria-label="Trang sau"
+                >
+                  ›
+                </button>
+              </div>
+            </div>
+
+            <div className="files-page__storage">
+              <div className="files-page__storage-info">
+                <div className="files-page__storage-icon" aria-hidden="true">
+                  ☁
+                </div>
+
+                <div>
+                  <h3 className="files-page__storage-title">Lưu trữ an toàn</h3>
+
+                  <p className="files-page__storage-description">
+                    Tất cả file của bạn đều được lưu trữ an toàn trên đám mây.
+                    Truy cập mọi lúc, mọi nơi.
+                  </p>
+                </div>
+              </div>
+
+              <div className="files-page__storage-usage">
+                <div className="files-page__storage-usage-header">
+                  <span>Đã sử dụng 1.75 GB / 5.00 GB</span>
+
+                  <span>35%</span>
+                </div>
+
+                <div className="files-page__storage-progress">
+                  <span />
+                </div>
               </div>
             </div>
 
