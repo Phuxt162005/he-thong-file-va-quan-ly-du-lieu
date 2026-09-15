@@ -2,18 +2,20 @@
    FILE ITEM
    ========================================================= */
 .file-item {
+  width: 100%;
+  min-width: 0;
   min-height: 57px;
   display: grid;
   grid-template-columns:
     40px
-    48px
-    minmax(180px, 1fr)
+    minmax(220px, 1fr)
     105px
     125px
     165px
     215px;
   align-items: center;
   padding: 0 12px;
+  box-sizing: border-box;
   background: #ffffff;
   border-bottom: 1px solid #e5ebf4;
   transition: background-color 0.15s ease;
@@ -65,7 +67,21 @@
    ========================================================= */
 .file-item__name {
   min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 12px;
   overflow: hidden;
+}
+
+.file-item__icon {
+  width: 34px;
+  height: 34px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 23px;
+  line-height: 1;
 }
 
 .file-item__name span {
@@ -127,6 +143,8 @@
   align-items: center;
   justify-content: flex-start;
   gap: 6px;
+  flex-wrap: nowrap;
+  white-space: nowrap;
 }
 
 .file-item__actions .btn {

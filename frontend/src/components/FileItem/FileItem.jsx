@@ -50,6 +50,7 @@ function FileItem({
       onContextMenu={handleContextMenu}
       onDragStart={handleDragStart}
     >
+      {/* CHECKBOX */}
       <div className="file-item__select">
         <input
           type="checkbox"
@@ -60,22 +61,27 @@ function FileItem({
         />
       </div>
 
-      <div className="file-item__icon" aria-hidden="true">
-        {getFileIcon(file)}
-      </div>
-
+      {/* TÊN + ICON */}
       <div className="file-item__name">
+        <div className="file-item__icon" aria-hidden="true">
+          {getFileIcon(file)}
+        </div>
+
         <span title={file.name}>{file.name || "Không có tên"}</span>
       </div>
 
+      {/* LOẠI */}
       <div className="file-item__type">{getFileType(file)}</div>
 
+      {/* DUNG LƯỢNG */}
       <div className="file-item__size">{formatFileSize(file.size)}</div>
 
+      {/* CẬP NHẬT */}
       <div className="file-item__date">
         {formatDate(file.updatedAt || file.createdAt)}
       </div>
 
+      {/* THAO TÁC */}
       <div className="file-item__actions">
         <button
           type="button"
