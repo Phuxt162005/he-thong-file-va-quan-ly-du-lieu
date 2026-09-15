@@ -68,6 +68,8 @@ function FileItem({
         <span title={file.name}>{file.name || "Không có tên"}</span>
       </div>
 
+      <div className="file-item__type">{getFileType(file)}</div>
+
       <div className="file-item__size">{formatFileSize(file.size)}</div>
 
       <div className="file-item__date">
@@ -136,6 +138,19 @@ function FileItem({
       </div>
     </div>
   );
+}
+
+function getFileType(file) {
+  if (!file?.name) {
+    return "FILE";
+  }
+
+  const parts = file.name.split(".");
+  if (parts.length < 2) {
+    return "FILE";
+  }
+
+  return parts.pop().toUpperCase();
 }
 
 function getFileIcon(file) {

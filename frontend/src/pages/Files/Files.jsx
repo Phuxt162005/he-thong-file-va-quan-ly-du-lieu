@@ -319,7 +319,18 @@ export default function Files() {
             >
               <span className="files-page__upload-icon">▤</span>
               <span>Tải lên</span>
-              <span className="files-page__upload-chevron">⌄</span>
+              <span className="files-page__upload-chevron" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="m7 9 5 5 5-5"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  />
+                </svg>
+              </span>
             </button>
           </div>
         </div>
@@ -387,6 +398,7 @@ export default function Files() {
                 </div>
 
                 <div>Tên</div>
+                <div>Loại</div>
                 <div>Dung lượng</div>
                 <div>Cập nhật</div>
                 <div>Thao tác</div>

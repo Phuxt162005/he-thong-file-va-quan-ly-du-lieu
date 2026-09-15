@@ -75,10 +75,10 @@ export default function FolderItem({
         </span>
       </button>
 
-      {/* Size */}
+      <div className="folder-item__type">Thư mục</div>
+
       <div className="folder-item__size">-</div>
 
-      {/* Date */}
       <div className="folder-item__date">
         {formatFolderDate(folder.updatedAt || folder.createdAt)}
       </div>

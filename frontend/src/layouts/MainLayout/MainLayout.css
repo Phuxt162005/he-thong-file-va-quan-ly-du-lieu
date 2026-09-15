@@ -251,8 +251,22 @@
   display: flex;
   flex-direction: column;
   padding: 25px 15px 18px;
-  background: rgba(255, 255, 255, 0.94);
-  border-right: 1px solid #dce4f2;
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.84) 0%,
+      rgba(255, 255, 255, 0.76) 45%,
+      rgba(255, 255, 255, 0.64) 100%
+    ),
+    url("/cloud_backround.png");
+  background-position: left center;
+  background-size: auto 100%;
+  background-repeat: no-repeat;
+  border-right: 1px solid rgba(210, 222, 241, 0.85);
+  box-shadow: 4px 0 18px rgba(79, 111, 160, 0.05);
+  z-index: 5;
 }
 
 .sidebar__nav {
@@ -284,13 +298,14 @@
 
 .sidebar__item:hover,
 .sidebar__logout:hover {
-  color: #2f6fc7;
-  background: #f1f5fd;
+  color: #3859b9;
+  background: rgba(255, 255, 255, 0.72);
 }
 
 .sidebar__item--active {
-  color: #2f80e4;
-  background: linear-gradient(135deg, #e0ebff 0%, #d9e7ff 100%);
+  color: #ffffff;
+  background: linear-gradient(135deg, #4b68c9 0%, #3f55bd 100%);
+  box-shadow: 0 6px 16px rgba(65, 83, 190, 0.18);
   font-weight: 650;
 }
 

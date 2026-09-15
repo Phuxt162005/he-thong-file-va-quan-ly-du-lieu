@@ -834,9 +834,54 @@
 .files-unified-table {
   width: 100%;
   overflow: hidden;
-  border: 1px solid #dfe7f4;
-  border-radius: 10px;
+
+  border: 1px solid #dfe8f7;
+  border-radius: 11px;
+
   background: #ffffff;
+}
+
+.files-unified-table__header,
+.folder-item,
+.file-item {
+  display: grid;
+
+  grid-template-columns:
+    42px
+    48px
+    minmax(190px, 1fr)
+    100px
+    125px
+    165px
+    220px;
+
+  align-items: center;
+}
+
+.files-unified-table__header {
+  min-height: 48px;
+
+  padding: 0 14px;
+
+  color: #31538d;
+
+  background: linear-gradient(180deg, #edf3fd 0%, #e8effb 100%);
+
+  font-size: 14px;
+  font-weight: 700;
+
+  border-bottom: 1px solid #d8e3f4;
+}
+
+.files-unified-table__header > div {
+  min-width: 0;
+}
+
+.files-unified-table__checkbox,
+.files-unified-table__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 /* ========================= HEADER ========================= */
@@ -1220,4 +1265,20 @@
   .files-unified-table__files {
     min-width: 820px;
   }
+}
+
+.files-page__upload-chevron {
+  width: 18px;
+  height: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: 1px;
+  flex-shrink: 0;
+}
+
+.files-page__upload-chevron svg {
+  width: 15px;
+  height: 15px;
+  display: block;
 }
