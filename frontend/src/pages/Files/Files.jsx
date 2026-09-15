@@ -393,10 +393,6 @@ export default function Files() {
                   <span />
                 </div>
 
-                <div className="files-unified-table__icon">
-                  <span />
-                </div>
-
                 <div>Tên</div>
                 <div>Loại</div>
                 <div>Dung lượng</div>

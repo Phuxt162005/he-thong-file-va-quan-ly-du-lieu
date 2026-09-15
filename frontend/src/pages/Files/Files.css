@@ -147,6 +147,7 @@
 }
 
 /* ========================================================= GROUP 05 - FOLDER MANAGEMENT ========================================================= */
+
 .folder-manager {
   width: 100%;
   display: grid;
@@ -217,6 +218,7 @@
 }
 
 /* ========================= FOLDER CONTENT ========================= */
+
 .folder-manager__content {
   width: 100%;
   min-width: 0;
@@ -247,6 +249,7 @@
   font-weight: 750;
   line-height: 1.2;
 }
+
 /* ========================= FOLDER LIST ========================= */
 
 /* ========================= FILE SECTION ========================= */
@@ -255,17 +258,21 @@
   .folder-manager {
     grid-template-columns: 1fr;
   }
+
   .folder-manager__sidebar {
     border-right: none;
     border-bottom: var(--border-width) solid var(--color-border);
   }
+
   .folder-manager__content {
     padding: var(--spacing-md);
   }
+
   .folder-manager__content-header {
     align-items: flex-start;
     flex-direction: column;
   }
+
   .folder-manager__content-header .btn {
     width: 100%;
   }
@@ -507,6 +514,7 @@
 /* ========================================================= FOLDER SIDEBAR ========================================================= */
 
 /* ========================================================= FOLDER TREE ========================================================= */
+
 .folder-manager__sidebar .folder-tree {
   margin-top: 7px;
 }
@@ -556,6 +564,7 @@
 /* ========================================================= MAIN FILE CONTENT ========================================================= */
 
 /* ========================================================= VIEW TOGGLE ========================================================= */
+
 .folder-manager__view-toggle {
   height: 38px;
   display: flex;
@@ -857,6 +866,7 @@
 }
 
 /* ========================================================= UNIFIED FILE TABLE ========================================================= */
+
 .files-unified-table {
   width: 100%;
   overflow: hidden;
@@ -1119,6 +1129,7 @@
   .files-unified-table__header {
     grid-template-columns: 36px 42px minmax(150px, 1fr) 110px 145px 205px;
   }
+
   .files-unified-table__files .file-item {
     grid-template-columns: 36px 42px minmax(150px, 1fr) 110px 145px 205px;
   }
