@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Loading from "../../components/Loading/Loading";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
@@ -8,98 +8,34 @@ import folderService from "../../services/folderService";
 
 import "./Trash.css";
 
+const RETENTION_DAYS = 30;
+const PAGE_SIZE = 8;
+
 export default function Trash() {
   const [files, setFiles] = useState([]);
   const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [sortColumn, setSortColumn] = useState("deletedAt");
+  const [sortDirection, setSortDirection] = useState("desc");
+  const [page, setPage] = useState(1);
+  const [selectedIds, setSelectedIds] = useState(new Set());
   const [selectedFile, setSelectedFile] = useState(null);
   const [restoreModal, setRestoreModal] = useState(false);
-  const [restoring, setRestoring] = useState(false);
   const [selectedFolder, setSelectedFolder] = useState(null);
   const [restoreFolderModal, setRestoreFolderModal] = useState(false);
-  const [deleting, setDeleting] = useState(false);
   const [selectedDeleteFile, setSelectedDeleteFile] = useState(null);
   const [permanentDeleteModal, setPermanentDeleteModal] = useState(false);
   const [selectedDeleteFolder, setSelectedDeleteFolder] = useState(null);
   const [permanentDeleteFolderModal, setPermanentDeleteFolderModal] =
     useState(false);
+  const [deleteAllModal, setDeleteAllModal] = useState(false);
+  const [restoring, setRestoring] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
-  // mở folder trong trash
-  const openRestoreFolderModal = (folder) => {
-    setSelectedFolder(folder);
-    setRestoreFolderModal(true);
-  };
-
-  // mở modal xóa vĩnh viễn file
-  const openPermanentDeleteModal = (file) => {
-    setSelectedDeleteFile(file);
-    setPermanentDeleteModal(true);
-  };
-
-  // mở modal xóa vĩnh viễn folder
-  const openPermanentDeleteFolderModal = (folder) => {
-    setSelectedDeleteFolder(folder);
-    setPermanentDeleteFolderModal(true);
-  };
-
-  // đóng model đã xóa
-  const closePermanentDeleteModal = () => {
-    if (deleting) {
-      return;
-    }
-
-    setPermanentDeleteModal(false);
-    setSelectedDeleteFile(null);
-  };
-
-  // lấy lại folder đã xóa
-  const handleRestoreFolder = async () => {
-    if (!selectedFolder?._id) {
-      return;
-    }
-
-    try {
-      setRestoring(true);
-      setError("");
-
-      await folderService.restoreFolder(selectedFolder._id);
-      setFolders((prev) =>
-        prev.filter((folder) => folder._id !== selectedFolder._id),
-      );
-
-      setRestoreFolderModal(false);
-      setSelectedFolder(null);
-    } catch (err) {
-      setError(err?.message || "Không thể khôi phục thư mục.");
-    } finally {
-      setRestoring(false);
-    }
-  };
-
-  // xóa vĩnh viễn folder
-  const handlePermanentDeleteFolder = async () => {
-    if (!selectedDeleteFolder?._id) {
-      return;
-    }
-
-    try {
-      setDeleting(true);
-      setError("");
-      await folderService.permanentDelete(selectedDeleteFolder._id);
-      setFolders((prev) =>
-        prev.filter((folder) => folder._id !== selectedDeleteFolder._id),
-      );
-      setPermanentDeleteFolderModal(false);
-      setSelectedDeleteFolder(null);
-    } catch (err) {
-      setError(err?.message || "Không thể xóa vĩnh viễn thư mục.");
-    } finally {
-      setDeleting(false);
-    }
-  };
-
-  // tải thùng rác
+  // =========================
+  // Load trash
+  // =========================
   const loadTrash = async () => {
     try {
       setLoading(true);
@@ -109,6 +45,7 @@ export default function Trash() {
         fileService.getDeletedFiles(),
         folderService.getDeletedFolders(),
       ]);
+
       const fileData = fileResponse?.data || fileResponse || [];
       const folderData = folderResponse?.data || folderResponse || [];
 
@@ -116,6 +53,8 @@ export default function Trash() {
       setFolders(
         Array.isArray(folderData) ? folderData : folderData.folders || [],
       );
+      setSelectedIds(new Set());
+      setPage(1);
     } catch (err) {
       setError(err?.message || "Không thể tải Thùng rác.");
     } finally {
@@ -127,23 +66,136 @@ export default function Trash() {
     loadTrash();
   }, []);
 
-  // mở restore modal
+  // =========================
+  // Combine files + folders
+  // =========================
+  const trashItems = useMemo(() => {
+    return [
+      ...folders.map((folder) => ({
+        ...folder,
+        _trashType: "folder",
+        _trashId: `folder-${folder._id}`,
+        _deletedAt: folder.deletedAt || folder.updatedAt || null,
+      })),
+
+      ...files.map((file) => ({
+        ...file,
+        _trashType: "file",
+        _trashId: `file-${file._id}`,
+        _deletedAt: file.deletedAt || null,
+      })),
+    ];
+  }, [files, folders]);
+
+  // =========================
+  // Sort
+  // =========================
+  const sortedItems = useMemo(() => {
+    const result = [...trashItems];
+    const getValue = (item) => {
+      switch (sortColumn) {
+        case "name":
+          return String(item.name || "").toLowerCase();
+        case "type":
+          return item._trashType === "folder"
+            ? "thư mục"
+            : getFriendlyExtension(item.name, item.mimeType).toLowerCase();
+        case "size":
+          return item._trashType === "folder" ? -1 : Number(item.size || 0);
+        case "deletedAt":
+          return new Date(item._deletedAt || 0).getTime();
+        case "remaining":
+          return getRemainingDays(item._deletedAt);
+        default:
+          return 0;
+      }
+    };
+
+    result.sort((a, b) => {
+      const valueA = getValue(a);
+      const valueB = getValue(b);
+
+      let comparison = 0;
+
+      if (typeof valueA === "number" && typeof valueB === "number") {
+        comparison = valueA - valueB;
+      } else {
+        comparison = String(valueA).localeCompare(String(valueB), "vi", {
+          numeric: true,
+          sensitivity: "base",
+        });
+      }
+
+      return sortDirection === "asc" ? comparison : -comparison;
+    });
+
+    return result;
+  }, [trashItems, sortColumn, sortDirection]);
+
+  // =========================
+  // Pagination
+  // =========================
+  const totalPages = Math.max(1, Math.ceil(sortedItems.length / PAGE_SIZE));
+  const visibleItems = sortedItems.slice(
+    (page - 1) * PAGE_SIZE,
+    page * PAGE_SIZE,
+  );
+  const firstItem = sortedItems.length === 0 ? 0 : (page - 1) * PAGE_SIZE + 1;
+  const lastItem = Math.min(page * PAGE_SIZE, sortedItems.length);
+
+  // =========================
+  // Sort handler
+  // =========================
+  const handleSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection((current) => (current === "asc" ? "desc" : "asc"));
+    } else {
+      setSortColumn(column);
+      setSortDirection(column === "deletedAt" ? "desc" : "asc");
+    }
+    setPage(1);
+  };
+
+  // =========================
+  // Checkbox
+  // =========================
+  const visibleIds = visibleItems.map((item) => item._trashId);
+  const allVisibleSelected =
+    visibleIds.length > 0 && visibleIds.every((id) => selectedIds.has(id));
+  const toggleSelect = (id) => {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+  };
+
+  const toggleSelectAll = () => {
+    setSelectedIds((current) => {
+      const next = new Set(current);
+
+      if (allVisibleSelected) {
+        visibleIds.forEach((id) => next.delete(id));
+      } else {
+        visibleIds.forEach((id) => next.add(id));
+      }
+      return next;
+    });
+  };
+
+  // =========================
+  // Restore file
+  // =========================
   const openRestoreModal = (file) => {
     setSelectedFile(file);
     setRestoreModal(true);
   };
 
-  // đóng restore modal
-  const closeRestoreModal = () => {
-    if (restoring) {
-      return;
-    }
-
-    setRestoreModal(false);
-    setSelectedFile(null);
-  };
-
-  // khôi phục file
   const handleRestore = async () => {
     if (!selectedFile?._id) {
       return;
@@ -152,9 +204,14 @@ export default function Trash() {
     try {
       setRestoring(true);
       setError("");
+
       await fileService.restoreFile(selectedFile._id);
-      setFiles((prev) => prev.filter((file) => file._id !== selectedFile._id));
-      closeRestoreModal();
+
+      setFiles((current) =>
+        current.filter((file) => file._id !== selectedFile._id),
+      );
+      setRestoreModal(false);
+      setSelectedFile(null);
     } catch (err) {
       setError(err?.message || "Không thể khôi phục file.");
     } finally {
@@ -162,7 +219,45 @@ export default function Trash() {
     }
   };
 
-  // xóa vĩnh viễn file
+  // =========================
+  // Restore folder
+  // =========================
+  const openRestoreFolderModal = (folder) => {
+    setSelectedFolder(folder);
+    setRestoreFolderModal(true);
+  };
+
+  const handleRestoreFolder = async () => {
+    if (!selectedFolder?._id) {
+      return;
+    }
+
+    try {
+      setRestoring(true);
+      setError("");
+
+      await folderService.restoreFolder(selectedFolder._id);
+
+      setFolders((current) =>
+        current.filter((folder) => folder._id !== selectedFolder._id),
+      );
+      setRestoreFolderModal(false);
+      setSelectedFolder(null);
+    } catch (err) {
+      setError(err?.message || "Không thể khôi phục thư mục.");
+    } finally {
+      setRestoring(false);
+    }
+  };
+
+  // =========================
+  // Permanent delete file
+  // =========================
+  const openPermanentDeleteModal = (file) => {
+    setSelectedDeleteFile(file);
+    setPermanentDeleteModal(true);
+  };
+
   const handlePermanentDelete = async () => {
     if (!selectedDeleteFile?._id) {
       return;
@@ -171,14 +266,77 @@ export default function Trash() {
     try {
       setDeleting(true);
       setError("");
+
       await fileService.permanentDelete(selectedDeleteFile._id);
-      setFiles((prev) =>
-        prev.filter((file) => file._id !== selectedDeleteFile._id),
+
+      setFiles((current) =>
+        current.filter((file) => file._id !== selectedDeleteFile._id),
       );
       setPermanentDeleteModal(false);
       setSelectedDeleteFile(null);
     } catch (err) {
       setError(err?.message || "Không thể xóa vĩnh viễn file.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // =========================
+  // Permanent delete folder
+  // =========================
+  const openPermanentDeleteFolderModal = (folder) => {
+    setSelectedDeleteFolder(folder);
+    setPermanentDeleteFolderModal(true);
+  };
+
+  const handlePermanentDeleteFolder = async () => {
+    if (!selectedDeleteFolder?._id) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError("");
+
+      await folderService.permanentDelete(selectedDeleteFolder._id);
+
+      setFolders((current) =>
+        current.filter((folder) => folder._id !== selectedDeleteFolder._id),
+      );
+      setPermanentDeleteFolderModal(false);
+      setSelectedDeleteFolder(null);
+    } catch (err) {
+      setError(err?.message || "Không thể xóa vĩnh viễn thư mục.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  // =========================
+  // Delete all
+  // =========================
+
+  const handleDeleteAll = async () => {
+    if (trashItems.length === 0) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError("");
+
+      await Promise.all([
+        ...files.map((file) => fileService.permanentDelete(file._id)),
+        ...folders.map((folder) => folderService.permanentDelete(folder._id)),
+      ]);
+
+      setFiles([]);
+      setFolders([]);
+      setSelectedIds(new Set());
+      setDeleteAllModal(false);
+      setPage(1);
+    } catch (err) {
+      setError(err?.message || "Không thể xóa toàn bộ Thùng rác.");
     } finally {
       setDeleting(false);
     }
@@ -190,6 +348,9 @@ export default function Trash() {
 
   return (
     <div className="trash-page">
+      {/* =========================
+          Confirm dialogs
+          ========================= */}
       <ConfirmDialog
         isOpen={restoreModal}
         title="Khôi phục file"
@@ -198,7 +359,12 @@ export default function Trash() {
         cancelText="Hủy"
         loading={restoring}
         onConfirm={handleRestore}
-        onCancel={closeRestoreModal}
+        onCancel={() => {
+          if (!restoring) {
+            setRestoreModal(false);
+            setSelectedFile(null);
+          }
+        }}
       />
 
       <ConfirmDialog
@@ -213,6 +379,22 @@ export default function Trash() {
           if (!restoring) {
             setRestoreFolderModal(false);
             setSelectedFolder(null);
+          }
+        }}
+      />
+
+      <ConfirmDialog
+        isOpen={permanentDeleteModal}
+        title="Xóa vĩnh viễn file"
+        message={`Bạn có chắc muốn xóa vĩnh viễn file "${selectedDeleteFile?.name || ""}"? Hành động này không thể hoàn tác.`}
+        confirmText="Xóa vĩnh viễn"
+        cancelText="Hủy"
+        loading={deleting}
+        onConfirm={handlePermanentDelete}
+        onCancel={() => {
+          if (!deleting) {
+            setPermanentDeleteModal(false);
+            setSelectedDeleteFile(null);
           }
         }}
       />
@@ -234,155 +416,465 @@ export default function Trash() {
       />
 
       <ConfirmDialog
-        isOpen={permanentDeleteModal}
-        title="Xóa vĩnh viễn file"
-        message={`Bạn có chắc muốn xóa vĩnh viễn file "${selectedDeleteFile?.name || ""}"? Hành động này không thể hoàn tác.`}
-        confirmText="Xóa vĩnh viễn"
+        isOpen={deleteAllModal}
+        title="Xóa tất cả"
+        message="Bạn có chắc muốn xóa vĩnh viễn toàn bộ file và thư mục trong Thùng rác? Hành động này không thể hoàn tác."
+        confirmText="Xóa tất cả"
         cancelText="Hủy"
         loading={deleting}
-        onConfirm={handlePermanentDelete}
-        onCancel={closePermanentDeleteModal}
+        onConfirm={handleDeleteAll}
+        onCancel={() => {
+          if (!deleting) {
+            setDeleteAllModal(false);
+          }
+        }}
       />
 
-      {/* Header */}
+      {/* =========================
+          Header
+          ========================= */}
       <div className="trash-page__header">
         <div>
           <h1>Thùng rác</h1>
-          <p>Các file đã bị xóa khỏi thư mục hiện tại</p>
+
+          <p>
+            Các file và thư mục đã bị xóa. Bạn có thể khôi phục hoặc xóa vĩnh
+            viễn.
+          </p>
         </div>
 
-        <button className="btn btn-secondary" onClick={loadTrash}>
-          Làm mới
+        <button
+          type="button"
+          className="trash-delete-all"
+          disabled={trashItems.length === 0}
+          onClick={() => setDeleteAllModal(true)}
+        >
+          <TrashIcon />
+          <span>Xóa tất cả</span>
         </button>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && <div className="trash-error">{error}</div>}
 
-      {/* Trash list */}
+      {/* =========================
+          Table
+          ========================= */}
       <div className="trash-card">
-        {files.length === 0 && folders.length === 0 ? (
-          <div className="trash-empty">
-            <div className="trash-empty__icon">🗑️</div>
-            <h2>Thùng rác trống</h2>
-            <p>Không có file hoặc thư mục nào đã bị xóa.</p>
-          </div>
-        ) : (
-          <div className="trash-list">
-            <div className="trash-list__header">
-              <span>Tệp</span>
-              <span>Kích thước</span>
-              <span>Thư mục cũ</span>
-              <span>Ngày xóa</span>
-              <span>Thao tác</span>
+        <div className="trash-table">
+          {/* Header */}
+
+          <div className="trash-table__head">
+            <div className="trash-col trash-col--check">
+              <label className="trash-checkbox" title="Chọn tất cả">
+                <input
+                  type="checkbox"
+                  checked={allVisibleSelected}
+                  onChange={toggleSelectAll}
+                  aria-label="Chọn tất cả"
+                />
+                <span />
+              </label>
             </div>
 
-            {folders.map((folder) => (
-              <TrashFolderItem
-                key={`folder-${folder._id}`}
-                folder={folder}
-                onRestore={openRestoreFolderModal}
-                onPermanentDelete={openPermanentDeleteFolderModal}
-              />
-            ))}
+            <SortableHeader
+              label="Tên"
+              column="name"
+              activeColumn={sortColumn}
+              direction={sortDirection}
+              onSort={handleSort}
+            />
 
-            {files.map((file) => (
-              <TrashItem
-                key={`file-${file._id}`}
-                file={file}
-                onRestore={openRestoreModal}
-                onPermanentDelete={openPermanentDeleteModal}
-              />
-            ))}
+            <SortableHeader
+              label="Loại"
+              column="type"
+              activeColumn={sortColumn}
+              direction={sortDirection}
+              onSort={handleSort}
+            />
+
+            <SortableHeader
+              label="Dung lượng"
+              column="size"
+              activeColumn={sortColumn}
+              direction={sortDirection}
+              onSort={handleSort}
+            />
+
+            <SortableHeader
+              label="Ngày xóa"
+              column="deletedAt"
+              activeColumn={sortColumn}
+              direction={sortDirection}
+              onSort={handleSort}
+            />
+
+            <SortableHeader
+              label="Thời gian còn lại"
+              column="remaining"
+              activeColumn={sortColumn}
+              direction={sortDirection}
+              onSort={handleSort}
+            />
+
+            <div className="trash-col trash-col--actions">Thao tác</div>
           </div>
-        )}
-      </div>
-    </div>
-  );
-}
 
-function TrashItem({ file, onRestore, onPermanentDelete }) {
-  return (
-    <div className="trash-item">
-      <div className="trash-item__name">
-        <div className="trash-item__icon">{getFileIcon(file.name)}</div>
+          {/* Rows */}
+          {visibleItems.length === 0 ? (
+            <div className="trash-empty">
+              <TrashIcon />
 
-        <div className="trash-item__info">
-          <strong title={file.name}>{file.name || "Không có tên"}</strong>
+              <h2>Thùng rác trống</h2>
 
-          <span>{file.mimeType || "File"}</span>
+              <p>Không có file hoặc thư mục nào đã bị xóa.</p>
+            </div>
+          ) : (
+            visibleItems.map((item) =>
+              item._trashType === "folder" ? (
+                <TrashFolderItem
+                  key={item._trashId}
+                  folder={item}
+                  selected={selectedIds.has(item._trashId)}
+                  onSelect={() => toggleSelect(item._trashId)}
+                  onRestore={openRestoreFolderModal}
+                  onPermanentDelete={openPermanentDeleteFolderModal}
+                />
+              ) : (
+                <TrashItem
+                  key={item._trashId}
+                  file={item}
+                  selected={selectedIds.has(item._trashId)}
+                  onSelect={() => toggleSelect(item._trashId)}
+                  onRestore={openRestoreModal}
+                  onPermanentDelete={openPermanentDeleteModal}
+                />
+              ),
+            )
+          )}
+
+          {/* Footer */}
+          <div className="trash-footer">
+            <span>
+              Hiển thị {firstItem} - {lastItem} của {sortedItems.length} mục
+            </span>
+
+            <div className="trash-pagination">
+              <button
+                type="button"
+                disabled={page <= 1}
+                onClick={() => setPage((current) => current - 1)}
+                aria-label="Trang trước"
+              >
+                ‹
+              </button>
+
+              {Array.from({ length: totalPages }, (_, index) => index + 1).map(
+                (number) => (
+                  <button
+                    type="button"
+                    key={number}
+                    className={number === page ? "is-active" : ""}
+                    onClick={() => setPage(number)}
+                  >
+                    {number}
+                  </button>
+                ),
+              )}
+
+              <button
+                type="button"
+                disabled={page >= totalPages}
+                onClick={() => setPage((current) => current + 1)}
+                aria-label="Trang sau"
+              >
+                ›
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
-      <div className="trash-item__size">{formatStorage(file.size)}</div>
+      {/* =========================
+          Retention information
+          ========================= */}
+      <div className="trash-retention">
+        <div className="trash-retention__icon">
+          <TrashIcon />
+        </div>
 
-      <div className="trash-item__folder">
-        {file.folder?.name ||
-          file.folderName ||
-          file.parentFolderName ||
-          "Thư mục không tồn tại"}
+        <div>
+          <h3>Tự động xóa vĩnh viễn</h3>
+
+          <p>
+            Các file trong thùng rác sẽ được tự động xóa vĩnh viễn sau 30 ngày.
+          </p>
+
+          <p>Hãy khôi phục các file quan trọng trước khi quá hạn.</p>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// =====================================================
+// Sortable header
+// =====================================================
+function SortableHeader({ label, column, activeColumn, direction, onSort }) {
+  const isActive = activeColumn === column;
+
+  return (
+    <div className="trash-col">
+      <button
+        type="button"
+        className="trash-sort-button"
+        onClick={() => onSort(column)}
+      >
+        <span>{label}</span>
+
+        <span className={`trash-sort-icon ${isActive ? "is-active" : ""}`}>
+          {isActive ? (direction === "asc" ? "⌃" : "⌄") : "↕"}
+        </span>
+      </button>
+    </div>
+  );
+}
+
+// =====================================================
+// File row
+// =====================================================
+function TrashItem({ file, selected, onSelect, onRestore, onPermanentDelete }) {
+  const extension = getFriendlyExtension(file.name, file.mimeType);
+  const remaining = getRemainingDays(file.deletedAt);
+
+  return (
+    <div className="trash-row">
+      <div className="trash-col trash-col--check">
+        <label className="trash-checkbox">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onSelect}
+            aria-label={`Chọn ${file.name || "file"}`}
+          />
+          <span />
+        </label>
       </div>
 
-      <div className="trash-item__date">{formatDate(file.deletedAt)}</div>
+      <div className="trash-col trash-col--name">
+        <FileTypeIcon name={file.name} mimeType={file.mimeType} />
 
-      <div className="trash-item__actions">
+        <div className="trash-name-info">
+          <strong title={file.name}>{file.name || "Không có tên"}</strong>
+        </div>
+      </div>
+
+      <div className="trash-col trash-col--type">{extension || "FILE"}</div>
+
+      <div className="trash-col trash-col--size">
+        {formatStorage(file.size)}
+      </div>
+
+      <div className="trash-col trash-col--date">
+        {formatDate(file.deletedAt)}
+      </div>
+
+      <div className="trash-col trash-col--remaining">
+        <RemainingBadge days={remaining} />
+      </div>
+
+      <div className="trash-col trash-col--actions">
         <button
-          className="btn btn-primary btn-sm"
+          type="button"
+          className="trash-action trash-action--restore"
           onClick={() => onRestore(file)}
+          title="Khôi phục"
+          aria-label="Khôi phục"
         >
-          Khôi phục
+          <RestoreIcon />
         </button>
 
         <button
-          className="btn btn-danger btn-sm"
+          type="button"
+          className="trash-action trash-action--delete"
           onClick={() => onPermanentDelete(file)}
+          title="Xóa vĩnh viễn"
+          aria-label="Xóa vĩnh viễn"
         >
-          Xóa vĩnh viễn
+          <TrashIcon />
         </button>
       </div>
     </div>
   );
 }
 
-function getFileIcon(name = "") {
-  const extension = name.split(".").pop().toLowerCase();
+// =====================================================
+// Folder row
+// =====================================================
+function TrashFolderItem({
+  folder,
+  selected,
+  onSelect,
+  onRestore,
+  onPermanentDelete,
+}) {
+  const deletedAt = folder.deletedAt || folder.updatedAt;
+  const remaining = getRemainingDays(deletedAt);
 
-  if (["jpg", "jpeg", "png", "gif", "webp"].includes(extension)) {
-    return "🖼️";
-  }
-  if (extension === "pdf") {
-    return "📕";
-  }
-  if (["doc", "docx"].includes(extension)) {
-    return "📘";
-  }
-  if (["xls", "xlsx"].includes(extension)) {
-    return "📗";
-  }
-  if (["ppt", "pptx"].includes(extension)) {
-    return "📙";
-  }
-  if (["zip", "rar", "7z"].includes(extension)) {
-    return "🗜️";
-  }
-  if (["mp4", "avi", "mkv", "mov"].includes(extension)) {
-    return "🎬";
-  }
-  if (["mp3", "wav"].includes(extension)) {
-    return "🎵";
-  }
-  return "📄";
+  return (
+    <div className="trash-row">
+      <div className="trash-col trash-col--check">
+        <label className="trash-checkbox">
+          <input
+            type="checkbox"
+            checked={selected}
+            onChange={onSelect}
+            aria-label={`Chọn ${folder.name || "thư mục"}`}
+          />
+          <span />
+        </label>
+      </div>
+
+      <div className="trash-col trash-col--name">
+        <FolderIcon />
+
+        <div className="trash-name-info">
+          <strong title={folder.name}>{folder.name || "Không có tên"}</strong>
+        </div>
+      </div>
+
+      <div className="trash-col trash-col--type">Thư mục</div>
+
+      <div className="trash-col trash-col--size">-</div>
+
+      <div className="trash-col trash-col--date">{formatDate(deletedAt)}</div>
+
+      <div className="trash-col trash-col--remaining">
+        <RemainingBadge days={remaining} />
+      </div>
+
+      <div className="trash-col trash-col--actions">
+        <button
+          type="button"
+          className="trash-action trash-action--restore"
+          onClick={() => onRestore(folder)}
+          title="Khôi phục"
+          aria-label="Khôi phục"
+        >
+          <RestoreIcon />
+        </button>
+
+        <button
+          type="button"
+          className="trash-action trash-action--delete"
+          onClick={() => onPermanentDelete(folder)}
+          title="Xóa vĩnh viễn"
+          aria-label="Xóa vĩnh viễn"
+        >
+          <TrashIcon />
+        </button>
+      </div>
+    </div>
+  );
 }
 
+// =====================================================
+// Remaining badge
+// =====================================================
+function RemainingBadge({ days }) {
+  if (days <= 0) {
+    return (
+      <span className="trash-remaining trash-remaining--danger">Quá hạn</span>
+    );
+  }
+
+  return (
+    <span
+      className={`trash-remaining ${
+        days <= 7 ? "trash-remaining--warning" : "trash-remaining--normal"
+      }`}
+    >
+      Còn {days} ngày
+    </span>
+  );
+}
+
+// =====================================================
+// File type
+// =====================================================
+function getFriendlyExtension(name = "", mimeType = "") {
+  const mime = String(mimeType || "").toLowerCase();
+  const extension = getExtension(name);
+
+  if (mime === "application/pdf" || extension === "pdf") {
+    return "PDF";
+  }
+  if (mime.includes("word") || extension === "doc" || extension === "docx") {
+    return extension === "doc" ? "DOC" : "DOCX";
+  }
+  if (
+    mime.includes("excel") ||
+    mime.includes("spreadsheet") ||
+    extension === "xls" ||
+    extension === "xlsx" ||
+    extension === "csv"
+  ) {
+    if (extension === "csv") {
+      return "CSV";
+    }
+    return extension === "xls" ? "XLS" : "XLSX";
+  }
+  if (
+    mime.includes("powerpoint") ||
+    mime.includes("presentation") ||
+    extension === "ppt" ||
+    extension === "pptx"
+  ) {
+    return extension === "ppt" ? "PPT" : "PPTX";
+  }
+  if (
+    mime.includes("zip") ||
+    mime.includes("rar") ||
+    mime.includes("7z") ||
+    ["zip", "rar", "7z"].includes(extension)
+  ) {
+    return extension.toUpperCase();
+  }
+  if (mime.startsWith("image/")) {
+    const imageType = mime.split("/")[1];
+
+    return imageType === "jpeg" ? "JPG" : imageType.toUpperCase();
+  }
+  if (extension) {
+    return extension.toUpperCase();
+  }
+  return "";
+}
+
+function getExtension(name = "") {
+  const value = String(name || "").trim();
+  const dot = value.lastIndexOf(".");
+
+  if (dot <= 0 || dot === value.length - 1) {
+    return "";
+  }
+  return value.slice(dot + 1).toLowerCase();
+}
+
+// =====================================================
+// Helpers
+// =====================================================
 function formatStorage(bytes) {
-  if (!bytes || bytes <= 0) {
-    return "0 B";
+  const value = Number(bytes);
+  if (!Number.isFinite(value) || value <= 0) {
+    return "-";
   }
 
   const units = ["B", "KB", "MB", "GB", "TB"];
-  const index = Math.floor(Math.log(bytes) / Math.log(1024));
-  const value = bytes / Math.pow(1024, index);
-
-  return `${value.toFixed(2)} ${units[index]}`;
+  const index = Math.min(
+    Math.floor(Math.log(value) / Math.log(1024)),
+    units.length - 1,
+  );
+  return `${(value / Math.pow(1024, index)).toFixed(2)} ${units[index]}`;
 }
 
 function formatDate(date) {
@@ -390,44 +882,103 @@ function formatDate(date) {
     return "-";
   }
 
-  return new Date(date).toLocaleString("vi-VN");
+  return new Date(date).toLocaleString("vi-VN", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
-function TrashFolderItem({ folder, onRestore, onPermanentDelete }) {
+function getRemainingDays(date) {
+  if (!date) {
+    return RETENTION_DAYS;
+  }
+
+  const deletedAt = new Date(date).getTime();
+  if (!Number.isFinite(deletedAt)) {
+    return RETENTION_DAYS;
+  }
+  const elapsed = Math.floor((Date.now() - deletedAt) / (24 * 60 * 60 * 1000));
+  return Math.max(0, RETENTION_DAYS - elapsed);
+}
+
+// =====================================================
+// Icons
+// =====================================================
+function FileTypeIcon({ name, mimeType }) {
+  const type = getFriendlyExtension(name, mimeType);
+  const classNameMap = {
+    PDF: "trash-file-icon--pdf",
+    PNG: "trash-file-icon--image",
+    JPG: "trash-file-icon--image",
+    JPEG: "trash-file-icon--image",
+    GIF: "trash-file-icon--image",
+    WEBP: "trash-file-icon--image",
+    DOC: "trash-file-icon--word",
+    DOCX: "trash-file-icon--word",
+    XLS: "trash-file-icon--excel",
+    XLSX: "trash-file-icon--excel",
+    CSV: "trash-file-icon--excel",
+    PPT: "trash-file-icon--powerpoint",
+    PPTX: "trash-file-icon--powerpoint",
+    ZIP: "trash-file-icon--archive",
+    RAR: "trash-file-icon--archive",
+    "7Z": "trash-file-icon--archive",
+  };
+
+  const className = classNameMap[type] || "trash-file-icon--file";
+  return <div className={`trash-file-icon ${className}`}>{type || "FILE"}</div>;
+}
+
+function FolderIcon() {
   return (
-    <div className="trash-item">
-      <div className="trash-item__name">
-        <div className="trash-item__icon">📁</div>
-
-        <div className="trash-item__info">
-          <strong title={folder.name}>{folder.name || "Không có tên"}</strong>
-          <span>Thư mục</span>
-        </div>
-      </div>
-
-      <div className="trash-item__size">—</div>
-
-      <div className="trash-item__folder">Thư mục</div>
-
-      <div className="trash-item__date">
-        {formatDate(folder.deletedAt || folder.updatedAt)}
-      </div>
-
-      <div className="trash-item__actions">
-        <button
-          className="btn btn-primary btn-sm"
-          onClick={() => onRestore(folder)}
-        >
-          Khôi phục
-        </button>
-
-        <button
-          className="btn btn-danger btn-sm"
-          onClick={() => onPermanentDelete(folder)}
-        >
-          Xóa vĩnh viễn
-        </button>
-      </div>
+    <div className="trash-folder-icon" aria-hidden="true">
+      <svg viewBox="0 0 48 48" fill="none">
+        <path
+          d="M5 13.5C5 10.46 7.46 8 10.5 8H19l5 5h13.5C40.54 13 43 15.46 43 18.5v16C43 37.54 40.54 40 37.5 40h-27C7.46 40 5 37.54 5 34.5v-21Z"
+          fill="currentColor"
+        />
+      </svg>
     </div>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg
+      className="trash-svg-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M5 7h14M10 11v6M14 11v6M9 7V4h6v3m-9 0 1 14h8l1-14"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function RestoreIcon() {
+  return (
+    <svg
+      className="trash-svg-icon"
+      viewBox="0 0 24 24"
+      fill="none"
+      aria-hidden="true"
+    >
+      <path
+        d="M4 10a8 8 0 1 1 2.34 5.66M4 10V5m0 5h5"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
   );
 }
