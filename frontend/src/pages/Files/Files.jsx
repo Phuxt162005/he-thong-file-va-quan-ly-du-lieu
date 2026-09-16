@@ -65,6 +65,7 @@ export default function Files() {
     function handleDocumentClick() {
       setContextMenu(null);
     }
+
     function handleOtherContextMenu() {
       setContextMenu(null);
     }
@@ -98,7 +99,6 @@ export default function Files() {
       });
     } catch (err) {
       console.error("Không thể tải dung lượng lưu trữ:", err);
-
       setStorage({
         storageUsed: 0,
         storageLimit: 0,
@@ -136,12 +136,10 @@ export default function Files() {
           name: folder.name,
           path: `/files?folder=${folder._id}`,
         });
-
         folderId = folder.parentFolder || null;
       }
       setBreadcrumbItems(items);
     } catch (err) {
-      // Breadcrumb là phần phụ của File Manager, không để lỗi breadcrumb chặn toàn bộ trang.
       setBreadcrumbItems([]);
     }
   }
@@ -192,6 +190,7 @@ export default function Files() {
 
   async function handleCreateFolder() {
     const validationError = validateFolderName(folderName);
+
     if (validationError) {
       setError(validationError);
       return;
@@ -208,7 +207,6 @@ export default function Files() {
 
       setFolderName("");
       setCreateModal(false);
-
       refreshFolders();
     } catch (err) {
       setError(err?.message || "Không thể tạo thư mục.");
@@ -313,7 +311,9 @@ export default function Files() {
 
     try {
       setDragError("");
+
       await fileService.moveFile(fileId, destinationFolder._id);
+
       refreshFolders();
     } catch (err) {
       setDragError(
@@ -360,7 +360,9 @@ export default function Files() {
               }}
             >
               <span className="files-page__upload-icon">▤</span>
+
               <span>Tải lên</span>
+
               <span className="files-page__upload-chevron" aria-hidden="true">
                 <svg viewBox="0 0 24 24">
                   <path
@@ -392,7 +394,14 @@ export default function Files() {
               }`}
               onClick={() => navigate("/files")}
             >
-              <span className="folder-manager__root-icon">🏠</span>
+              <span className="folder-manager__root-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24">
+                  <path
+                    d="m3 10 9-7 9 7v10a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"
+                    fill="currentColor"
+                  />
+                </svg>
+              </span>
 
               <span>Tất cả tệp</span>
             </button>
@@ -451,6 +460,7 @@ export default function Files() {
                       rx="1"
                       fill="currentColor"
                     />
+
                     <rect
                       x="14"
                       y="4"
@@ -459,6 +469,7 @@ export default function Files() {
                       rx="1"
                       fill="currentColor"
                     />
+
                     <rect
                       x="4"
                       y="14"
@@ -467,6 +478,7 @@ export default function Files() {
                       rx="1"
                       fill="currentColor"
                     />
+
                     <rect
                       x="14"
                       y="14"
@@ -479,7 +491,10 @@ export default function Files() {
                 </button>
               </div>
             </div>
-            <div className="files-unified-table">
+
+            <div
+              className={`files-unified-table files-unified-table--${viewMode}`}
+            >
               <div className="files-unified-table__header">
                 <div className="files-unified-table__checkbox">
                   <input
@@ -497,10 +512,20 @@ export default function Files() {
                   />
                 </div>
 
-                <div>Tên</div>
+                <div>
+                  Tên
+                  <span className="files-table-sort">↕</span>
+                </div>
+
                 <div>Loại</div>
+
                 <div>Dung lượng</div>
-                <div>Cập nhật</div>
+
+                <div>
+                  Cập nhật
+                  <span className="files-table-sort">↕</span>
+                </div>
+
                 <div>Thao tác</div>
               </div>
 
@@ -531,12 +556,17 @@ export default function Files() {
               </div>
 
               <div className="files-unified-table__files">
-                <FileList />
+                <FileList
+                  selectAllRequest={selectAllRequest}
+                  onSelectionStateChange={setAllFilesSelected}
+                  viewMode={viewMode}
+                  onFilesChanged={loadStorage}
+                />
               </div>
             </div>
 
             <div className="files-page__table-footer">
-              <span>Hiển thị danh sách tệp của bạn</span>
+              <span>Hiển thị 1 - 10 của 10 tệp</span>
 
               <div className="files-page__pagination">
                 <button
@@ -565,63 +595,57 @@ export default function Files() {
                 </button>
               </div>
             </div>
-
-            <div className="files-page__storage">
-              <div className="files-page__storage-info">
-                <div className="files-page__storage-icon" aria-hidden="true">
-                  ☁
-                </div>
-
-                <div>
-                  <h3 className="files-page__storage-title">Lưu trữ an toàn</h3>
-
-                  <p className="files-page__storage-description">
-                    Tất cả file của bạn đều được lưu trữ an toàn trên đám mây.
-                    Truy cập mọi lúc, mọi nơi.
-                  </p>
-                </div>
-              </div>
-
-              <div className="files-page__storage-usage">
-                <div className="files-page__storage-usage-header">
-                  <span>
-                    {storageLoading
-                      ? "Đang tính dung lượng..."
-                      : `Đã sử dụng ${formatStorageSize(
-                          storage.storageUsed,
-                        )} / ${formatStorageSize(storage.storageLimit)}`}
-                  </span>
-
-                  <span>
-                    {storageLoading
-                      ? "--"
-                      : `${Math.round(storage.usagePercent)}%`}
-                  </span>
-
-                  <div className="files-page__storage-progress">
-                    <span
-                      style={{
-                        width: `${Math.min(
-                          Math.max(storage.usagePercent, 0),
-                          100,
-                        )}%`,
-                      }}
-                    />
-                  </div>
-                </div>
-
-                <div className="files-page__storage-progress">
-                  <span />
-                </div>
-              </div>
-            </div>
-
-            <FileUpload
-              folderId={currentFolderId}
-              onUploaded={refreshFolders}
-            />
           </section>
         </div>
+
+        {/* STORAGE NẰM NGOÀI folder-manager */}
+        <div className="files-page__storage">
+          <div className="files-page__storage-info">
+            <div className="files-page__storage-icon" aria-hidden="true">
+              <svg viewBox="0 0 48 48">
+                <path
+                  d="M15 38h21a9 9 0 0 0 1-17.9A13 13 0 0 0 12.8 17 9 9 0 0 0 15 38Z"
+                  fill="currentColor"
+                />
+              </svg>
+            </div>
+
+            <div>
+              <h3 className="files-page__storage-title">Lưu trữ an toàn</h3>
+
+              <p className="files-page__storage-description">
+                Tất cả file của bạn đều được lưu trữ an toàn trên đám mây. Truy
+                cập mọi lúc, mọi nơi.
+              </p>
+            </div>
+          </div>
+
+          <div className="files-page__storage-usage">
+            <div className="files-page__storage-usage-header">
+              <span>
+                {storageLoading
+                  ? "Đang tính dung lượng..."
+                  : `Đã sử dụng ${formatStorageSize(
+                      storage.storageUsed,
+                    )} / ${formatStorageSize(storage.storageLimit)}`}
+              </span>
+
+              <span>
+                {storageLoading ? "--" : `${Math.round(storage.usagePercent)}%`}
+              </span>
+            </div>
+
+            <div className="files-page__storage-progress">
+              <span
+                style={{
+                  width: `${Math.min(Math.max(storage.usagePercent, 0), 100)}%`,
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <FileUpload folderId={currentFolderId} onUploaded={refreshFolders} />
       </div>
 
       <Modal
@@ -748,7 +772,9 @@ export default function Files() {
       <ConfirmDialog
         isOpen={deleteModal}
         title="Xóa thư mục"
-        message={`Bạn có chắc muốn xóa thư mục "${selectedFolder?.name || ""}"? Thư mục và dữ liệu bên trong sẽ được chuyển vào thùng rác.`}
+        message={`Bạn có chắc muốn xóa thư mục "${
+          selectedFolder?.name || ""
+        }"? Thư mục và dữ liệu bên trong sẽ được chuyển vào thùng rác.`}
         confirmText="Xóa"
         cancelText="Hủy"
         danger
@@ -815,6 +841,7 @@ export default function Files() {
                 ...contextMenu.folder,
                 type: "folder",
               });
+
               setContextMenu(null);
             }}
           >
@@ -844,9 +871,9 @@ function formatStorageSize(bytes) {
   }
 
   const units = ["KB", "MB", "GB", "TB"];
-
   let size = value;
   let unitIndex = -1;
+
   while (size >= 1024 && unitIndex < units.length - 1) {
     size /= 1024;
     unitIndex += 1;

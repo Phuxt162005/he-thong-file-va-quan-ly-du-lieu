@@ -1,65 +1,74 @@
 .folder-tree {
-  width: 100%;
+  margin-top: 8px;
 }
 
 .folder-tree__item {
-  min-height: 36px;
+  min-height: 44px;
   display: flex;
   align-items: center;
-  gap: var(--spacing-xs);
-  padding: var(--spacing-xs) var(--spacing-sm);
-  border-radius: var(--radius-sm);
+  gap: 8px;
+  padding-right: 8px;
+  color: #173f80;
+  border-radius: 9px;
+  font-size: 15px;
+  font-weight: 500;
   cursor: pointer;
+  transition: background 0.15s ease;
 }
 
 .folder-tree__item:hover {
-  background-color: var(--color-hover);
+  background: #f4f8ff;
 }
 
 .folder-tree__item--selected {
-  color: var(--color-primary);
-  background-color: var(--color-selected);
+  background: #e9f2ff;
+  color: #2474dc;
 }
 
 .folder-tree__expand {
   width: 20px;
-  height: 24px;
-  display: flex;
+  height: 28px;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  color: var(--color-text-secondary);
+  padding: 0;
+  border: 0;
   background: transparent;
-  font-size: 10px;
+  color: #16447f;
+  cursor: pointer;
+}
+
+.folder-tree__expand svg {
+  width: 14px;
+  height: 14px;
 }
 
 .folder-tree__icon {
-  width: 24px;
-  flex-shrink: 0;
+  width: 32px;
+  height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 32px;
+}
+
+.folder-tree__icon svg {
+  width: 30px;
+  height: 30px;
+  display: block;
 }
 
 .folder-tree__name {
   min-width: 0;
-  flex: 1;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: var(--font-size-sm);
 }
 
-.folder-tree__children {
-  margin-left: 20px;
-  padding-left: var(--spacing-xs);
-  border-left: var(--border-width) solid var(--color-border);
-}
-
-.folder-tree__loading {
-  padding: var(--spacing-sm);
-  color: var(--color-text-secondary);
-  font-size: var(--font-size-xs);
-}
-
-.folder-tree__error {
-  padding: var(--spacing-sm);
-  color: var(--color-danger);
-  font-size: var(--font-size-sm);
+.folder-tree__loading,
+.folder-tree__error,
+.folder-tree__empty {
+  padding: 12px 10px;
+  color: #7b8fac;
+  font-size: 13px;
 }

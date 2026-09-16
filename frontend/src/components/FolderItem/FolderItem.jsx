@@ -11,6 +11,12 @@ export default function FolderItem({
   onContextMenu,
   onDropFile,
 }) {
+  const action = (event, callback) => {
+    event.preventDefault();
+    event.stopPropagation();
+    callback?.(folder);
+  };
+
   const handleContextMenu = (event) => {
     event.preventDefault();
     event.stopPropagation();
@@ -26,9 +32,6 @@ export default function FolderItem({
   };
 
   const handleDragLeave = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-
     event.currentTarget.classList.remove("folder-item--drag-over");
   };
 
@@ -39,19 +42,9 @@ export default function FolderItem({
     event.currentTarget.classList.remove("folder-item--drag-over");
 
     const fileId = event.dataTransfer.getData("application/x-file-id");
-
-    if (!fileId) {
-      return;
+    if (fileId) {
+      onDropFile?.(fileId, folder);
     }
-
-    onDropFile?.(fileId, folder);
-  };
-
-  const handleAction = (event, callback) => {
-    event.preventDefault();
-    event.stopPropagation();
-
-    callback?.(folder);
   };
 
   return (
@@ -62,10 +55,10 @@ export default function FolderItem({
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
-      {/* Checkbox */}
-      <div className="folder-item__select" aria-hidden="true" />
+      <div className="folder-item__select">
+        <span />
+      </div>
 
-      {/* Tên */}
       <button
         type="button"
         className="folder-item__name-cell"
@@ -75,14 +68,14 @@ export default function FolderItem({
         <span className="folder-item__icon" aria-hidden="true">
           <svg viewBox="0 0 48 48">
             <path
-              d="M5 12.5C5 10.01 7.01 8 9.5 8h10.2l4 4H38.5c2.49 0 4.5 2.01 4.5 4.5v18c0 3.04-2.46 5.5-5.5 5.5h-27C7.46 40 5 37.54 5 34.5v-22Z"
-              fill="#FFD15C"
+              d="M5 12.5A4.5 4.5 0 0 1 9.5 8h10l4 4h15A4.5 4.5 0 0 1 43 16.5v20a3.5 3.5 0 0 1-3.5 3.5h-31A3.5 3.5 0 0 1 5 36.5z"
+              fill="#65a8ef"
             />
+
             <path
-              d="M5 17h38v17.5c0 3.04-2.46 5.5-5.5 5.5h-27C7.46 40 5 37.54 5 34.5V17Z"
-              fill="#FFC247"
+              d="M5 17h38v19.5a3.5 3.5 0 0 1-3.5 3.5h-31A3.5 3.5 0 0 1 5 36.5z"
+              fill="#5b9ee8"
             />
-            <path d="M5 17h38" stroke="#E7A92E" strokeWidth="1.5" />
           </svg>
         </span>
 
@@ -91,81 +84,141 @@ export default function FolderItem({
         </span>
       </button>
 
-      {/* Loại */}
       <div className="folder-item__type">Thư mục</div>
 
-      {/* Dung lượng */}
       <div className="folder-item__size">-</div>
 
-      {/* Cập nhật */}
       <div className="folder-item__date">
-        {formatFolderDate(folder.updatedAt || folder.createdAt)}
+        {formatDate(folder.updatedAt || folder.createdAt)}
       </div>
 
-      {/* Thao tác */}
       <div className="folder-item__actions">
         <button
           type="button"
           className="folder-item__action folder-item__action--view"
-          onClick={(event) => handleAction(event, onOpen)}
+          onClick={(event) => action(event, onOpen)}
           title="Mở thư mục"
-          aria-label={`Mở ${folder.name || "thư mục"}`}
+          aria-label="Mở thư mục"
         >
-          👁
+          <EyeIcon />
         </button>
 
         <button
           type="button"
           className="folder-item__action folder-item__action--share"
-          onClick={(event) => handleAction(event, onShare)}
+          onClick={(event) => action(event, onShare)}
           title="Chia sẻ"
-          aria-label={`Chia sẻ ${folder.name || "thư mục"}`}
+          aria-label="Chia sẻ"
         >
-          🔗
+          <ShareIcon />
         </button>
 
         <button
           type="button"
           className="folder-item__action"
-          onClick={(event) => handleAction(event, onRename)}
+          onClick={(event) => action(event, onRename)}
           title="Đổi tên"
-          aria-label={`Đổi tên ${folder.name || "thư mục"}`}
+          aria-label="Đổi tên"
         >
-          ✏️
+          <EditIcon />
         </button>
 
         <button
           type="button"
           className="folder-item__action folder-item__action--danger"
-          onClick={(event) => handleAction(event, onDelete)}
+          onClick={(event) => action(event, onDelete)}
           title="Xóa"
-          aria-label={`Xóa ${folder.name || "thư mục"}`}
+          aria-label="Xóa"
         >
-          🗑️
+          <TrashIcon />
         </button>
 
         <button
           type="button"
           className="folder-item__action"
-          onClick={(event) => {
-            event.preventDefault();
-            event.stopPropagation();
-            onContextMenu?.(event, folder);
-          }}
+          onClick={handleContextMenu}
           title="Thêm thao tác"
-          aria-label={`Thêm thao tác cho ${folder.name || "thư mục"}`}
+          aria-label="Thêm thao tác"
         >
-          ⋯
+          <MoreIcon />
         </button>
       </div>
     </div>
   );
 }
 
-function formatFolderDate(date) {
-  if (!date) {
-    return "-";
-  }
+function formatDate(value) {
+  return value ? new Date(value).toLocaleString("vi-VN") : "-";
+}
 
-  return new Date(date).toLocaleString("vi-VN");
+function EyeIcon() {
+  return (
+    <svg viewBox="0 0 24 24">
+      <path
+        d="M2.5 12s3.4-5 9.5-5 9.5 5 9.5 5-3.4 5-9.5 5-9.5-5-9.5-5Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+
+      <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+function ShareIcon() {
+  return (
+    <svg viewBox="0 0 24 24">
+      <path
+        d="M7 12v7h10v-7M12 15V4m0 0-4 4m4-4 4 4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function EditIcon() {
+  return (
+    <svg viewBox="0 0 24 24">
+      <path
+        d="m4 16.5-.8 4.3 4.3-.8L18.7 8.8l-3.5-3.5zM13.8 6.7l3.5 3.5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24">
+      <path
+        d="M5 7h14M9 7V4h6v3m-8 0 1 13h8l1-13M10 11v6M14 11v6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function MoreIcon() {
+  return (
+    <svg viewBox="0 0 24 24">
+      <circle cx="5" cy="12" r="1.8" fill="currentColor" />
+
+      <circle cx="12" cy="12" r="1.8" fill="currentColor" />
+
+      <circle cx="19" cy="12" r="1.8" fill="currentColor" />
+    </svg>
+  );
 }
