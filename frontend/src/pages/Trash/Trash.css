@@ -768,3 +768,65 @@
     left: 30px;
   }
 }
+
+/* =========================================================
+   TRASH RETENTION — FINAL ICON ALIGNMENT
+   ========================================================= */
+
+.trash-retention {
+  position: relative;
+  min-height: 120px;
+  margin-top: 20px;
+  padding: 20px 34px 20px 170px;
+
+  display: flex;
+  align-items: center;
+
+  box-sizing: border-box;
+}
+
+.trash-retention__icon {
+  position: absolute;
+
+  left: 30px;
+  top: 50%;
+
+  width: 105px;
+  height: 88px;
+
+  margin: 0;
+  padding: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  transform: translateY(-50%);
+
+  color: #5066bd;
+}
+
+.trash-retention__icon .trash-svg-icon {
+  display: block;
+
+  width: 72px;
+  height: 72px;
+
+  margin: 0;
+  padding: 0;
+
+  transform: none;
+}
+
+/* Phần chữ */
+.trash-retention h3 {
+  margin: 0 0 7px;
+
+  line-height: 1.35;
+}
+
+.trash-retention p {
+  margin: 2px 0;
+
+  line-height: 1.45;
+}
