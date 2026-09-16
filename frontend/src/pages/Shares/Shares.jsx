@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import Loading from "../../components/Loading/Loading";
 import Modal from "../../components/Modal/Modal";
@@ -13,11 +13,14 @@ export default function Shares() {
   const [shares, setShares] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [filter, setFilter] = useState("all");
+  const [typeFilter, setTypeFilter] = useState("all");
+  const [sortOrder, setSortOrder] = useState("newest");
   const [selectedShare, setSelectedShare] = useState(null);
+  const [selectedShares, setSelectedShares] = useState([]);
   const [editModal, setEditModal] = useState(false);
   const [revokeModal, setRevokeModal] = useState(false);
   const [saving, setSaving] = useState(false);
+
   const [formData, setFormData] = useState({
     visibility: "public",
     accessType: "download",
@@ -29,7 +32,7 @@ export default function Shares() {
 
   useEffect(() => {
     loadShares();
-  }, [filter]);
+  }, []);
 
   const loadShares = async () => {
     try {
@@ -38,12 +41,9 @@ export default function Shares() {
 
       const response = await shareService.getShares();
       const allShares = response?.data || response || [];
-      if (filter === "all") {
-        setShares(allShares);
-        return;
-      }
 
-      setShares(allShares.filter((share) => getStatus(share) === filter));
+      setShares(Array.isArray(allShares) ? allShares : []);
+      setSelectedShares([]);
     } catch (err) {
       setError(
         err?.response?.data?.message ||
@@ -55,8 +55,61 @@ export default function Shares() {
     }
   };
 
+  const visibleShares = useMemo(() => {
+    let result = [...shares];
+
+    if (typeFilter !== "all") {
+      result = result.filter((share) => {
+        const type = String(
+          share.resourceType || share.type || "",
+        ).toLowerCase();
+
+        return type === typeFilter;
+      });
+    }
+
+    result.sort((a, b) => {
+      const dateA = new Date(
+        a.createdAt || a.sharedAt || a.updatedAt || a.expiresAt || 0,
+      ).getTime();
+
+      const dateB = new Date(
+        b.createdAt || b.sharedAt || b.updatedAt || b.expiresAt || 0,
+      ).getTime();
+
+      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+    });
+
+    return result;
+  }, [shares, typeFilter, sortOrder]);
+
+  const allVisibleSelected =
+    visibleShares.length > 0 &&
+    visibleShares.every((share) => selectedShares.includes(share._id));
+
+  const toggleSelectAll = () => {
+    if (allVisibleSelected) {
+      setSelectedShares((prev) =>
+        prev.filter((id) => !visibleShares.some((share) => share._id === id)),
+      );
+
+      return;
+    }
+
+    setSelectedShares((prev) => [
+      ...new Set([...prev, ...visibleShares.map((share) => share._id)]),
+    ]);
+  };
+
+  const toggleSelect = (id) => {
+    setSelectedShares((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
+    );
+  };
+
   const openEdit = (share) => {
     setSelectedShare(share);
+
     setFormData({
       visibility: share.visibility || "public",
       accessType: share.accessType || "download",
@@ -65,6 +118,7 @@ export default function Shares() {
       maxDownloads: share.maxDownloads ?? "",
       removePassword: false,
     });
+
     setEditModal(true);
   };
 
@@ -92,6 +146,7 @@ export default function Shares() {
       }
 
       const data = {};
+
       if (formData.expiresAt !== formatDateTime(selectedShare.expiresAt)) {
         data.expiresAt = formData.expiresAt || null;
       }
@@ -139,6 +194,7 @@ export default function Shares() {
       setError("");
 
       await shareService.revokeShare(selectedShare._id);
+
       setShares((prev) =>
         prev.map((share) =>
           share._id === selectedShare._id
@@ -161,6 +217,7 @@ export default function Shares() {
       share?.url ||
       share?.shareUrl ||
       (share?.token ? `${window.location.origin}/share/${share.token}` : "");
+
     if (!url) {
       setError("Không tìm thấy URL của Share Link.");
       return;
@@ -181,44 +238,146 @@ export default function Shares() {
   return (
     <>
       <div className="shares-page">
+        {/* =================================================
+            HEADER
+            ================================================= */}
         <div className="shares-page__header">
           <div>
-            <h1>Liên kết chia sẻ</h1>
+            <h1>Được chia sẻ</h1>
 
-            <p>Quản lý các Share Link</p>
+            <p>Các file và thư mục được người khác chia sẻ với bạn</p>
           </div>
 
-          <select
-            className="input shares-page__filter"
-            value={filter}
-            onChange={(event) => setFilter(event.target.value)}
-          >
-            <option value="all">Tất cả</option>
-            <option value="active">Đang hoạt động</option>
-            <option value="expired">Đã hết hạn</option>
-            <option value="revoked">Đã thu hồi</option>
-          </select>
+          <div className="shares-page__sort">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path
+                d="M8 5v14M8 5l-3 3m3-3 3 3M16 19V5m0 14 3-3m-3 3-3-3"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+
+            <select
+              value={sortOrder}
+              onChange={(event) => setSortOrder(event.target.value)}
+              aria-label="Sắp xếp"
+            >
+              <option value="newest">Mới nhất</option>
+
+              <option value="oldest">Cũ nhất</option>
+            </select>
+
+            <svg
+              className="shares-page__sort-chevron"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              <path
+                d="m6 9 6 6 6-6"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              />
+            </svg>
+          </div>
         </div>
 
         {error && <div className="error-message">{error}</div>}
 
+        {/* =================================================
+            FILTER TABS
+            ================================================= */}
+        <div className="shares-page__tabs">
+          <button
+            type="button"
+            className={`shares-page__tab ${
+              typeFilter === "all" ? "shares-page__tab--active" : ""
+            }`}
+            onClick={() => setTypeFilter("all")}
+          >
+            <UsersIcon />
+
+            <span>Tất cả</span>
+          </button>
+
+          <button
+            type="button"
+            className={`shares-page__tab ${
+              typeFilter === "file" ? "shares-page__tab--active" : ""
+            }`}
+            onClick={() => setTypeFilter("file")}
+          >
+            <FileIcon />
+
+            <span>File</span>
+          </button>
+
+          <button
+            type="button"
+            className={`shares-page__tab ${
+              typeFilter === "folder" ? "shares-page__tab--active" : ""
+            }`}
+            onClick={() => setTypeFilter("folder")}
+          >
+            <FolderIcon />
+
+            <span>Thư mục</span>
+          </button>
+        </div>
+
+        {/* =================================================
+            LIST
+            ================================================= */}
         <div className="shares-list">
           <div className="shares-list__header">
-            <span>Tài nguyên</span>
-            <span>Quyền truy cập</span>
-            <span>Hết hạn</span>
-            <span>Download</span>
-            <span>Trạng thái</span>
-            <span>Thao tác</span>
+            <div className="shares-list__checkbox">
+              <input
+                type="checkbox"
+                checked={allVisibleSelected}
+                onChange={toggleSelectAll}
+                aria-label="Chọn tất cả"
+              />
+            </div>
+
+            <div>
+              Tên
+              <SortIcon />
+            </div>
+
+            <div>
+              Chia sẻ bởi
+              <SortIcon />
+            </div>
+
+            <div>
+              Quyền truy cập
+              <SortIcon />
+            </div>
+
+            <div>
+              Thời gian
+              <SortIcon />
+            </div>
+
+            <div>Thao tác</div>
           </div>
 
-          {shares.length === 0 ? (
-            <div className="shares-list__empty">Chưa có Share Link.</div>
+          {visibleShares.length === 0 ? (
+            <div className="shares-list__empty">
+              Không có tài nguyên được chia sẻ.
+            </div>
           ) : (
-            shares.map((share) => (
+            visibleShares.map((share) => (
               <ShareItem
                 key={share._id}
                 share={share}
+                selected={selectedShares.includes(share._id)}
+                onSelect={() => toggleSelect(share._id)}
                 onEdit={openEdit}
                 onRevoke={(item) => {
                   setSelectedShare(item);
@@ -228,9 +387,35 @@ export default function Shares() {
               />
             ))
           )}
+
+          {/* =================================================
+              FOOTER
+              ================================================= */}
+          <div className="shares-page__footer">
+            <span>
+              Hiển thị 1 - {visibleShares.length} của {visibleShares.length} mục
+            </span>
+
+            <div className="shares-page__pagination">
+              <button type="button" disabled aria-label="Trang trước">
+                ‹
+              </button>
+
+              <button type="button" className="shares-page__pagination--active">
+                1
+              </button>
+
+              <button type="button" disabled aria-label="Trang sau">
+                ›
+              </button>
+            </div>
+          </div>
         </div>
       </div>
 
+      {/* =================================================
+          EDIT MODAL
+          ================================================= */}
       <Modal
         isOpen={editModal}
         title="Chỉnh sửa Share Link"
@@ -275,6 +460,7 @@ export default function Shares() {
             disabled={saving}
           >
             <option value="public">Public - Công khai</option>
+
             <option value="private">Private - Riêng tư</option>
           </select>
         </div>
@@ -291,6 +477,7 @@ export default function Shares() {
             disabled={saving}
           >
             <option value="download">Cho phép xem và Download</option>
+
             <option value="view">View Only - Chỉ xem</option>
           </select>
         </div>
@@ -340,10 +527,16 @@ export default function Shares() {
         </div>
       </Modal>
 
+      {/* =================================================
+          REVOKE MODAL
+          ================================================= */}
+
       <ConfirmDialog
         isOpen={revokeModal}
         title="Thu hồi Share Link"
-        message={`Bạn có chắc muốn thu hồi Share Link của "${selectedShare?.resourceName || selectedShare?.name || ""}"?`}
+        message={`Bạn có chắc muốn thu hồi Share Link của "${
+          selectedShare?.resourceName || selectedShare?.name || ""
+        }"?`}
         confirmText="Thu hồi"
         cancelText="Hủy"
         danger
@@ -360,14 +553,37 @@ export default function Shares() {
   );
 }
 
-function ShareItem({ share, onEdit, onRevoke, onCopy }) {
-  const status = share.status || getStatus(share);
+/* =========================================================
+   SHARE ITEM
+   ========================================================= */
+function ShareItem({ share, selected, onSelect, onEdit, onRevoke, onCopy }) {
+  const status = getStatus(share);
+  const isFolder =
+    String(share.resourceType || share.type || "").toLowerCase() === "folder";
 
   return (
     <div className="share-item">
+      {/* CHECKBOX */}
+      <div className="share-item__checkbox">
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={onSelect}
+          aria-label={`Chọn ${
+            share.resourceName || share.name || "tài nguyên"
+          }`}
+        />
+      </div>
+
+      {/* RESOURCE */}
       <div className="share-item__resource">
-        <span className="share-item__icon" aria-hidden="true">
-          🔗
+        <span
+          className={`share-item__icon ${
+            isFolder ? "share-item__icon--folder" : ""
+          }`}
+          aria-hidden="true"
+        >
+          {isFolder ? <FolderIcon /> : <ResourceFileIcon share={share} />}
         </span>
 
         <div className="share-item__resource-info">
@@ -375,77 +591,246 @@ function ShareItem({ share, onEdit, onRevoke, onCopy }) {
             {share.resourceName || share.name || "Tài nguyên"}
           </strong>
 
-          <span>{share.resourceType === "folder" ? "Folder" : "File"}</span>
+          <span>
+            {isFolder
+              ? `Thư mục${
+                  share.itemCount != null ? ` • ${share.itemCount} mục` : ""
+                }`
+              : getFileMeta(share)}
+          </span>
         </div>
       </div>
 
+      {/* SHARED BY */}
+      <div className="share-item__shared-by">
+        <span className="share-item__avatar">
+          {getInitials(getSharerName(share))}
+        </span>
+
+        <div>
+          <strong>{getSharerName(share)}</strong>
+
+          <span>{getSharerEmail(share)}</span>
+        </div>
+      </div>
+
+      {/* ACCESS */}
       <div className="share-item__access">
-        <span>
-          {share.visibility === "private" ? "🔒 Private" : "🌐 Public"}
-        </span>
+        <span
+          className={`share-access ${
+            share.accessType === "view"
+              ? "share-access--view"
+              : "share-access--download"
+          }`}
+        >
+          <EyeIcon />
 
-        <span>
-          {share.accessType === "view" ? "👁 View Only" : "⬇️ Download"}
-        </span>
-      </div>
-
-      <div className="share-item__expiry">
-        {share.expiresAt
-          ? new Date(share.expiresAt).toLocaleString("vi-VN")
-          : "Không giới hạn"}
-      </div>
-
-      <div className="share-item__downloads">
-        <strong>{share.downloadCount || 0}</strong>
-
-        <span>
-          /
-          {share.maxDownloads !== null && share.maxDownloads !== undefined
-            ? share.maxDownloads
-            : "∞"}
+          <span>
+            {share.accessType === "view" ? "Chỉ xem" : "Xem & Tải xuống"}
+          </span>
         </span>
       </div>
 
-      <div className="share-item__status">
-        <span className={`share-status share-status--${status}`}>
-          {getStatusText(status)}
-        </span>
+      {/* TIME */}
+      <div className="share-item__time">
+        {formatDisplayDate(
+          share.createdAt ||
+            share.sharedAt ||
+            share.updatedAt ||
+            share.expiresAt,
+        )}
       </div>
 
+      {/* ACTIONS */}
       <div className="share-item__actions">
         <button
           type="button"
-          className="btn btn-secondary btn-sm"
+          className="share-item__download"
           onClick={() => onCopy(share)}
-          title="Sao chép Share Link"
+          title="Tải xuống / Sao chép liên kết"
         >
-          Sao chép
+          <DownloadIcon />
         </button>
 
         <button
           type="button"
-          className="btn btn-secondary btn-sm"
+          className="share-item__more"
           onClick={() => onEdit(share)}
           disabled={status === "revoked"}
-          title="Chỉnh sửa Share Link"
+          title="Thao tác khác"
         >
-          Sửa
-        </button>
-
-        <button
-          type="button"
-          className="btn btn-danger btn-sm"
-          onClick={() => onRevoke(share)}
-          disabled={status === "revoked"}
-          title="Thu hồi Share Link"
-        >
-          Thu hồi
+          <MoreIcon />
         </button>
       </div>
     </div>
   );
 }
 
+/* =========================================================
+   ICONS
+   ========================================================= */
+function UsersIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+
+      <circle
+        cx="9"
+        cy="7"
+        r="4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+
+      <path
+        d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function FileIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M6 2h8l5 5v15H6z" fill="currentColor" opacity=".95" />
+
+      <path d="M14 2v5h5" fill="none" stroke="#fff" strokeWidth="1.5" />
+
+      <path
+        d="M9 12h6M9 16h6"
+        fill="none"
+        stroke="#fff"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function FolderIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M3 6.5A2.5 2.5 0 0 1 5.5 4H10l2 2h6.5A2.5 2.5 0 0 1 21 8.5v9a2.5 2.5 0 0 1-2.5 2.5h-13A2.5 2.5 0 0 1 3 17.5z"
+        fill="currentColor"
+      />
+    </svg>
+  );
+}
+
+function ResourceFileIcon({ share }) {
+  const type = String(
+    share?.fileType ||
+      share?.mimeType ||
+      share?.extension ||
+      share?.resourceName ||
+      "",
+  ).toLowerCase();
+
+  if (type.includes("pdf") || type.endsWith(".pdf")) {
+    return (
+      <span className="resource-file-icon resource-file-icon--pdf">PDF</span>
+    );
+  }
+
+  if (
+    type.includes("png") ||
+    type.includes("jpg") ||
+    type.includes("jpeg") ||
+    type.includes("image")
+  ) {
+    return (
+      <span className="resource-file-icon resource-file-icon--image">IMG</span>
+    );
+  }
+
+  if (type.includes("doc") || type.includes("word")) {
+    return (
+      <span className="resource-file-icon resource-file-icon--word">W</span>
+    );
+  }
+  if (type.includes("xls") || type.includes("excel")) {
+    return (
+      <span className="resource-file-icon resource-file-icon--excel">X</span>
+    );
+  }
+  if (type.includes("ppt") || type.includes("powerpoint")) {
+    return (
+      <span className="resource-file-icon resource-file-icon--powerpoint">
+        P
+      </span>
+    );
+  }
+  if (type.includes("zip") || type.includes("rar") || type.includes("7z")) {
+    return (
+      <span className="resource-file-icon resource-file-icon--archive">
+        ZIP
+      </span>
+    );
+  }
+  return (
+    <span className="resource-file-icon resource-file-icon--file">TXT</span>
+  );
+}
+
+function SortIcon() {
+  return <span className="shares-sort-icon">↕</span>;
+}
+
+function EyeIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M2 12s3.5-6 10-6 10 6 10 6-3.5 6-10 6S2 12 2 12z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+
+      <circle cx="12" cy="12" r="2.5" fill="currentColor" />
+    </svg>
+  );
+}
+
+function DownloadIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M12 3v12m0 0 4-4m-4 4-4-4M5 20h14"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function MoreIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle cx="5" cy="12" r="2" fill="currentColor" />
+      <circle cx="12" cy="12" r="2" fill="currentColor" />
+      <circle cx="19" cy="12" r="2" fill="currentColor" />
+    </svg>
+  );
+}
+
+/* =========================================================
+   HELPERS
+   ========================================================= */
 function getStatus(share) {
   if (share.isActive === false) {
     return "revoked";
@@ -462,20 +847,95 @@ function getStatus(share) {
   ) {
     return "expired";
   }
+
   return "active";
 }
 
-function getStatusText(status) {
-  switch (status) {
-    case "active":
-      return "Đang hoạt động";
-    case "expired":
-      return "Đã hết hạn";
-    case "revoked":
-      return "Đã thu hồi";
-    default:
-      return status;
+function getSharerName(share) {
+  return (
+    share?.sharedBy?.name ||
+    share?.sharedBy?.fullName ||
+    share?.owner?.name ||
+    share?.owner?.fullName ||
+    share?.user?.name ||
+    share?.user?.fullName ||
+    share?.createdBy?.name ||
+    share?.createdBy?.fullName ||
+    "Người dùng"
+  );
+}
+
+function getSharerEmail(share) {
+  return (
+    share?.sharedBy?.email ||
+    share?.owner?.email ||
+    share?.user?.email ||
+    share?.createdBy?.email ||
+    "Không có email"
+  );
+}
+
+function getInitials(name) {
+  const words = String(name || "")
+    .trim()
+    .split(/\s+/)
+    .filter(Boolean);
+
+  if (words.length === 0) {
+    return "?";
   }
+  if (words.length === 1) {
+    return words[0].slice(0, 1).toUpperCase();
+  }
+  return (
+    words[0].slice(0, 1) + words[words.length - 1].slice(0, 1)
+  ).toUpperCase();
+}
+
+function getFileMeta(share) {
+  const type =
+    share?.fileType ||
+    share?.extension ||
+    getExtension(share?.resourceName || share?.name || "");
+
+  const size = share?.size || share?.fileSize || share?.resourceSize;
+
+  if (type && size) {
+    return `${String(type).toUpperCase()} • ${size}`;
+  }
+  if (type) {
+    return String(type).toUpperCase();
+  }
+  if (size) {
+    return String(size);
+  }
+  return "File";
+}
+
+function getExtension(name) {
+  const value = String(name || "");
+  const index = value.lastIndexOf(".");
+
+  return index > -1 ? value.slice(index + 1) : "";
+}
+
+function formatDisplayDate(date) {
+  if (!date) {
+    return "—";
+  }
+
+  const value = new Date(date);
+  if (Number.isNaN(value.getTime())) {
+    return "—";
+  }
+
+  const day = String(value.getDate()).padStart(2, "0");
+  const month = String(value.getMonth() + 1).padStart(2, "0");
+  const year = value.getFullYear();
+  const hours = String(value.getHours()).padStart(2, "0");
+  const minutes = String(value.getMinutes()).padStart(2, "0");
+
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
 function formatDateTime(date) {
@@ -484,7 +944,12 @@ function formatDateTime(date) {
   }
 
   const value = new Date(date);
+  if (Number.isNaN(value.getTime())) {
+    return "";
+  }
+
   const offset = value.getTimezoneOffset();
   const local = new Date(value.getTime() - offset * 60000);
+
   return local.toISOString().slice(0, 16);
 }
