@@ -953,7 +953,6 @@ function TrashIcon() {
       fill="none"
       aria-hidden="true"
     >
-      {/* Nắp */}
       <path
         d="M9 12H39"
         stroke="currentColor"
@@ -961,7 +960,6 @@ function TrashIcon() {
         strokeLinecap="round"
       />
 
-      {/* Tay cầm */}
       <path
         d="M17 12V7H31V12"
         stroke="currentColor"
@@ -970,7 +968,6 @@ function TrashIcon() {
         strokeLinejoin="round"
       />
 
-      {/* Thân thùng */}
       <path
         d="M13 12L15.5 41H32.5L35 12"
         stroke="currentColor"
@@ -979,7 +976,6 @@ function TrashIcon() {
         strokeLinejoin="round"
       />
 
-      {/* Hai đường bên trong */}
       <path
         d="M21 19V34"
         stroke="currentColor"
