@@ -140,37 +140,39 @@ exports.disable = asyncHandler(async (req, res) => {
 // danh sách Share Link của User
 exports.list = asyncHandler(async (req, res) => {
   const shares = await shareService.getMyShares(req.user.id, req.query.status);
-
   const enrichedShares = await Promise.all(
     shares.map(async (share) => {
       const shareData = share.toObject ? share.toObject() : { ...share };
-
       let resource = null;
 
       if (share.resourceType === "file") {
-        resource = await File.findOne({
-          _id: share.resourceId,
-          isDeleted: false,
-        }).select("name mimeType size");
-      } else if (share.resourceType === "folder") {
-        resource = await Folder.findOne({
-          _id: share.resourceId,
-          isDeleted: false,
-        }).select("name");
+        // Không lọc isDeleted ở bước lấy metadata.
+        // Mục đích là vẫn lấy được tên + định dạng của các Share Link đã được tạo từ trước.
+        resource = await File.findById(share.resourceId)
+          .select("name mimeType size isDeleted")
+          .lean();
+      }
+      if (share.resourceType === "folder") {
+        resource = await Folder.findById(share.resourceId)
+          .select("name isDeleted")
+          .lean();
       }
 
       if (resource) {
         shareData.resourceName = resource.name || "Tài nguyên";
+        shareData.isResourceDeleted = resource.isDeleted === true;
 
         if (share.resourceType === "file") {
-          shareData.fileType = resource.mimeType;
-          shareData.mimeType = resource.mimeType;
-          shareData.size = resource.size;
+          shareData.fileType = resource.mimeType || "";
+          shareData.mimeType = resource.mimeType || "";
+          shareData.size = resource.size || 0;
         }
       } else {
         shareData.resourceName = "Tài nguyên";
+        shareData.fileType = "";
+        shareData.mimeType = "";
+        shareData.size = 0;
       }
-
       return shareData;
     }),
   );
