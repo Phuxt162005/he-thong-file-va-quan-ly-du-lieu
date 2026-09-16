@@ -207,19 +207,146 @@ const RESOURCE_LABELS = {
 };
 
 function formatAction(action) {
-  if (!action) {
+  const normalized = String(action || "")
+    .trim()
+    .toLowerCase()
+    .replaceAll(" ", "_");
+
+  if (normalized === "upload" || normalized === "file_upload") {
     return {
-      label: "-",
-      className: "activity-action--default",
-      icon: "file",
+      label: "File Upload",
+      className: "activity-action--upload",
+      icon: "upload",
     };
   }
 
-  if (ACTION_CONFIG[action]) {
-    return ACTION_CONFIG[action];
+  if (normalized === "download" || normalized === "file_download") {
+    return {
+      label: "File Download",
+      className: "activity-action--download",
+      icon: "download",
+    };
   }
 
-  const label = action
+  if (normalized === "delete" || normalized === "file_delete") {
+    return {
+      label: "File Delete",
+      className: "activity-action--delete",
+      icon: "trash",
+    };
+  }
+
+  if (
+    normalized === "permanent_delete" ||
+    normalized === "file_permanent_delete"
+  ) {
+    return {
+      label: "File Permanent Delete",
+      className: "activity-action--delete",
+      icon: "trash",
+    };
+  }
+
+  if (normalized === "restore" || normalized === "file_restore") {
+    return {
+      label: "File Restore",
+      className: "activity-action--restore",
+      icon: "restore",
+    };
+  }
+
+  if (normalized === "move" || normalized === "file_move") {
+    return {
+      label: "File Move",
+      className: "activity-action--move",
+      icon: "move",
+    };
+  }
+
+  if (normalized === "copy" || normalized === "file_copy") {
+    return {
+      label: "File Copy",
+      className: "activity-action--copy",
+      icon: "copy",
+    };
+  }
+
+  if (normalized === "folder_copy") {
+    return {
+      label: "Folder Copy",
+      className: "activity-action--copy",
+      icon: "copy",
+    };
+  }
+
+  if (normalized === "rename" || normalized === "file_rename") {
+    return {
+      label: "File Rename",
+      className: "activity-action--rename",
+      icon: "edit",
+    };
+  }
+
+  if (normalized === "folder_rename") {
+    return {
+      label: "Folder Rename",
+      className: "activity-action--rename",
+      icon: "edit",
+    };
+  }
+
+  if (normalized === "share" || normalized === "share_link") {
+    return {
+      label: "Share Link",
+      className: "activity-action--share",
+      icon: "link",
+    };
+  }
+
+  if (normalized === "grant_permission" || normalized === "update_permission") {
+    return {
+      label:
+        normalized === "grant_permission"
+          ? "Permission Grant"
+          : "Permission Update",
+      className: "activity-action--permission",
+      icon: "key",
+    };
+  }
+
+  if (normalized === "revoke_permission") {
+    return {
+      label: "Permission Revoke",
+      className: "activity-action--delete",
+      icon: "key",
+    };
+  }
+
+  if (normalized === "preview" || normalized === "file_preview") {
+    return {
+      label: "File Preview",
+      className: "activity-action--preview",
+      icon: "eye",
+    };
+  }
+
+  if (normalized === "login") {
+    return {
+      label: "Login",
+      className: "activity-action--login",
+      icon: "login",
+    };
+  }
+
+  if (normalized === "logout") {
+    return {
+      label: "Logout",
+      className: "activity-action--logout",
+      icon: "logout",
+    };
+  }
+
+  const label = String(action || "-")
     .replaceAll("_", " ")
     .replace(/\b\w/g, (character) => character.toUpperCase());
 

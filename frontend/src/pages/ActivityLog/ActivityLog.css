@@ -350,56 +350,44 @@
 
 .activity-action--upload,
 .activity-action--download,
-.activity-action--restore,
-.activity-action--login {
-  color: #1463c4;
-  background: #dcecff;
-}
-
-.activity-action--upload {
-  background: #d7e9ff;
-}
-
-.activity-action--download {
-  background: #d8eaff;
-}
-
 .activity-action--restore {
-  background: #d9e9ff;
+  color: #1764c5;
+  background: #d7e8ff;
 }
 
-/* Delete */
-
-.activity-action--delete,
-.activity-action--logout {
-  color: #c82b70;
-  background: #f8dce9;
+.activity-action--delete {
+  color: #c72b70;
+  background: #f7d9e7;
 }
-
-/* Move / copy / share */
 
 .activity-action--move,
 .activity-action--copy,
 .activity-action--share {
-  color: #6426bb;
+  color: #6728bc;
   background: #eadcf8;
 }
-
-/* Rename / permission */
 
 .activity-action--rename,
 .activity-action--permission {
   color: #934b27;
-  background: #f4e4df;
+  background: #f2e1dc;
 }
 
-/* Create / default */
-
 .activity-action--create,
-.activity-action--default,
-.activity-action--preview {
-  color: #4f5ab2;
-  background: #e7e6fa;
+.activity-action--preview,
+.activity-action--default {
+  color: #4e5bb1;
+  background: #e5e5f8;
+}
+
+.activity-action--login {
+  color: #1764c5;
+  background: #d7e8ff;
+}
+
+.activity-action--logout {
+  color: #c72b70;
+  background: #f7d9e7;
 }
 
 /* =========================================================
