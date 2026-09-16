@@ -77,6 +77,21 @@
   --spacing-xl: 32px;
 
   /* =========================================================
+     BUTTON SIZE
+     ========================================================= */
+  --button-height-sm: 34px;
+  --button-height-md: 40px;
+  --button-height-lg: 46px;
+
+  --button-padding-sm: var(--spacing-sm);
+  --button-padding-md: var(--spacing-md);
+  --button-padding-lg: var(--spacing-lg);
+
+  --button-icon-size-sm: 34px;
+  --button-icon-size-md: 40px;
+  --button-icon-size-lg: 46px;
+
+  /* =========================================================
      BORDER
      ========================================================= */
   --border-width: 0.75px;

@@ -155,10 +155,9 @@ ol {
   justify-content: center;
   flex-shrink: 0;
   gap: var(--spacing-sm);
-
-  height: 40px;
-  min-width: 40px;
-  padding: 0 var(--spacing-md);
+  height: var(--button-height-md);
+  min-width: var(--button-height-md);
+  padding: 0 var(--button-padding-md);
   border: var(--border-width) solid transparent;
   border-radius: var(--radius-md);
   font-family: inherit;
@@ -198,23 +197,23 @@ ol {
    BUTTON SIZES
    ========================= */
 .btn-sm {
-  height: 34px;
-  min-width: 34px;
-  padding: 0 var(--spacing-sm);
+  height: var(--button-height-sm);
+  min-width: var(--button-height-sm);
+  padding: 0 var(--button-padding-sm);
   font-size: var(--font-size-xs);
   border-radius: var(--radius-sm);
 }
 
 .btn-md {
-  height: 40px;
-  min-width: 40px;
-  padding: 0 var(--spacing-md);
+  height: var(--button-height-md);
+  min-width: var(--button-height-md);
+  padding: 0 var(--button-padding-md);
 }
 
 .btn-lg {
-  height: 46px;
-  min-width: 46px;
-  padding: 0 var(--spacing-lg);
+  height: var(--button-height-lg);
+  min-width: var(--button-height-lg);
+  padding: 0 var(--button-padding-lg);
   font-size: var(--font-size-md);
 }
 
@@ -222,19 +221,19 @@ ol {
    ICON BUTTON
    ========================= */
 .btn-icon {
-  width: 40px;
-  min-width: 40px;
+  width: var(--button-icon-size-md);
+  min-width: var(--button-icon-size-md);
   padding: 0;
 }
 
 .btn-icon.btn-sm {
-  width: 34px;
-  min-width: 34px;
+  width: var(--button-icon-size-sm);
+  min-width: var(--button-icon-size-sm);
 }
 
 .btn-icon.btn-lg {
-  width: 46px;
-  min-width: 46px;
+  width: var(--button-icon-size-lg);
+  min-width: var(--button-icon-size-lg);
 }
 
 /* =========================
@@ -436,15 +435,15 @@ ol {
   }
 
   .btn {
-    height: 38px;
+    height: var(--button-height-md);
   }
 
   .btn-sm {
-    height: 34px;
+    height: var(--button-height-sm);
   }
 
   .btn-lg {
-    height: 44px;
+    height: var(--button-height-lg);
   }
 
   .modal-overlay {

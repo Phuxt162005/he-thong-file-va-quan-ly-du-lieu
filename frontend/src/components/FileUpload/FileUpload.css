@@ -94,19 +94,21 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
+  height: var(--button-height-md);
+  min-width: 110px;
   margin-top: var(--spacing-sm);
-  padding: 0 var(--spacing-lg);
-  border: var(--border-width) solid #2f80e4;
+  padding: 0 var(--spacing-md);
+  border: var(--border-width) solid var(--color-primary);
   border-radius: var(--radius-md);
-  background-color: #2f80e4;
+  background-color: var(--color-primary);
   color: #ffffff;
   font-size: var(--font-size-sm);
   font-weight: 600;
+  line-height: 1;
   transition:
-    background-color 0.2s ease,
-    border-color 0.2s ease,
-    transform 0.2s ease;
+    background-color var(--transition-fast),
+    border-color var(--transition-fast),
+    transform var(--transition-fast);
 }
 
 .file-upload__dropzone:hover .file-upload__dropzone-button {
@@ -211,17 +213,17 @@
   position: absolute;
   top: var(--spacing-sm);
   right: var(--spacing-sm);
+  width: var(--button-height-sm);
+  height: var(--button-height-sm);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
   padding: 0;
   border: var(--border-width) solid transparent;
   border-radius: var(--radius-sm);
   background-color: transparent;
   color: var(--color-text-secondary);
-  font-size: 20px;
+  font-size: var(--font-size-lg);
   line-height: 1;
   cursor: pointer;
 }
