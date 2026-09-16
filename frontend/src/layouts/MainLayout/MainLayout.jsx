@@ -3,6 +3,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
 import fileService from "../../services/fileService";
+import NotificationBell from "../../components/NotificationBell/NotificationBell";
 
 import "./MainLayout.css";
 
@@ -436,14 +437,7 @@ export default function MainLayout({ children }) {
           </div>
 
           <div className="main-layout__header-actions">
-            <button
-              type="button"
-              className="main-layout__notification"
-              aria-label="Thông báo"
-            >
-              <BellIcon />
-              <span className="main-layout__notification-dot" />
-            </button>
+            <NotificationBell />
 
             <button
               type="button"

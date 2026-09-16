@@ -1,5 +1,6 @@
 const userRepository = require("../repositories/userRepository");
 const httpError = require("../utils/httpError");
+const notificationService = require("./notificationService");
 
 // lấy hồ sơ người dùng
 exports.getProfile = async (userId) => {
@@ -93,9 +94,66 @@ exports.updateProfile = async (id, data = {}) => {
   }
 
   try {
+    const previousUser = await userRepository.findById(id);
+    if (!previousUser) {
+      throw httpError("User not found", 404);
+    }
+
     const user = await userRepository.updateProfile(id, allowedData);
     if (!user) {
       throw httpError("User not found", 404);
+    }
+
+    const fields = [
+      ["username", "Tên đăng nhập"],
+      ["email", "Email"],
+      ["firstName", "Tên"],
+      ["lastName", "Họ"],
+      ["avatar", "Ảnh đại diện"],
+    ];
+
+    for (const [field, label] of fields) {
+      if (!Object.prototype.hasOwnProperty.call(allowedData, field)) {
+        continue;
+      }
+      const oldValue = previousUser[field] ?? "";
+      const newValue = user[field] ?? "";
+      if (String(oldValue) === String(newValue)) {
+        continue;
+      }
+      const displayOld =
+        field === "avatar"
+          ? oldValue
+            ? "đã có"
+            : "chưa có"
+          : oldValue || "(trống)";
+      const displayNew =
+        field === "avatar"
+          ? newValue
+            ? "đã có"
+            : "chưa có"
+          : newValue || "(trống)";
+
+      await notificationService.create({
+        user: id,
+        type: "profile_updated",
+        title: "Hồ sơ đã được cập nhật",
+        message:
+          `${label} đã thay đổi từ ` +
+          `"${displayOld}" thành ` +
+          `"${displayNew}".`,
+
+        resourceType: "user",
+        resourceId: id,
+        metadata: {
+          field,
+          label,
+          oldValue: displayOld,
+          newValue: displayNew,
+        },
+        dedupeKey:
+          `profile-updated:${id}:` + `${field}:${Date.now()}:${Math.random()}`,
+      });
     }
     return user;
   } catch (error) {

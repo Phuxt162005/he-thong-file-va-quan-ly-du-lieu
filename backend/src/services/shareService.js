@@ -7,6 +7,7 @@ const File = require("../models/File");
 const Folder = require("../models/Folder");
 const storageService = require("./storageService");
 const httpError = require("../utils/httpError");
+const notificationService = require("./notificationService");
 
 exports.createShare = async (userId, data) => {
   if (!data.resourceId) {
@@ -78,18 +79,16 @@ exports.createShare = async (userId, data) => {
       throw new httpError("maxDownloads must be a positive integer", 400);
     }
   }
-
   const visibility = data.visibility || "public";
   if (!["public", "private"].includes(visibility)) {
     throw new httpError("Invalid visibility", 400);
   }
-
   const accessType = data.accessType || "download";
   if (!["view", "download"].includes(accessType)) {
     throw new httpError("Invalid access type", 400);
   }
 
-  return await shareRepository.create({
+  const share = await shareRepository.create({
     resourceId: data.resourceId,
     resourceType: data.resourceType,
     owner: userId,
@@ -100,6 +99,22 @@ exports.createShare = async (userId, data) => {
     visibility,
     accessType,
   });
+
+  let resourceName = "";
+  if (data.resourceType === "file") {
+    const file = await File.findById(data.resourceId).select("name");
+    resourceName = file?.name || "";
+  } else {
+    const folder = await Folder.findById(data.resourceId).select("name");
+    resourceName = folder?.name || "";
+  }
+
+  await notificationService.createShareCreated({
+    userId,
+    share,
+    resourceName,
+  });
+  return share;
 };
 
 exports.accessShare = async (token, password, userId = null) => {

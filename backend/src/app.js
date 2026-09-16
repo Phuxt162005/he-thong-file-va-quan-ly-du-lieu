@@ -17,7 +17,6 @@ app.use((req, res, next) => {
   }
 
   res.setHeader("Access-Control-Allow-Methods", "GET,POST,PUT,DELETE,OPTIONS");
-
   res.setHeader(
     "Access-Control-Allow-Headers",
     "Content-Type, Authorization, X-Chunk-Index, X-Chunk-Checksum",
@@ -39,6 +38,7 @@ app.use("/api/files", require("./routes/fileRoute.js"));
 app.use("/api/shares", require("./routes/shareRoute.js"));
 app.use("/api/permissions", require("./routes/permissionRoute.js"));
 app.use("/api/activities", require("./routes/activityLogRoute.js"));
+app.use("/api/notifications", require("./routes/notificationRoute.js"));
 app.use("/api/audit-logs", require("./routes/auditLogRoute.js"));
 
 app.use("/api/auth/logout", logoutRoutes);
