@@ -953,31 +953,42 @@ function TrashIcon() {
       fill="none"
       aria-hidden="true"
     >
+      {/* Nắp */}
       <path
-        d="M10 12h28"
+        d="M9 12H39"
         stroke="currentColor"
         strokeWidth="4"
         strokeLinecap="round"
       />
 
+      {/* Tay cầm */}
       <path
-        d="M17 12V7h14v5"
-        stroke="currentColor"
-        strokeWidth="4"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-
-      <path
-        d="M14 12l2 29h16l2-29"
+        d="M17 12V7H31V12"
         stroke="currentColor"
         strokeWidth="4"
         strokeLinecap="round"
         strokeLinejoin="round"
       />
 
+      {/* Thân thùng */}
       <path
-        d="M21 19v15M27 19v15"
+        d="M13 12L15.5 41H32.5L35 12"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      {/* Hai đường bên trong */}
+      <path
+        d="M21 19V34"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M27 19V34"
         stroke="currentColor"
         strokeWidth="4"
         strokeLinecap="round"
