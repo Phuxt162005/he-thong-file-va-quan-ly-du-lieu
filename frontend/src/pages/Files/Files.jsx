@@ -25,6 +25,7 @@ export default function Files() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const currentFolderId = searchParams.get("folder");
+  const previewFileId = searchParams.get("preview");
   const [folders, setFolders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -560,7 +561,8 @@ export default function Files() {
                   selectAllRequest={selectAllRequest}
                   onSelectionStateChange={setAllFilesSelected}
                   viewMode={viewMode}
-                  onFilesChanged={loadStorage}
+                  onFilesChanged={refreshFolders}
+                  openFileId={previewFileId}
                 />
               </div>
             </div>

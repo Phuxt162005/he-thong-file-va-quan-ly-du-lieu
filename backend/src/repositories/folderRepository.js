@@ -296,3 +296,9 @@ exports.findVisibleByParent = async (userId, parentFolder = null) => {
   });
   return [...folderMap.values()].sort((a, b) => a.name.localeCompare(b.name));
 };
+
+exports.search = (keyword) => {
+  const regex = new RegExp(keyword, "i");
+
+  return Folder.find({ isDeleted: false, name: regex }).sort({ updatedAt: -1 });
+};

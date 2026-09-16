@@ -140,6 +140,14 @@ const fileService = {
     const response = await api.post(`/files/upload/${uploadId}/complete`);
     return response.data;
   },
+
+  async searchResources(keyword, sortBy = "updatedAt") {
+    const response = await api.get("/files/search", {
+      params: { q: keyword, sort: sortBy },
+    });
+
+    return response.data;
+  },
 };
 
 async function calculateChecksum(blob) {

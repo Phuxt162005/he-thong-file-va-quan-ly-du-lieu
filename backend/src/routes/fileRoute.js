@@ -25,10 +25,11 @@ router.post("/upload", auth, upload.single("file"), controller.upload);
 // recycle Bin
 router.get("/trash", auth, controller.getTrash);
 
+router.get("/search", auth, controller.search);
+
 // ========================
 // File
 // ========================
-
 router.get("/", auth, controller.getFilesByFolder);
 
 // download

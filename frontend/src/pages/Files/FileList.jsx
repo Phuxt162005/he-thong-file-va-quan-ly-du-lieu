@@ -22,6 +22,7 @@ export default function FileList({
   onSelectionStateChange,
   viewMode = "list",
   onFilesChanged,
+  openFileId = null,
 }) {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
@@ -54,6 +55,35 @@ export default function FileList({
   useEffect(() => {
     loadFiles();
   }, [folderId]);
+
+  useEffect(() => {
+    if (!openFileId) {
+      return;
+    }
+
+    let cancelled = false;
+    async function openSearchedFile() {
+      try {
+        const response = await fileService.getFile(openFileId);
+        const file = response?.file || response;
+        if (!cancelled && file?._id) {
+          setPreviewFile(file);
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(
+            err?.response?.data?.message ||
+              err?.message ||
+              "Không thể mở file.",
+          );
+        }
+      }
+    }
+    openSearchedFile();
+    return () => {
+      cancelled = true;
+    };
+  }, [openFileId]);
 
   useEffect(() => {
     if (!selectAllRequest) {

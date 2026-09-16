@@ -1,6 +1,8 @@
+import { useEffect, useRef, useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 
 import { useAuth } from "../../context/AuthContext";
+import fileService from "../../services/fileService";
 
 import "./MainLayout.css";
 
@@ -165,17 +167,96 @@ export default function MainLayout({ children }) {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuth();
-
+  const searchRef = useRef(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchSort, setSearchSort] = useState("updatedAt");
+  const [searchResults, setSearchResults] = useState([]);
+  const [searchLoading, setSearchLoading] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [searchError, setSearchError] = useState("");
   const currentUser = getCurrentUser();
-
   const username = currentUser?.username || currentUser?.name || "User";
-
   const avatarLetter = username.charAt(0).toUpperCase();
 
   const handleLogout = async () => {
     await logout();
     navigate("/login", { replace: true });
   };
+
+  useEffect(() => {
+    const keyword = searchQuery.trim();
+    if (!keyword) {
+      setSearchResults([]);
+      setSearchOpen(false);
+      setSearchError("");
+      return undefined;
+    }
+
+    let cancelled = false;
+    const timer = setTimeout(async () => {
+      try {
+        setSearchLoading(true);
+        setSearchError("");
+        setSearchOpen(true);
+
+        const response = await fileService.searchResources(keyword, searchSort);
+        if (cancelled) {
+          return;
+        }
+
+        setSearchResults(
+          Array.isArray(response?.results) ? response.results : [],
+        );
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        setSearchResults([]);
+        setSearchError(
+          error?.response?.data?.message ||
+            error?.message ||
+            "Không thể tìm kiếm.",
+        );
+      } finally {
+        if (!cancelled) {
+          setSearchLoading(false);
+        }
+      }
+    }, 250);
+
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [searchQuery, searchSort]);
+
+  useEffect(() => {
+    function handleOutsideClick(event) {
+      if (!searchRef.current?.contains(event.target)) {
+        setSearchOpen(false);
+      }
+    }
+
+    document.addEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
+
+  function handleSearchResultClick(result) {
+    setSearchQuery("");
+    setSearchResults([]);
+    setSearchOpen(false);
+    setSearchError("");
+
+    if (result.resourceType === "folder") {
+      navigate(`/files?folder=${result._id}`);
+      return;
+    }
+
+    navigate(`/files?preview=${result._id}`);
+  }
 
   const isActive = (path) => {
     if (path === "/") {
@@ -240,14 +321,118 @@ export default function MainLayout({ children }) {
         </Link>
 
         <div className="main-layout__header-main">
-          <div className="main-layout__search">
-            <SearchIcon />
+          <div className="main-layout__search-wrapper" ref={searchRef}>
+            <div className="main-layout__search">
+              <SearchIcon />
 
-            <input
-              type="text"
-              placeholder="Tìm kiếm file, thư mục..."
-              aria-label="Tìm kiếm file, thư mục"
-            />
+              <input
+                type="text"
+                value={searchQuery}
+                placeholder="Tìm kiếm file, thư mục..."
+                aria-label="Tìm kiếm file, thư mục"
+                onFocus={() => {
+                  if (searchQuery.trim()) {
+                    setSearchOpen(true);
+                  }
+                }}
+                onChange={(event) => {
+                  setSearchQuery(event.target.value);
+                }}
+              />
+
+              {searchQuery && (
+                <button
+                  type="button"
+                  className="main-layout__search-clear"
+                  onClick={() => {
+                    setSearchQuery("");
+                    setSearchResults([]);
+                    setSearchOpen(false);
+                    setSearchError("");
+                  }}
+                  aria-label="Xóa tìm kiếm"
+                >
+                  ×
+                </button>
+              )}
+            </div>
+
+            {searchOpen && (
+              <div className="main-layout__search-panel">
+                <div className="main-layout__search-controls">
+                  <span>Sắp xếp</span>
+
+                  <select
+                    value={searchSort}
+                    onChange={(event) => {
+                      setSearchSort(event.target.value);
+                    }}
+                    aria-label="Sắp xếp kết quả tìm kiếm"
+                  >
+                    <option value="updatedAt">Mới chỉnh sửa</option>
+                    <option value="createdAt">Mới tải lên</option>
+                  </select>
+                </div>
+
+                {searchLoading && (
+                  <div className="main-layout__search-status">
+                    Đang tìm kiếm...
+                  </div>
+                )}
+
+                {!searchLoading && searchError && (
+                  <div className="main-layout__search-status main-layout__search-status--error">
+                    {searchError}
+                  </div>
+                )}
+
+                {!searchLoading &&
+                  !searchError &&
+                  searchResults.length === 0 && (
+                    <div className="main-layout__search-status">
+                      Không tìm thấy file hoặc thư mục.
+                    </div>
+                  )}
+
+                {!searchLoading && !searchError && searchResults.length > 0 && (
+                  <div className="main-layout__search-results">
+                    {searchResults.map((result) => (
+                      <button
+                        type="button"
+                        key={`${result.resourceType}-${result._id}`}
+                        className="main-layout__search-result"
+                        onMouseDown={(event) => {
+                          event.preventDefault();
+                        }}
+                        onClick={() => handleSearchResultClick(result)}
+                      >
+                        <span className="main-layout__search-result-icon">
+                          {result.resourceType === "folder" ? "📁" : "📄"}
+                        </span>
+
+                        <span className="main-layout__search-result-content">
+                          <strong>{result.name}</strong>
+
+                          <small>
+                            {result.resourceType === "folder"
+                              ? "Thư mục"
+                              : result.mimeType || "File"}
+                          </small>
+                        </span>
+
+                        <span className="main-layout__search-result-date">
+                          {formatSearchDate(
+                            searchSort === "createdAt"
+                              ? result.createdAt
+                              : result.updatedAt,
+                          )}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           <div className="main-layout__header-actions">

@@ -147,3 +147,15 @@ exports.move = asyncHandler(async (req, res) => {
 
   return res.json({ message: "File moved successfully", file });
 });
+
+exports.search = asyncHandler(async (req, res) => {
+  const keyword = req.query.q || "";
+  const sortBy = req.query.sort === "createdAt" ? "createdAt" : "updatedAt";
+  const results = await fileService.searchResources(
+    req.user.id,
+    keyword,
+    sortBy,
+  );
+
+  return res.json({ results });
+});

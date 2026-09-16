@@ -149,3 +149,9 @@ exports.getStorageUsedByOwner = async (ownerId) => {
 
   return result[0]?.total || 0;
 };
+
+exports.search = (keyword) => {
+  const regex = new RegExp(keyword, "i");
+
+  return File.find({ isDeleted: false, name: regex }).sort({ updatedAt: -1 });
+};

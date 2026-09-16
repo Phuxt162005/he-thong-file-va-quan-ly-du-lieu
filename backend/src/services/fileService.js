@@ -443,3 +443,93 @@ exports.moveFile = async (userId, fileId, destinationFolderId = null) => {
   });
   return movedFile;
 };
+
+exports.searchResources = async (userId, keyword, sortBy = "updatedAt") => {
+  const searchText = String(keyword || "").trim();
+  if (!searchText) {
+    return [];
+  }
+
+  const [files, folders] = await Promise.all([
+    fileRepository.search(searchText),
+    folderRepository.search(searchText),
+  ]);
+  const visibleFiles = [];
+
+  for (const file of files) {
+    const owner = await permissionService.isOwner(userId, file._id, "file");
+    if (owner) {
+      visibleFiles.push({
+        _id: file._id,
+        name: file.name,
+        resourceType: "file",
+        mimeType: file.mimeType,
+        size: file.size,
+        createdAt: file.createdAt,
+        updatedAt: file.updatedAt,
+        folder: file.folder,
+      });
+
+      continue;
+    }
+
+    const permissions = await permissionService.resolvePermission(
+      userId,
+      file._id,
+      "file",
+    );
+    if (permissions.includes("read")) {
+      visibleFiles.push({
+        _id: file._id,
+        name: file.name,
+        resourceType: "file",
+        mimeType: file.mimeType,
+        size: file.size,
+        createdAt: file.createdAt,
+        updatedAt: file.updatedAt,
+        folder: file.folder,
+      });
+    }
+  }
+  const visibleFolders = [];
+
+  for (const folder of folders) {
+    const owner = await permissionService.isOwner(userId, folder._id, "folder");
+    if (owner) {
+      visibleFolders.push({
+        _id: folder._id,
+        name: folder.name,
+        resourceType: "folder",
+        createdAt: folder.createdAt,
+        updatedAt: folder.updatedAt,
+        parentFolder: folder.parentFolder,
+      });
+      continue;
+    }
+
+    const permissions = await permissionService.resolvePermission(
+      userId,
+      folder._id,
+      "folder",
+    );
+    if (permissions.includes("read")) {
+      visibleFolders.push({
+        _id: folder._id,
+        name: folder.name,
+        resourceType: "folder",
+        createdAt: folder.createdAt,
+        updatedAt: folder.updatedAt,
+        parentFolder: folder.parentFolder,
+      });
+    }
+  }
+
+  const results = [...visibleFiles, ...visibleFolders];
+  results.sort((a, b) => {
+    const first = new Date(a[sortBy] || 0).getTime();
+    const second = new Date(b[sortBy] || 0).getTime();
+
+    return second - first;
+  });
+  return results;
+};
