@@ -137,11 +137,28 @@ function FolderTreeItem({
             event.stopPropagation();
             onToggle(folder._id);
           }}
+          aria-label={expanded ? "Thu gọn thư mục" : "Mở rộng thư mục"}
         >
-          {expanded ? "▼" : "▶"}
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d={expanded ? "m6 9 6 6 6-6" : "m9 6 6 6-6 6"}
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.5"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            />
+          </svg>
         </button>
 
-        <span className="folder-tree__icon">📁</span>
+        <span className="folder-tree__icon" aria-hidden="true">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M3 6.5A2.5 2.5 0 0 1 5.5 4H10l2 2h6.5A2.5 2.5 0 0 1 21 8.5v9A2.5 2.5 0 0 1 18.5 20h-13A2.5 2.5 0 0 1 3 17.5z"
+              fill="currentColor"
+            />
+          </svg>
+        </span>
 
         <span className="folder-tree__name">{folder.name}</span>
       </div>

@@ -44,18 +44,23 @@
 }
 
 .folder-tree__icon {
-  width: 32px;
-  height: 32px;
+  width: 34px;
+  height: 34px;
+  min-width: 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  flex: 0 0 32px;
+  color: #79b2f0;
+  font-size: 0;
+  line-height: 0;
 }
 
 .folder-tree__icon svg {
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   display: block;
+  color: #79b2f0;
+  fill: currentColor;
 }
 
 .folder-tree__name {
