@@ -38,8 +38,8 @@
   --color-surface-soft: #f8f9ff;
 
   /* Border */
-  --color-border: #dfe5f2;
-  --color-border-light: #edf0f7;
+  --color-border: #e7ebf4;
+  --color-border-light: #f0f2f8;
 
   /* Interaction */
   --color-hover: #f0f4ff;
@@ -56,10 +56,8 @@
   /* =========================================================
      TYPOGRAPHY
      ========================================================= */
-
   --font-family: Inter, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-  --font-family-heading: Georgia, "Times New Roman", serif;
+  --font-family-heading: var(--font-family);
 
   --font-size-xs: 12px;
   --font-size-sm: 14px;
@@ -81,8 +79,7 @@
   /* =========================================================
      BORDER
      ========================================================= */
-
-  --border-width: 1px;
+  --border-width: 0.75px;
 
   --radius-sm: 6px;
   --radius-md: 10px;

@@ -283,7 +283,7 @@
   align-items: center;
   gap: 17px;
   padding: 0 22px;
-  color: #5d7298;
+  color: #5b61b2;
   background: transparent;
   border: none;
   border-radius: 11px;
@@ -298,14 +298,14 @@
 
 .sidebar__item:hover,
 .sidebar__logout:hover {
-  color: #3859b9;
-  background: rgba(255, 255, 255, 0.72);
+  color: #2f80e4;
+  background: rgba(255, 255, 255, 0.18);
 }
 
 .sidebar__item--active {
-  color: #ffffff;
-  background: linear-gradient(135deg, #4b68c9 0%, #3f55bd 100%);
-  box-shadow: 0 6px 16px rgba(65, 83, 190, 0.18);
+  color: #2f80e4;
+  background: transparent;
+  box-shadow: none;
   font-weight: 650;
 }
 
@@ -336,7 +336,7 @@
 
 /* Logout */
 .sidebar__logout {
-  color: #6680a9;
+  color: #5b61b2;
 }
 
 /* =========================================================
