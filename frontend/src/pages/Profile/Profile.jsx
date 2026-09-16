@@ -1,17 +1,18 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import FormInput from "../../components/FormInput/FormInput";
 import Loading from "../../components/Loading/Loading";
-
 import userService from "../../services/userService";
 
 import "./Profile.css";
 
 function Profile() {
   const navigate = useNavigate();
+  const avatarInputRef = useRef(null);
 
   const [user, setUser] = useState(null);
+  const [avatarPreview, setAvatarPreview] = useState("");
   const [formData, setFormData] = useState({
     username: "",
     email: "",
@@ -27,6 +28,14 @@ function Profile() {
   useEffect(() => {
     loadProfile();
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (avatarPreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(avatarPreview);
+      }
+    };
+  }, [avatarPreview]);
 
   const loadProfile = async () => {
     try {
@@ -53,19 +62,51 @@ function Profile() {
   const handleChange = (event) => {
     const { name, value } = event.target;
 
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
     setMessage("");
     setError("");
+  };
+
+  const handleAvatarChange = (event) => {
+    const file = event.target.files?.[0];
+
+    if (!file) {
+      return;
+    }
+
+    if (!file.type.startsWith("image/")) {
+      setError("Vui lòng chọn một file hình ảnh.");
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Ảnh đại diện không được vượt quá 5 MB.");
+      return;
+    }
+
+    if (avatarPreview?.startsWith("blob:")) {
+      URL.revokeObjectURL(avatarPreview);
+    }
+
+    setAvatarPreview(URL.createObjectURL(file));
+    setError("");
+    setMessage("Ảnh đại diện đã được chọn.");
   };
 
   const handleSubmit = async (event) => {
     event.preventDefault();
 
     const email = formData.email.trim();
+
     if (!email) {
       setError("Vui lòng nhập email.");
       return;
     }
+
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError("Email không hợp lệ.");
       return;
@@ -81,9 +122,14 @@ function Profile() {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
       });
+
       const data = response?.data || response;
 
-      setUser((prev) => ({ ...prev, ...data }));
+      setUser((prev) => ({
+        ...prev,
+        ...data,
+      }));
+
       setFormData((prev) => ({
         ...prev,
         email: data?.email ?? prev.email,
@@ -103,6 +149,20 @@ function Profile() {
     return <Loading message="Đang tải thông tin..." />;
   }
 
+  const displayName =
+    formData.firstName || formData.lastName
+      ? `${formData.firstName} ${formData.lastName}`.trim()
+      : formData.username;
+
+  const avatarLetter = (
+    formData.firstName ||
+    formData.lastName ||
+    formData.username ||
+    "U"
+  )
+    .charAt(0)
+    .toUpperCase();
+
   return (
     <div className="profile-page">
       <div className="profile-page__header">
@@ -110,39 +170,101 @@ function Profile() {
         <p>Quản lý thông tin tài khoản của bạn</p>
       </div>
 
-      {error && <div className="error-message">{error}</div>}
+      {error && (
+        <div className="profile-message profile-message--error">{error}</div>
+      )}
 
-      {message && <div className="success-message">{message}</div>}
+      {message && (
+        <div className="profile-message profile-message--success">
+          {message}
+        </div>
+      )}
 
-      <div className="profile-layout">
-        <div className="profile-card">
-          <div className="profile-card__avatar">
-            {(
-              formData.firstName ||
-              formData.lastName ||
-              formData.username ||
-              "U"
-            )
-              .charAt(0)
-              .toUpperCase()}
+      <div className="profile-grid">
+        {/* =====================================================
+            ACCOUNT
+            ===================================================== */}
+        <section className="profile-panel profile-account">
+          <div className="profile-account__avatar-wrap">
+            <div className="profile-account__avatar">
+              {avatarPreview ? (
+                <img src={avatarPreview} alt="Ảnh đại diện" />
+              ) : (
+                avatarLetter
+              )}
+            </div>
+
+            <button
+              type="button"
+              className="profile-account__camera"
+              onClick={() => avatarInputRef.current?.click()}
+              aria-label="Đổi ảnh đại diện"
+            >
+              <CameraIcon />
+            </button>
           </div>
 
-          <h2>
-            {formData.firstName || formData.lastName
-              ? `${formData.firstName} ${formData.lastName}`.trim()
-              : formData.username}
-          </h2>
+          <div className="profile-account__info">
+            <div className="profile-account__top">
+              <div>
+                <h2>{displayName}</h2>
+                <p>{formData.email}</p>
+              </div>
 
-          <p>{formData.email}</p>
+              <button
+                type="button"
+                className="profile-change-photo"
+                onClick={() => avatarInputRef.current?.click()}
+              >
+                <CameraIcon />
+                Đổi ảnh
+              </button>
+            </div>
 
-          {user?.role && (
-            <span className="profile-card__role">
-              {user.role === "admin" ? "Administrator" : "User"}
+            <span className="profile-role">
+              {user?.role === "admin" ? "Administrator" : "User"}
             </span>
-          )}
-        </div>
 
-        <div className="profile-card profile-card--form">
+            <div className="profile-joined">
+              <CalendarIcon />
+              <span>
+                Tham gia:{" "}
+                {user?.createdAt
+                  ? new Date(user.createdAt).toLocaleDateString("vi-VN")
+                  : "--/--/----"}
+              </span>
+            </div>
+          </div>
+
+          <input
+            ref={avatarInputRef}
+            type="file"
+            accept="image/*"
+            hidden
+            onChange={handleAvatarChange}
+          />
+        </section>
+
+        {/* =====================================================
+            STORAGE
+            ===================================================== */}
+        <StorageQuota />
+
+        {/* =====================================================
+            EDIT FORM
+            ===================================================== */}
+        <section className="profile-panel profile-edit">
+          <div className="profile-section-heading">
+            <div className="profile-section-icon profile-section-icon--purple">
+              <EditSettingsIcon />
+            </div>
+
+            <div>
+              <h2>Chỉnh sửa thông tin</h2>
+              <p>Cập nhật thông tin tài khoản của bạn</p>
+            </div>
+          </div>
+
           <form className="profile-form" onSubmit={handleSubmit}>
             <FormInput
               label="Tên đăng nhập"
@@ -183,29 +305,109 @@ function Profile() {
             <div className="profile-form__actions">
               <button
                 type="button"
-                className="btn btn-secondary"
+                className="profile-button profile-button--secondary"
                 onClick={() => navigate("/change-password")}
                 disabled={saving}
               >
+                <LockIcon />
                 Đổi mật khẩu
               </button>
 
               <button
                 type="submit"
-                className="btn btn-primary"
+                className="profile-button profile-button--primary"
                 disabled={saving}
               >
+                <SaveIcon />
                 {saving ? "Đang lưu..." : "Lưu thay đổi"}
               </button>
             </div>
           </form>
-        </div>
+        </section>
+
+        {/* =====================================================
+            SECURITY
+            ===================================================== */}
+        <section className="profile-panel profile-security">
+          <div className="profile-section-heading">
+            <div className="profile-section-icon profile-section-icon--blue">
+              <ShieldIcon />
+            </div>
+
+            <div>
+              <h2>Bảo mật tài khoản</h2>
+              <p>Quản lý bảo mật và cài đặt tài khoản</p>
+            </div>
+          </div>
+
+          <div className="profile-security-list">
+            <button
+              type="button"
+              className="profile-security-item profile-security-item--blue"
+              onClick={() => navigate("/change-password")}
+            >
+              <span className="profile-security-item__icon">
+                <LockIcon />
+              </span>
+
+              <span className="profile-security-item__content">
+                <strong>Đổi mật khẩu</strong>
+                <small>Cập nhật mật khẩu để bảo vệ tài khoản</small>
+              </span>
+
+              <ArrowIcon />
+            </button>
+
+            <div className="profile-security-item profile-security-item--purple">
+              <span className="profile-security-item__icon">
+                <BellIcon />
+              </span>
+
+              <span className="profile-security-item__content">
+                <strong>Thông báo</strong>
+                <small>Quản lý cài đặt thông báo</small>
+              </span>
+
+              <ArrowIcon />
+            </div>
+
+            <div className="profile-security-item profile-security-item--danger">
+              <span className="profile-security-item__icon">
+                <TrashIcon />
+              </span>
+
+              <span className="profile-security-item__content">
+                <strong>Xóa tài khoản</strong>
+                <small>Hành động này không thể hoàn tác</small>
+              </span>
+
+              <ArrowIcon />
+            </div>
+          </div>
+        </section>
       </div>
 
-      <StorageQuota />
+      {/* =======================================================
+          ACCOUNT INFORMATION
+          ======================================================= */}
+      <section className="profile-account-info">
+        <div className="profile-account-info__icon">
+          <InfoIcon />
+        </div>
+
+        <div>
+          <h2>Thông tin tài khoản</h2>
+          <p>Tài khoản của bạn đang hoạt động bình thường.</p>
+          <p>Hãy giữ an toàn thông tin đăng nhập để bảo vệ dữ liệu của bạn.</p>
+        </div>
+      </section>
     </div>
   );
 }
+
+/* ============================================================
+   STORAGE
+   ============================================================ */
 
 function StorageQuota() {
   const [storage, setStorage] = useState(null);
@@ -234,17 +436,17 @@ function StorageQuota() {
 
   if (loading) {
     return (
-      <div className="profile-card storage-card">
+      <section className="profile-panel profile-storage">
         <Loading message="Đang tải dung lượng..." />
-      </div>
+      </section>
     );
   }
 
   if (error) {
     return (
-      <div className="profile-card storage-card">
-        <div className="error-message">{error}</div>
-      </div>
+      <section className="profile-panel profile-storage">
+        <div className="profile-message profile-message--error">{error}</div>
+      </section>
     );
   }
 
@@ -268,35 +470,46 @@ function StorageQuota() {
   }
 
   return (
-    <div className="profile-card storage-card">
-      <div className="storage-card__header">
+    <section className="profile-panel profile-storage">
+      <div className="profile-section-heading">
+        <div className="profile-section-icon profile-section-icon--purple">
+          <StorageIcon />
+        </div>
+
         <div>
           <h2>Dung lượng lưu trữ</h2>
           <p>Thông tin sử dụng dung lượng tài khoản</p>
         </div>
-
-        <span>
-          {formatStorage(used)} / {formatStorage(limit)}
-        </span>
       </div>
 
-      <div className="storage-card__progress">
+      <div className="profile-storage__numbers">
+        <div>
+          <strong>{formatStorage(used)}</strong>
+          <span>/ {formatStorage(limit)}</span>
+        </div>
+
+        <strong>{safePercentage.toFixed(1)}%</strong>
+      </div>
+
+      <div className="profile-storage__progress">
         <div
-          className="storage-card__progress-value"
-          style={{
-            width: `${safePercentage}%`,
-          }}
+          className="profile-storage__progress-value"
+          style={{ width: `${safePercentage}%` }}
         />
       </div>
 
-      <div className="storage-card__footer">
-        <span>Đã sử dụng {safePercentage.toFixed(1)}%</span>
+      <div className="profile-storage__footer">
+        <span>
+          <i className="profile-storage__dot profile-storage__dot--used" />
+          Đã sử dụng: {formatStorage(used)}
+        </span>
 
-        <span>Còn lại {formatStorage(remaining)}</span>
+        <span>
+          <i className="profile-storage__dot profile-storage__dot--remaining" />
+          Còn lại: {formatStorage(remaining)}
+        </span>
       </div>
-
-      <div className="storage-card__status">{quotaStatus}</div>
-    </div>
+    </section>
   );
 }
 
@@ -310,9 +523,236 @@ function formatStorage(bytes) {
     Math.floor(Math.log(bytes) / Math.log(1024)),
     units.length - 1,
   );
+
   const value = bytes / Math.pow(1024, index);
 
   return `${value.toFixed(2)} ${units[index]}`;
+}
+
+/* ============================================================
+   ICONS
+   ============================================================ */
+
+function CameraIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M5 7h3l1.5-2h5L16 7h3a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <circle
+        cx="12"
+        cy="13"
+        r="3.2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function CalendarIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect
+        x="4"
+        y="5"
+        width="16"
+        height="15"
+        rx="2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M8 3v4M16 3v4M4 10h16"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+function EditSettingsIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M5 6h8M5 12h14M5 18h8"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+      <circle cx="16" cy="6" r="2" fill="currentColor" />
+      <circle cx="10" cy="18" r="2" fill="currentColor" />
+    </svg>
+  );
+}
+
+function StorageIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <ellipse
+        cx="12"
+        cy="5"
+        rx="7"
+        ry="3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M5 5v7c0 1.7 3.1 3 7 3s7-1.3 7-3V5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M5 12v7c0 1.7 3.1 3 7 3s7-1.3 7-3v-7"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function ShieldIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M12 3 20 6v5c0 5-3.3 8.6-8 10-4.7-1.4-8-5-8-10V6l8-3Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="m8.5 12 2.3 2.3 4.7-5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function LockIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <rect
+        x="5"
+        y="10"
+        width="14"
+        height="10"
+        rx="2"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M8 10V7a4 4 0 0 1 8 0v3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function SaveIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M5 4h12l3 3v13H5V4Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+      />
+      <path
+        d="M8 4v6h8V4M8 20v-6h8v6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+    </svg>
+  );
+}
+
+function BellIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M18 10a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9ZM10 22h4"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function TrashIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="M5 7h14M9 7V4h6v3M8 7l1 14h6l1-14M10 11v6M14 11v6"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function ArrowIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <path
+        d="m9 5 7 7-7 7"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
+function InfoIcon() {
+  return (
+    <svg viewBox="0 0 24 24" aria-hidden="true">
+      <circle
+        cx="12"
+        cy="12"
+        r="9"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+      />
+      <path
+        d="M12 11v6M12 7h.01"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2.3"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
 }
 
 export default Profile;
