@@ -949,16 +949,38 @@ function TrashIcon() {
   return (
     <svg
       className="trash-svg-icon"
-      viewBox="0 0 24 24"
+      viewBox="0 0 48 48"
       fill="none"
       aria-hidden="true"
     >
       <path
-        d="M5 7h14M10 11v6M14 11v6M9 7V4h6v3m-9 0 1 14h8l1-14"
+        d="M10 12h28"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="4"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M17 12V7h14v5"
+        stroke="currentColor"
+        strokeWidth="4"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+
+      <path
+        d="M14 12l2 29h16l2-29"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="M21 19v15M27 19v15"
+        stroke="currentColor"
+        strokeWidth="4"
+        strokeLinecap="round"
       />
     </svg>
   );
