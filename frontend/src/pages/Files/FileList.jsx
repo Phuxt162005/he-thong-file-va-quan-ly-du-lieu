@@ -17,7 +17,12 @@ import { useAuth } from "../../context/AuthContext";
 
 import fileService from "../../services/fileService";
 
-export default function FileList() {
+export default function FileList({
+  selectAllRequest,
+  onSelectionStateChange,
+  viewMode = "list",
+  onFilesChanged,
+}) {
   const { user } = useAuth();
   const [searchParams] = useSearchParams();
   const folderId = searchParams.get("folder");
@@ -49,6 +54,21 @@ export default function FileList() {
   useEffect(() => {
     loadFiles();
   }, [folderId]);
+
+  useEffect(() => {
+    if (!selectAllRequest) {
+      return;
+    }
+
+    handleSelectAll(selectAllRequest.checked);
+  }, [selectAllRequest]);
+
+  useEffect(() => {
+    const allSelected =
+      files.length > 0 && selectedFiles.length === files.length;
+
+    onSelectionStateChange?.(allSelected);
+  }, [files, selectedFiles, onSelectionStateChange]);
 
   useEffect(() => {
     function closeContextMenu() {
@@ -91,8 +111,9 @@ export default function FileList() {
     }
   }
 
-  function refreshFiles() {
-    loadFiles();
+  async function refreshFiles() {
+    await loadFiles();
+    onFilesChanged?.();
   }
 
   function handleSelect(file, checked) {
@@ -450,7 +471,7 @@ export default function FileList() {
         </div>
       )}
 
-      <div className="file-list">
+      <div className={`file-list file-list--${viewMode}`}>
         {files.length === 0 ? (
           <div className="file-list__empty">
             {loading ? "Đang tải file..." : ""}

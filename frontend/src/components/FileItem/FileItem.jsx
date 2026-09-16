@@ -69,7 +69,7 @@ function FileItem({
       {/* Tên + icon */}
       <div className="file-item__name-cell">
         <div className="file-item__icon" aria-hidden="true">
-          {getFileIcon(file)}
+          <FileTypeIcon file={file} />
         </div>
 
         <div className="file-item__name">
@@ -168,48 +168,81 @@ function getFileType(file) {
   return parts.pop().toUpperCase();
 }
 
-function getFileIcon(file) {
-  const extension = file?.extension || getExtension(file?.name);
+function FileTypeIcon({ file }) {
+  const extension = (file?.extension || getExtension(file?.name)).toLowerCase();
 
-  const ext = extension.toLowerCase();
+  let label = "FILE";
+  let fill = "#64748B";
+  let pageFill = "#F8FAFC";
 
-  if (["jpg", "jpeg", "png", "gif", "webp"].includes(ext)) {
-    return "🖼️";
+  if (extension === "pdf") {
+    label = "PDF";
+    fill = "#E05252";
+    pageFill = "#FFF1F2";
+  } else if (["doc", "docx"].includes(extension)) {
+    label = "DOC";
+    fill = "#3978D5";
+    pageFill = "#EFF6FF";
+  } else if (["xls", "xlsx", "csv"].includes(extension)) {
+    label = "XLS";
+    fill = "#3A9B68";
+    pageFill = "#ECFDF5";
+  } else if (["ppt", "pptx"].includes(extension)) {
+    label = "PPT";
+    fill = "#D86B35";
+    pageFill = "#FFF7ED";
+  } else if (["jpg", "jpeg", "png", "gif", "webp", "svg"].includes(extension)) {
+    label = "IMG";
+    fill = "#8B63C7";
+    pageFill = "#F5F3FF";
+  } else if (["zip", "rar", "7z", "tar", "gz"].includes(extension)) {
+    label = "ZIP";
+    fill = "#A9782D";
+    pageFill = "#FFFBEB";
+  } else if (
+    ["js", "jsx", "ts", "tsx", "css", "html", "json"].includes(extension)
+  ) {
+    label = extension.toUpperCase().slice(0, 4);
+    fill = "#5969C8";
+    pageFill = "#EEF2FF";
+  } else if (["mp4", "avi", "mkv", "mov"].includes(extension)) {
+    label = "VID";
+    fill = "#C85A87";
+    pageFill = "#FDF2F8";
+  } else if (["mp3", "wav", "flac", "aac"].includes(extension)) {
+    label = "AUD";
+    fill = "#7A62B8";
+    pageFill = "#F5F3FF";
+  } else if (extension) {
+    label = extension.toUpperCase().slice(0, 4);
   }
 
-  if (ext === "pdf") {
-    return "📕";
-  }
+  return (
+    <svg viewBox="0 0 48 48" className="file-type-icon" aria-hidden="true">
+      <path
+        d="M10 4h18l10 10v28c0 1.1-.9 2-2 2H10c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2Z"
+        fill={pageFill}
+        stroke={fill}
+        strokeWidth="1.5"
+      />
 
-  if (["doc", "docx"].includes(ext)) {
-    return "📘";
-  }
+      <path d="M28 4v10h10" fill="none" stroke={fill} strokeWidth="1.5" />
 
-  if (["xls", "xlsx"].includes(ext)) {
-    return "📗";
-  }
+      <rect x="8" y="27" width="30" height="12" rx="2" fill={fill} />
 
-  if (["ppt", "pptx"].includes(ext)) {
-    return "📙";
-  }
-
-  if (["zip", "rar", "7z"].includes(ext)) {
-    return "🗜️";
-  }
-
-  if (["mp4", "avi", "mkv", "mov"].includes(ext)) {
-    return "🎬";
-  }
-
-  if (["mp3", "wav"].includes(ext)) {
-    return "🎵";
-  }
-
-  if (["js", "jsx", "ts", "tsx", "css", "html", "json"].includes(ext)) {
-    return "💻";
-  }
-
-  return "📄";
+      <text
+        x="23"
+        y="35.5"
+        textAnchor="middle"
+        fontSize="7"
+        fontWeight="700"
+        fill="#ffffff"
+        fontFamily="Arial, sans-serif"
+      >
+        {label}
+      </text>
+    </svg>
+  );
 }
 
 function getExtension(name = "") {

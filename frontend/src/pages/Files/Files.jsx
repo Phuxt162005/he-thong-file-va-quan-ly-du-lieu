@@ -15,6 +15,7 @@ import FolderCopyDialog from "../../components/FolderCopyDialog/FolderCopyDialog
 
 import folderService from "../../services/folderService";
 import fileService from "../../services/fileService";
+import userService from "../../services/userService";
 
 import FileList from "./FileList";
 
@@ -40,10 +41,24 @@ export default function Files() {
   const [contextMenu, setContextMenu] = useState(null);
   const [breadcrumbItems, setBreadcrumbItems] = useState([]);
   const [dragError, setDragError] = useState("");
+  const [storage, setStorage] = useState({
+    storageUsed: 0,
+    storageLimit: 0,
+    storageRemaining: 0,
+    usagePercent: 0,
+  });
+  const [storageLoading, setStorageLoading] = useState(true);
+  const [viewMode, setViewMode] = useState("list");
+  const [selectAllRequest, setSelectAllRequest] = useState({
+    checked: false,
+    version: 0,
+  });
+  const [allFilesSelected, setAllFilesSelected] = useState(false);
 
   useEffect(() => {
     loadFolders();
     loadBreadcrumb();
+    loadStorage();
   }, [currentFolderId]);
 
   useEffect(() => {
@@ -68,6 +83,32 @@ export default function Files() {
       );
     };
   }, []);
+
+  async function loadStorage() {
+    try {
+      setStorageLoading(true);
+
+      const response = await userService.getStorageQuota();
+
+      setStorage({
+        storageUsed: Number(response?.storageUsed || 0),
+        storageLimit: Number(response?.storageLimit || 0),
+        storageRemaining: Number(response?.storageRemaining || 0),
+        usagePercent: Number(response?.usagePercent || 0),
+      });
+    } catch (err) {
+      console.error("Không thể tải dung lượng lưu trữ:", err);
+
+      setStorage({
+        storageUsed: 0,
+        storageLimit: 0,
+        storageRemaining: 0,
+        usagePercent: 0,
+      });
+    } finally {
+      setStorageLoading(false);
+    }
+  }
 
   async function loadBreadcrumb() {
     if (!currentFolderId) {
@@ -123,6 +164,7 @@ export default function Files() {
 
   function refreshFolders() {
     loadFolders();
+    loadStorage();
     setRefreshKey((value) => value + 1);
   }
 
@@ -369,7 +411,12 @@ export default function Files() {
               <div className="folder-manager__view-toggle">
                 <button
                   type="button"
-                  className="folder-manager__view-button folder-manager__view-button--active"
+                  className={`folder-manager__view-button ${
+                    viewMode === "list"
+                      ? "folder-manager__view-button--active"
+                      : ""
+                  }`}
+                  onClick={() => setViewMode("list")}
                   aria-label="Xem dạng danh sách"
                   title="Danh sách"
                 >
@@ -386,7 +433,12 @@ export default function Files() {
 
                 <button
                   type="button"
-                  className="folder-manager__view-button"
+                  className={`folder-manager__view-button ${
+                    viewMode === "grid"
+                      ? "folder-manager__view-button--active"
+                      : ""
+                  }`}
+                  onClick={() => setViewMode("grid")}
                   aria-label="Xem dạng lưới"
                   title="Lưới"
                 >
@@ -427,11 +479,22 @@ export default function Files() {
                 </button>
               </div>
             </div>
-
             <div className="files-unified-table">
               <div className="files-unified-table__header">
                 <div className="files-unified-table__checkbox">
-                  <span />
+                  <input
+                    type="checkbox"
+                    checked={allFilesSelected}
+                    onChange={(event) => {
+                      setAllFilesSelected(event.target.checked);
+
+                      setSelectAllRequest({
+                        checked: event.target.checked,
+                        version: Date.now(),
+                      });
+                    }}
+                    aria-label="Chọn tất cả tệp"
+                  />
                 </div>
 
                 <div>Tên</div>
@@ -521,9 +584,30 @@ export default function Files() {
 
               <div className="files-page__storage-usage">
                 <div className="files-page__storage-usage-header">
-                  <span>Đã sử dụng 1.75 GB / 5.00 GB</span>
+                  <span>
+                    {storageLoading
+                      ? "Đang tính dung lượng..."
+                      : `Đã sử dụng ${formatStorageSize(
+                          storage.storageUsed,
+                        )} / ${formatStorageSize(storage.storageLimit)}`}
+                  </span>
 
-                  <span>35%</span>
+                  <span>
+                    {storageLoading
+                      ? "--"
+                      : `${Math.round(storage.usagePercent)}%`}
+                  </span>
+
+                  <div className="files-page__storage-progress">
+                    <span
+                      style={{
+                        width: `${Math.min(
+                          Math.max(storage.usagePercent, 0),
+                          100,
+                        )}%`,
+                      }}
+                    />
+                  </div>
                 </div>
 
                 <div className="files-page__storage-progress">
@@ -751,4 +835,24 @@ export default function Files() {
       )}
     </>
   );
+}
+
+function formatStorageSize(bytes) {
+  const value = Number(bytes || 0);
+  if (value < 1024) {
+    return `${value} B`;
+  }
+
+  const units = ["KB", "MB", "GB", "TB"];
+
+  let size = value;
+  let unitIndex = -1;
+  while (size >= 1024 && unitIndex < units.length - 1) {
+    size /= 1024;
+    unitIndex += 1;
+  }
+  if (unitIndex === -1) {
+    return `${Math.round(size)} B`;
+  }
+  return `${size.toFixed(2)} ${units[unitIndex]}`;
 }

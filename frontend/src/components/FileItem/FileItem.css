@@ -65,29 +65,25 @@
 }
 
 /* ================= ICON ================= */
-
 .file-item__icon {
   width: 34px;
   height: 34px;
-
   flex: 0 0 34px;
-
   display: inline-flex;
   align-items: center;
   justify-content: center;
+}
 
-  border-radius: 7px;
-
-  font-size: 23px;
-
-  line-height: 1;
+.file-type-icon {
+  width: 31px;
+  height: 31px;
+  display: block;
 }
 
 /* ================= NAME ================= */
 
 .file-item__name {
   min-width: 0;
-
   overflow: hidden;
 }
 

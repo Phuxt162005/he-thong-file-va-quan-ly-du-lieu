@@ -73,7 +73,17 @@ export default function FolderItem({
         title={`Mở thư mục ${folder.name || "Không có tên"}`}
       >
         <span className="folder-item__icon" aria-hidden="true">
-          📁
+          <svg viewBox="0 0 48 48">
+            <path
+              d="M5 12.5C5 10.01 7.01 8 9.5 8h10.2l4 4H38.5c2.49 0 4.5 2.01 4.5 4.5v18c0 3.04-2.46 5.5-5.5 5.5h-27C7.46 40 5 37.54 5 34.5v-22Z"
+              fill="#FFD15C"
+            />
+            <path
+              d="M5 17h38v17.5c0 3.04-2.46 5.5-5.5 5.5h-27C7.46 40 5 37.54 5 34.5V17Z"
+              fill="#FFC247"
+            />
+            <path d="M5 17h38" stroke="#E7A92E" strokeWidth="1.5" />
+          </svg>
         </span>
 
         <span className="folder-item__name">
