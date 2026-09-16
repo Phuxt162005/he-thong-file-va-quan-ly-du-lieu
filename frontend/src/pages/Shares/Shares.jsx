@@ -1038,30 +1038,132 @@ function getInitials(name) {
 }
 
 function getFileMeta(share) {
-  const type =
-    share?.fileType ||
-    share?.extension ||
-    getExtension(share?.resourceName || share?.name || "");
+  const fileName = String(share?.resourceName || share?.name || "").trim();
 
-  const size = share?.size || share?.fileSize || share?.resourceSize;
+  const mimeType = String(share?.mimeType || share?.fileType || "")
+    .trim()
+    .toLowerCase();
 
-  if (type && size) {
-    return `${String(type).toUpperCase()} • ${size}`;
+  const extension = getFriendlyExtension(fileName, mimeType);
+
+  const size = share?.size ?? share?.fileSize ?? share?.resourceSize ?? null;
+
+  if (extension && size !== null) {
+    return `${extension} • ${formatFileSize(size)}`;
   }
-  if (type) {
-    return String(type).toUpperCase();
+
+  if (extension) {
+    return extension;
   }
-  if (size) {
-    return String(size);
+
+  if (size !== null) {
+    return formatFileSize(size);
   }
+
   return "File";
 }
 
-function getExtension(name) {
-  const value = String(name || "");
-  const index = value.lastIndexOf(".");
+function getFriendlyExtension(fileName, mimeType) {
+  /*
+   * Ưu tiên MIME type vì nó là thông tin chính xác
+   * được lưu trong File model.
+   */
+  if (mimeType === "application/pdf") {
+    return "PDF";
+  }
+  if (
+    mimeType === "application/msword" ||
+    mimeType === "application/vnd.ms-word"
+  ) {
+    return "DOC";
+  }
+  if (
+    mimeType ===
+    "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+  ) {
+    return "DOCX";
+  }
+  if (mimeType === "application/vnd.ms-excel") {
+    return "XLS";
+  }
+  if (
+    mimeType ===
+    "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+  ) {
+    return "XLSX";
+  }
+  if (mimeType === "text/csv") {
+    return "CSV";
+  }
+  if (mimeType === "application/vnd.ms-powerpoint") {
+    return "PPT";
+  }
+  if (
+    mimeType ===
+    "application/vnd.openxmlformats-officedocument.presentationml.presentation"
+  ) {
+    return "PPTX";
+  }
+  if (mimeType === "application/zip") {
+    return "ZIP";
+  }
+  if (
+    mimeType === "application/x-rar-compressed" ||
+    mimeType === "application/vnd.rar"
+  ) {
+    return "RAR";
+  }
+  if (mimeType === "application/x-7z-compressed") {
+    return "7Z";
+  }
+  if (mimeType.startsWith("image/")) {
+    const imageType = mimeType.split("/")[1];
 
-  return index > -1 ? value.slice(index + 1) : "";
+    if (imageType === "jpeg") {
+      return "JPG";
+    }
+    return imageType.toUpperCase();
+  }
+
+  if (mimeType === "text/plain") {
+    return "TXT";
+  }
+
+  /*
+   * Nếu MIME type không nằm trong danh sách trên,
+   * lấy extension từ tên file.
+   */
+  const extension = getExtension(fileName);
+
+  return extension ? extension.toUpperCase() : "";
+}
+
+function getExtension(name) {
+  const value = String(name || "").trim();
+  const lastDot = value.lastIndexOf(".");
+
+  if (lastDot <= 0 || lastDot === value.length - 1) {
+    return "";
+  }
+  return value.slice(lastDot + 1).toLowerCase();
+}
+
+function formatFileSize(bytes) {
+  const value = Number(bytes);
+
+  if (!Number.isFinite(value) || value < 0) {
+    return "0 B";
+  }
+  if (value < 1024) {
+    return `${value} B`;
+  }
+  if (value < 1024 * 1024) {
+    return `${(value / 1024).toFixed(2)} KB`;
+  }
+  if (value < 1024 * 1024 * 1024) {
+    return `${(value / (1024 * 1024)).toFixed(2)} MB`;
+  }
+  return `${(value / (1024 * 1024 * 1024)).toFixed(2)} GB`;
 }
 
 function formatDisplayDate(date) {
