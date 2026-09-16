@@ -7,7 +7,6 @@ import activityLogService from "../../services/activityLogService";
 import "./ActivityLog.css";
 
 const PAGE_SIZE = 12;
-
 const ACTION_CONFIG = {
   create: {
     label: "File Create",
@@ -24,81 +23,174 @@ const ACTION_CONFIG = {
     className: "activity-action--create",
     icon: "plus",
   },
+  file_create: {
+    label: "File Create",
+    className: "activity-action--create",
+    icon: "plus",
+  },
+  folder_create: {
+    label: "Folder Create",
+    className: "activity-action--create",
+    icon: "plus",
+  },
+
   upload: {
     label: "File Upload",
     className: "activity-action--upload",
     icon: "upload",
   },
+  file_upload: {
+    label: "File Upload",
+    className: "activity-action--upload",
+    icon: "upload",
+  },
+
   download: {
     label: "File Download",
     className: "activity-action--download",
     icon: "download",
   },
+  file_download: {
+    label: "File Download",
+    className: "activity-action--download",
+    icon: "download",
+  },
+
   preview: {
     label: "File Preview",
     className: "activity-action--preview",
     icon: "eye",
   },
+  file_preview: {
+    label: "File Preview",
+    className: "activity-action--preview",
+    icon: "eye",
+  },
+
   rename: {
     label: "File Rename",
     className: "activity-action--rename",
     icon: "edit",
   },
+  file_rename: {
+    label: "File Rename",
+    className: "activity-action--rename",
+    icon: "edit",
+  },
+  folder_rename: {
+    label: "Folder Rename",
+    className: "activity-action--rename",
+    icon: "edit",
+  },
+
   move: {
     label: "File Move",
     className: "activity-action--move",
     icon: "move",
   },
+  file_move: {
+    label: "File Move",
+    className: "activity-action--move",
+    icon: "move",
+  },
+  folder_move: {
+    label: "Folder Move",
+    className: "activity-action--move",
+    icon: "move",
+  },
+
   copy: {
     label: "File Copy",
     className: "activity-action--copy",
     icon: "copy",
   },
+  file_copy: {
+    label: "File Copy",
+    className: "activity-action--copy",
+    icon: "copy",
+  },
+  folder_copy: {
+    label: "Folder Copy",
+    className: "activity-action--copy",
+    icon: "copy",
+  },
+
   delete: {
     label: "File Delete",
     className: "activity-action--delete",
     icon: "trash",
   },
+  file_delete: {
+    label: "File Delete",
+    className: "activity-action--delete",
+    icon: "trash",
+  },
+
+  permanent_delete: {
+    label: "File Permanent Delete",
+    className: "activity-action--delete",
+    icon: "trash",
+  },
+
+  file_permanent_delete: {
+    label: "File Permanent Delete",
+    className: "activity-action--delete",
+    icon: "trash",
+  },
+
   restore: {
     label: "File Restore",
     className: "activity-action--restore",
     icon: "restore",
   },
+  file_restore: {
+    label: "File Restore",
+    className: "activity-action--restore",
+    icon: "restore",
+  },
+
   share: {
     label: "Share Link",
     className: "activity-action--share",
     icon: "link",
   },
+  share_link: {
+    label: "Share Link",
+    className: "activity-action--share",
+    icon: "link",
+  },
+
   revoke_share: {
     label: "Revoke Share",
     className: "activity-action--delete",
     icon: "link",
   },
+
   grant_permission: {
     label: "Permission Grant",
     className: "activity-action--permission",
     icon: "key",
   },
+
   update_permission: {
     label: "Permission Update",
     className: "activity-action--permission",
     icon: "key",
   },
+
   revoke_permission: {
     label: "Permission Revoke",
     className: "activity-action--delete",
     icon: "key",
   },
-  login: {
-    label: "Login",
-    className: "activity-action--login",
-    icon: "login",
-  },
+
+  login: { label: "Login", className: "activity-action--login", icon: "login" },
   logout: {
     label: "Logout",
     className: "activity-action--logout",
     icon: "logout",
   },
+
   change_password: {
     label: "Change Password",
     className: "activity-action--permission",
@@ -608,16 +700,17 @@ export default function ActivityLog() {
           <div className="activity-card__title">
             <div className="activity-card__icon">
               <svg viewBox="0 0 24 24" aria-hidden="true">
+                <circle cx="5" cy="6" r="1.7" fill="currentColor" />
+                <circle cx="5" cy="12" r="1.7" fill="currentColor" />
+                <circle cx="5" cy="18" r="1.7" fill="currentColor" />
+
                 <path
-                  d="M4 5h16M4 12h16M4 19h16"
+                  d="M9 6h10M9 12h10M9 18h10"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="2.4"
                   strokeLinecap="round"
                 />
-                <circle cx="7" cy="5" r="1.4" fill="currentColor" />
-                <circle cx="7" cy="12" r="1.4" fill="currentColor" />
-                <circle cx="7" cy="19" r="1.4" fill="currentColor" />
               </svg>
             </div>
 
