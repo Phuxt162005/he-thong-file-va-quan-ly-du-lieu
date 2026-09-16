@@ -93,6 +93,40 @@
   font-size: 17px;
   line-height: 1.45;
 }
+
+.shares-list__sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  font: inherit;
+  font-weight: inherit;
+  cursor: pointer;
+}
+
+.shares-list__sort-button:hover {
+  color: #173d79;
+}
+
+.shares-sort-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  color: #7d8fb4;
+  font-size: 15px;
+  font-weight: 700;
+  transition:
+    color 0.15s ease,
+    transform 0.15s ease;
+}
+
+.shares-sort-icon--active {
+  color: #4966a4;
+}
 /* =========================================================
    SORT DROPDOWN
    ========================================================= */

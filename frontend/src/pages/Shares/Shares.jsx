@@ -16,6 +16,8 @@ export default function Shares() {
   const [typeFilter, setTypeFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("newest");
   const [sortOpen, setSortOpen] = useState(false);
+  const [sortColumn, setSortColumn] = useState("createdAt");
+  const [sortDirection, setSortDirection] = useState("desc");
   const [selectedShare, setSelectedShare] = useState(null);
   const [selectedShares, setSelectedShares] = useState([]);
   const [editModal, setEditModal] = useState(false);
@@ -69,20 +71,56 @@ export default function Shares() {
       });
     }
 
+    const getSortValue = (share) => {
+      switch (sortColumn) {
+        case "name":
+          return String(
+            share.resourceName || share.name || "Tài nguyên",
+          ).toLowerCase();
+        case "sharedBy":
+          return String(
+            share.ownerName ||
+              share.ownerUsername ||
+              share.ownerEmail ||
+              "Người dùng",
+          ).toLowerCase();
+        case "access":
+          return String(share.accessType || "").toLowerCase();
+        case "createdAt":
+        default:
+          return new Date(
+            share.createdAt || share.sharedAt || share.updatedAt || 0,
+          ).getTime();
+      }
+    };
+
     result.sort((a, b) => {
-      const dateA = new Date(
-        a.createdAt || a.sharedAt || a.updatedAt || a.expiresAt || 0,
-      ).getTime();
+      const valueA = getSortValue(a);
+      const valueB = getSortValue(b);
 
-      const dateB = new Date(
-        b.createdAt || b.sharedAt || b.updatedAt || b.expiresAt || 0,
-      ).getTime();
+      let comparison = 0;
 
-      return sortOrder === "newest" ? dateB - dateA : dateA - dateB;
+      if (typeof valueA === "number" && typeof valueB === "number") {
+        comparison = valueA - valueB;
+      } else {
+        comparison = String(valueA).localeCompare(String(valueB), "vi", {
+          numeric: true,
+          sensitivity: "base",
+        });
+      }
+      return sortDirection === "asc" ? comparison : -comparison;
     });
-
     return result;
-  }, [shares, typeFilter, sortOrder]);
+  }, [shares, typeFilter, sortColumn, sortDirection]);
+
+  const handleColumnSort = (column) => {
+    if (sortColumn === column) {
+      setSortDirection((prev) => (prev === "asc" ? "desc" : "asc"));
+      return;
+    }
+    setSortColumn(column);
+    setSortDirection(column === "createdAt" ? "desc" : "asc");
+  };
 
   const allVisibleSelected =
     visibleShares.length > 0 &&
@@ -381,26 +419,64 @@ export default function Shares() {
             </div>
 
             <div>
-              Tên
-              <SortIcon />
+              <button
+                type="button"
+                className="shares-list__sort-button"
+                onClick={() => handleColumnSort("name")}
+              >
+                <span>Tên</span>
+
+                <SortIcon
+                  active={sortColumn === "name"}
+                  direction={sortColumn === "name" ? sortDirection : null}
+                />
+              </button>
             </div>
 
             <div>
-              Chia sẻ bởi
-              <SortIcon />
+              <button
+                type="button"
+                className="shares-list__sort-button"
+                onClick={() => handleColumnSort("sharedBy")}
+              >
+                <span>Chia sẻ bởi</span>
+
+                <SortIcon
+                  active={sortColumn === "sharedBy"}
+                  direction={sortColumn === "sharedBy" ? sortDirection : null}
+                />
+              </button>
             </div>
 
             <div>
-              Quyền truy cập
-              <SortIcon />
+              <button
+                type="button"
+                className="shares-list__sort-button"
+                onClick={() => handleColumnSort("access")}
+              >
+                <span>Quyền truy cập</span>
+
+                <SortIcon
+                  active={sortColumn === "access"}
+                  direction={sortColumn === "access" ? sortDirection : null}
+                />
+              </button>
             </div>
 
             <div>
-              Thời gian
-              <SortIcon />
-            </div>
+              <button
+                type="button"
+                className="shares-list__sort-button"
+                onClick={() => handleColumnSort("createdAt")}
+              >
+                <span>Thời gian</span>
 
-            <div>Thao tác</div>
+                <SortIcon
+                  active={sortColumn === "createdAt"}
+                  direction={sortColumn === "createdAt" ? sortDirection : null}
+                />
+              </button>
+            </div>
           </div>
 
           {visibleShares.length === 0 ? (
@@ -766,62 +842,95 @@ function FolderIcon() {
 }
 
 function ResourceFileIcon({ share }) {
-  const type = String(
-    share?.fileType ||
-      share?.mimeType ||
-      share?.extension ||
-      share?.resourceName ||
-      "",
+  const fileName = String(share?.resourceName || share?.name || "");
+  const mimeType = String(
+    share?.mimeType || share?.fileType || "",
   ).toLowerCase();
+  const extension = getExtension(fileName);
+  const type = `${mimeType} ${extension}`.toLowerCase();
 
-  if (type.includes("pdf") || type.endsWith(".pdf")) {
+  if (type.includes("pdf") || extension === "pdf") {
     return (
       <span className="resource-file-icon resource-file-icon--pdf">PDF</span>
     );
   }
-
   if (
     type.includes("png") ||
     type.includes("jpg") ||
     type.includes("jpeg") ||
-    type.includes("image")
+    type.includes("gif") ||
+    type.includes("webp") ||
+    type.includes("image/")
   ) {
     return (
       <span className="resource-file-icon resource-file-icon--image">IMG</span>
     );
   }
-
-  if (type.includes("doc") || type.includes("word")) {
+  if (
+    type.includes("word") ||
+    type.includes("msword") ||
+    type.includes("officedocument.word") ||
+    extension === "doc" ||
+    extension === "docx"
+  ) {
     return (
       <span className="resource-file-icon resource-file-icon--word">W</span>
     );
   }
-  if (type.includes("xls") || type.includes("excel")) {
+  if (
+    type.includes("excel") ||
+    type.includes("spreadsheet") ||
+    extension === "xls" ||
+    extension === "xlsx" ||
+    extension === "csv"
+  ) {
     return (
       <span className="resource-file-icon resource-file-icon--excel">X</span>
     );
   }
-  if (type.includes("ppt") || type.includes("powerpoint")) {
+  if (
+    type.includes("powerpoint") ||
+    type.includes("presentation") ||
+    extension === "ppt" ||
+    extension === "pptx"
+  ) {
     return (
       <span className="resource-file-icon resource-file-icon--powerpoint">
         P
       </span>
     );
   }
-  if (type.includes("zip") || type.includes("rar") || type.includes("7z")) {
+  if (
+    type.includes("zip") ||
+    type.includes("rar") ||
+    type.includes("7z") ||
+    extension === "zip" ||
+    extension === "rar" ||
+    extension === "7z"
+  ) {
     return (
       <span className="resource-file-icon resource-file-icon--archive">
         ZIP
       </span>
     );
   }
+
   return (
-    <span className="resource-file-icon resource-file-icon--file">TXT</span>
+    <span className="resource-file-icon resource-file-icon--file">
+      {extension ? extension.slice(0, 4).toUpperCase() : "FILE"}
+    </span>
   );
 }
 
-function SortIcon() {
-  return <span className="shares-sort-icon">↕</span>;
+function SortIcon({ active = false, direction = null }) {
+  return (
+    <span
+      className={`shares-sort-icon ${active ? "shares-sort-icon--active" : ""}`}
+      aria-hidden="true"
+    >
+      {direction === "asc" ? "↑" : direction === "desc" ? "↓" : "↕"}
+    </span>
+  );
 }
 
 function EyeIcon() {

@@ -141,7 +141,41 @@ exports.disable = asyncHandler(async (req, res) => {
 exports.list = asyncHandler(async (req, res) => {
   const shares = await shareService.getMyShares(req.user.id, req.query.status);
 
-  return res.json(shares);
+  const enrichedShares = await Promise.all(
+    shares.map(async (share) => {
+      const shareData = share.toObject ? share.toObject() : { ...share };
+
+      let resource = null;
+
+      if (share.resourceType === "file") {
+        resource = await File.findOne({
+          _id: share.resourceId,
+          isDeleted: false,
+        }).select("name mimeType size");
+      } else if (share.resourceType === "folder") {
+        resource = await Folder.findOne({
+          _id: share.resourceId,
+          isDeleted: false,
+        }).select("name");
+      }
+
+      if (resource) {
+        shareData.resourceName = resource.name || "Tài nguyên";
+
+        if (share.resourceType === "file") {
+          shareData.fileType = resource.mimeType;
+          shareData.mimeType = resource.mimeType;
+          shareData.size = resource.size;
+        }
+      } else {
+        shareData.resourceName = "Tài nguyên";
+      }
+
+      return shareData;
+    }),
+  );
+
+  return res.json(enrichedShares);
 });
 
 // update share link
