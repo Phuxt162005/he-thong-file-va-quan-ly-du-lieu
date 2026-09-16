@@ -15,6 +15,7 @@ export default function Shares() {
   const [error, setError] = useState("");
   const [typeFilter, setTypeFilter] = useState("all");
   const [sortOrder, setSortOrder] = useState("newest");
+  const [sortOpen, setSortOpen] = useState(false);
   const [selectedShare, setSelectedShare] = useState(null);
   const [selectedShares, setSelectedShares] = useState([]);
   const [editModal, setEditModal] = useState(false);
@@ -249,41 +250,76 @@ export default function Shares() {
           </div>
 
           <div className="shares-page__sort">
-            <svg viewBox="0 0 24 24" aria-hidden="true">
-              <path
-                d="M8 5v14M8 5l-3 3m3-3 3 3M16 19V5m0 14 3-3m-3 3-3-3"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-
-            <select
-              value={sortOrder}
-              onChange={(event) => setSortOrder(event.target.value)}
-              aria-label="Sắp xếp"
+            <button
+              type="button"
+              className="shares-page__sort-button"
+              onClick={() => setSortOpen((prev) => !prev)}
+              aria-expanded={sortOpen}
             >
-              <option value="newest">Mới nhất</option>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  d="M8 5v14M8 5l-3 3m3-3 3 3M16 19V5m0 14 3-3m-3 3-3-3"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
 
-              <option value="oldest">Cũ nhất</option>
-            </select>
+              <span>{sortOrder === "newest" ? "Mới nhất" : "Cũ nhất"}</span>
 
-            <svg
-              className="shares-page__sort-chevron"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
-              <path
-                d="m6 9 6 6 6-6"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
+              <svg
+                className={`shares-page__sort-chevron ${
+                  sortOpen ? "shares-page__sort-chevron--open" : ""
+                }`}
+                viewBox="0 0 24 24"
+                aria-hidden="true"
+              >
+                <path
+                  d="m6 9 6 6 6-6"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            </button>
+
+            {sortOpen && (
+              <div className="shares-page__sort-menu">
+                <button
+                  type="button"
+                  className={
+                    sortOrder === "newest"
+                      ? "shares-page__sort-option shares-page__sort-option--active"
+                      : "shares-page__sort-option"
+                  }
+                  onClick={() => {
+                    setSortOrder("newest");
+                    setSortOpen(false);
+                  }}
+                >
+                  Mới nhất
+                </button>
+
+                <button
+                  type="button"
+                  className={
+                    sortOrder === "oldest"
+                      ? "shares-page__sort-option shares-page__sort-option--active"
+                      : "shares-page__sort-option"
+                  }
+                  onClick={() => {
+                    setSortOrder("oldest");
+                    setSortOpen(false);
+                  }}
+                >
+                  Cũ nhất
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
