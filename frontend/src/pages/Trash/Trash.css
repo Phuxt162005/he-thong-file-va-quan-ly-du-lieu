@@ -675,9 +675,7 @@
 /* Text in retention box */
 .trash-retention h3 {
   margin: 0 0 6px;
-
   color: #173f7e;
-
   font-size: 18px;
   line-height: 1.35;
   font-weight: 800;
@@ -685,9 +683,7 @@
 
 .trash-retention p {
   margin: 2px 0;
-
   color: #6b82ad;
-
   font-size: 13px;
   line-height: 1.5;
 }
@@ -717,5 +713,96 @@
   .trash-retention__icon {
     width: 70px;
     flex-basis: 70px;
+  }
+}
+
+/* =========================================================
+   SELECTION TOOLBAR
+   ========================================================= */
+
+.trash-selection-toolbar {
+  width: 100%;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+  padding: 8px 14px;
+  background: #ffffff;
+  border: 1px solid #dce5f4;
+  border-radius: 11px;
+  box-shadow: 0 3px 12px rgba(53, 87, 143, 0.04);
+}
+
+.trash-selection-toolbar__info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #45659f;
+  font-size: 14px;
+}
+
+.trash-selection-toolbar__info strong {
+  color: #3459a1;
+  font-size: 16px;
+}
+
+.trash-selection-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.trash-selection-toolbar__clear,
+.trash-selection-toolbar__restore,
+.trash-selection-toolbar__delete {
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  box-sizing: border-box;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.trash-selection-toolbar__clear {
+  color: #4e679a;
+  background: #f4f7fc;
+  border: 1px solid #dce5f4;
+}
+
+.trash-selection-toolbar__restore {
+  color: #2877d7;
+  background: #e6f1ff;
+  border: 1px solid #d4e6fb;
+}
+
+.trash-selection-toolbar__delete {
+  color: #ffffff;
+  background: #e45c7d;
+  border: 1px solid #e45c7d;
+}
+
+.trash-selection-toolbar__restore svg,
+.trash-selection-toolbar__delete svg {
+  width: 17px;
+  height: 17px;
+}
+
+@media (max-width: 768px) {
+  .trash-selection-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .trash-selection-toolbar__actions {
+    flex-wrap: wrap;
   }
 }

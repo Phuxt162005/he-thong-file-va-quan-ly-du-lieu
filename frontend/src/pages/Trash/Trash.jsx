@@ -32,6 +32,8 @@ export default function Trash() {
   const [deleteAllModal, setDeleteAllModal] = useState(false);
   const [restoring, setRestoring] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [bulkRestoreModal, setBulkRestoreModal] = useState(false);
+  const [bulkDeleteModal, setBulkDeleteModal] = useState(false);
 
   // =========================
   // Load trash
@@ -250,6 +252,51 @@ export default function Trash() {
     }
   };
 
+  const handleBulkRestore = async () => {
+    if (selectedIds.size === 0) {
+      return;
+    }
+
+    try {
+      setRestoring(true);
+      setError("");
+
+      const selectedItems = trashItems.filter((item) =>
+        selectedIds.has(item._trashId),
+      );
+      const selectedFiles = selectedItems.filter(
+        (item) => item._trashType === "file",
+      );
+      const selectedFolders = selectedItems.filter(
+        (item) => item._trashType === "folder",
+      );
+      await Promise.all([
+        ...selectedFiles.map((file) => fileService.restoreFile(file._id)),
+        ...selectedFolders.map((folder) =>
+          folderService.restoreFolder(folder._id),
+        ),
+      ]);
+      const selectedFileIds = new Set(selectedFiles.map((file) => file._id));
+      const selectedFolderIds = new Set(
+        selectedFolders.map((folder) => folder._id),
+      );
+
+      setFiles((current) =>
+        current.filter((file) => !selectedFileIds.has(file._id)),
+      );
+      setFolders((current) =>
+        current.filter((folder) => !selectedFolderIds.has(folder._id)),
+      );
+      setSelectedIds(new Set());
+      setBulkRestoreModal(false);
+      setPage(1);
+    } catch (err) {
+      setError(err?.message || "Không thể khôi phục các mục đã chọn.");
+    } finally {
+      setRestoring(false);
+    }
+  };
+
   // =========================
   // Permanent delete file
   // =========================
@@ -307,6 +354,53 @@ export default function Trash() {
       setSelectedDeleteFolder(null);
     } catch (err) {
       setError(err?.message || "Không thể xóa vĩnh viễn thư mục.");
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const handleBulkPermanentDelete = async () => {
+    if (selectedIds.size === 0) {
+      return;
+    }
+
+    try {
+      setDeleting(true);
+      setError("");
+
+      const selectedItems = trashItems.filter((item) =>
+        selectedIds.has(item._trashId),
+      );
+      const selectedFiles = selectedItems.filter(
+        (item) => item._trashType === "file",
+      );
+      const selectedFolders = selectedItems.filter(
+        (item) => item._trashType === "folder",
+      );
+
+      await Promise.all([
+        ...selectedFiles.map((file) => fileService.permanentDelete(file._id)),
+        ...selectedFolders.map((folder) =>
+          folderService.permanentDelete(folder._id),
+        ),
+      ]);
+
+      const selectedFileIds = new Set(selectedFiles.map((file) => file._id));
+      const selectedFolderIds = new Set(
+        selectedFolders.map((folder) => folder._id),
+      );
+
+      setFiles((current) =>
+        current.filter((file) => !selectedFileIds.has(file._id)),
+      );
+      setFolders((current) =>
+        current.filter((folder) => !selectedFolderIds.has(folder._id)),
+      );
+      setSelectedIds(new Set());
+      setBulkDeleteModal(false);
+      setPage(1);
+    } catch (err) {
+      setError(err?.message || "Không thể xóa vĩnh viễn các mục đã chọn.");
     } finally {
       setDeleting(false);
     }
@@ -384,6 +478,21 @@ export default function Trash() {
       />
 
       <ConfirmDialog
+        isOpen={bulkRestoreModal}
+        title="Khôi phục các mục đã chọn"
+        message={`Bạn có chắc muốn khôi phục ${selectedIds.size} mục đã chọn?`}
+        confirmText="Khôi phục"
+        cancelText="Hủy"
+        loading={restoring}
+        onConfirm={handleBulkRestore}
+        onCancel={() => {
+          if (!restoring) {
+            setBulkRestoreModal(false);
+          }
+        }}
+      />
+
+      <ConfirmDialog
         isOpen={permanentDeleteModal}
         title="Xóa vĩnh viễn file"
         message={`Bạn có chắc muốn xóa vĩnh viễn file "${selectedDeleteFile?.name || ""}"? Hành động này không thể hoàn tác.`}
@@ -411,6 +520,21 @@ export default function Trash() {
           if (!deleting) {
             setPermanentDeleteFolderModal(false);
             setSelectedDeleteFolder(null);
+          }
+        }}
+      />
+
+      <ConfirmDialog
+        isOpen={bulkDeleteModal}
+        title="Xóa vĩnh viễn các mục đã chọn"
+        message={`Bạn có chắc muốn xóa vĩnh viễn ${selectedIds.size} mục đã chọn? Hành động này không thể hoàn tác.`}
+        confirmText="Xóa vĩnh viễn"
+        cancelText="Hủy"
+        loading={deleting}
+        onConfirm={handleBulkPermanentDelete}
+        onCancel={() => {
+          if (!deleting) {
+            setBulkDeleteModal(false);
           }
         }}
       />
@@ -455,6 +579,43 @@ export default function Trash() {
       </div>
 
       {error && <div className="trash-error">{error}</div>}
+
+      {selectedIds.size > 0 && (
+        <div className="trash-selection-toolbar">
+          <div className="trash-selection-toolbar__info">
+            <strong>{selectedIds.size}</strong>
+            <span>mục đã chọn</span>
+          </div>
+
+          <div className="trash-selection-toolbar__actions">
+            <button
+              type="button"
+              className="trash-selection-toolbar__clear"
+              onClick={() => setSelectedIds(new Set())}
+            >
+              Bỏ chọn
+            </button>
+
+            <button
+              type="button"
+              className="trash-selection-toolbar__restore"
+              onClick={() => setBulkRestoreModal(true)}
+            >
+              <RestoreIcon />
+              <span>Khôi phục</span>
+            </button>
+
+            <button
+              type="button"
+              className="trash-selection-toolbar__delete"
+              onClick={() => setBulkDeleteModal(true)}
+            >
+              <TrashIcon />
+              <span>Xóa vĩnh viễn</span>
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* =========================
           Table
@@ -717,7 +878,7 @@ function TrashFolderItem({
   onRestore,
   onPermanentDelete,
 }) {
-  const deletedAt = folder.deletedAt || folder.updatedAt;
+  const deletedAt = folder.deletedAt || null;
   const remaining = getRemainingDays(deletedAt);
 
   return (
