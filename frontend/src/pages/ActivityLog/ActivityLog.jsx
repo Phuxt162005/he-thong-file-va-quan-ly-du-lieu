@@ -716,6 +716,13 @@ export default function ActivityLog() {
   const [error, setError] = useState("");
   const [auditError, setAuditError] = useState("");
   const [page, setPage] = useState(1);
+  const [actionFilter, setActionFilter] = useState("all");
+  const [resourceFilter, setResourceFilter] = useState("all");
+  const [sortDirection, setSortDirection] = useState("desc");
+  const [timeFrom, setTimeFrom] = useState("");
+  const [timeTo, setTimeTo] = useState("");
+  const [appliedTimeFrom, setAppliedTimeFrom] = useState("");
+  const [appliedTimeTo, setAppliedTimeTo] = useState("");
 
   const loadData = useCallback(
     async ({ initial = false } = {}) => {
@@ -771,20 +778,99 @@ export default function ActivityLog() {
     loadData({ initial: true });
   }, [loadData]);
 
-  const totalPages = Math.max(1, Math.ceil(activities.length / PAGE_SIZE));
+  const actionOptions = Array.from(
+    new Set(activities.map((activity) => formatAction(activity.action).label)),
+  );
+  const resourceOptions = Array.from(
+    new Set(
+      activities.map((activity) => activity.resourceType).filter(Boolean),
+    ),
+  );
+  const filteredActivities = [...activities]
+    .filter((activity) => {
+      if (actionFilter === "all") {
+        return true;
+      }
+      return formatAction(activity.action).label === actionFilter;
+    })
+    .filter((activity) => {
+      if (resourceFilter === "all") {
+        return true;
+      }
 
+      return activity.resourceType === resourceFilter;
+    })
+    .filter((activity) => {
+      const createdAt = new Date(activity.createdAt);
+      if (Number.isNaN(createdAt.getTime())) {
+        return false;
+      }
+      if (appliedTimeFrom) {
+        const fromDate = new Date(`${appliedTimeFrom}T00:00:00`);
+        if (createdAt < fromDate) {
+          return false;
+        }
+      }
+      if (appliedTimeTo) {
+        const toDate = new Date(`${appliedTimeTo}T23:59:59.999`);
+        if (createdAt > toDate) {
+          return false;
+        }
+      }
+      return true;
+    })
+    .sort((a, b) => {
+      const timeA = new Date(a.createdAt).getTime();
+      const timeB = new Date(b.createdAt).getTime();
+
+      return sortDirection === "asc" ? timeA - timeB : timeB - timeA;
+    });
+  const totalPages = Math.max(
+    1,
+    Math.ceil(filteredActivities.length / PAGE_SIZE),
+  );
   const startIndex = (page - 1) * PAGE_SIZE;
-  const visibleActivities = activities.slice(
+  const visibleActivities = filteredActivities.slice(
     startIndex,
     startIndex + PAGE_SIZE,
   );
-
-  const firstItem = activities.length === 0 ? 0 : startIndex + 1;
-
-  const lastItem = Math.min(startIndex + PAGE_SIZE, activities.length);
-
+  const firstItem = filteredActivities.length === 0 ? 0 : startIndex + 1;
+  const lastItem = Math.min(startIndex + PAGE_SIZE, filteredActivities.length);
   const goToPage = (nextPage) => {
     setPage(Math.min(Math.max(nextPage, 1), totalPages));
+  };
+  const handleActionFilterChange = (event) => {
+    setActionFilter(event.target.value);
+    setPage(1);
+  };
+  const handleResourceFilterChange = (event) => {
+    setResourceFilter(event.target.value);
+    setPage(1);
+  };
+  const handleSortTime = () => {
+    setSortDirection((current) => (current === "desc" ? "asc" : "desc"));
+    setPage(1);
+  };
+  const handleTimeSearch = () => {
+    if (timeFrom && timeTo && timeFrom > timeTo) {
+      setError("Khoảng thời gian tìm kiếm không hợp lệ.");
+      return;
+    }
+
+    setError("");
+    setAppliedTimeFrom(timeFrom);
+    setAppliedTimeTo(timeTo);
+    setPage(1);
+  };
+  const handleClearFilters = () => {
+    setActionFilter("all");
+    setResourceFilter("all");
+    setTimeFrom("");
+    setTimeTo("");
+    setAppliedTimeFrom("");
+    setAppliedTimeTo("");
+    setSortDirection("desc");
+    setPage(1);
   };
 
   if (loading) {
@@ -802,7 +888,10 @@ export default function ActivityLog() {
         <button
           type="button"
           className="activity-refresh-button"
-          onClick={() => loadData()}
+          onClick={async () => {
+            handleClearFilters();
+            await loadData();
+          }}
           disabled={refreshing}
         >
           <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -847,16 +936,104 @@ export default function ActivityLog() {
             </div>
           </div>
 
-          <span className="activity-count">{activities.length} hoạt động</span>
+          <div className="activity-filters">
+            <select
+              className="activity-filter-select"
+              value={actionFilter}
+              onChange={handleActionFilterChange}
+              aria-label="Lọc theo thao tác"
+            >
+              <option value="all">Tất cả thao tác</option>
+
+              {actionOptions.map((action) => (
+                <option key={action} value={action}>
+                  {action}
+                </option>
+              ))}
+            </select>
+
+            <select
+              className="activity-filter-select"
+              value={resourceFilter}
+              onChange={handleResourceFilterChange}
+              aria-label="Lọc theo tài nguyên"
+            >
+              <option value="all">Tất cả tài nguyên</option>
+
+              {resourceOptions.map((resource) => (
+                <option key={resource} value={resource}>
+                  {formatResourceType(resource)}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <span className="activity-count">
+            {filteredActivities.length} hoạt động
+          </span>
         </div>
 
-        {activities.length === 0 ? (
+        <div className="activity-time-search">
+          <div className="activity-time-search__field">
+            <label htmlFor="activity-time-from">Từ ngày</label>
+
+            <input
+              id="activity-time-from"
+              type="date"
+              value={timeFrom}
+              onChange={(event) => setTimeFrom(event.target.value)}
+            />
+          </div>
+
+          <span className="activity-time-search__separator">→</span>
+
+          <div className="activity-time-search__field">
+            <label htmlFor="activity-time-to">Đến ngày</label>
+
+            <input
+              id="activity-time-to"
+              type="date"
+              value={timeTo}
+              onChange={(event) => setTimeTo(event.target.value)}
+            />
+          </div>
+
+          <button
+            type="button"
+            className="activity-time-search__button"
+            onClick={handleTimeSearch}
+          >
+            Tìm kiếm
+          </button>
+
+          {(appliedTimeFrom || appliedTimeTo) && (
+            <button
+              type="button"
+              className="activity-time-search__clear"
+              onClick={handleClearFilters}
+            >
+              Xóa bộ lọc
+            </button>
+          )}
+        </div>
+
+        {filteredActivities.length === 0 ? (
           <div className="activity-empty">
             <div className="activity-empty__icon">
               <ActivityIcon type="file" />
             </div>
-            <h3>Chưa có hoạt động</h3>
-            <p>Không có lịch sử hoạt động nào để hiển thị.</p>
+
+            <h3>
+              {activities.length === 0
+                ? "Chưa có hoạt động"
+                : "Không tìm thấy hoạt động"}
+            </h3>
+
+            <p>
+              {activities.length === 0
+                ? "Không có lịch sử hoạt động nào để hiển thị."
+                : "Không có hoạt động phù hợp với bộ lọc hoặc khoảng thời gian đã chọn."}
+            </p>
           </div>
         ) : (
           <>
@@ -873,10 +1050,21 @@ export default function ActivityLog() {
                 <thead>
                   <tr>
                     <th>
-                      <span className="activity-th-sort">
-                        Thời gian
-                        <span className="activity-sort-icon">↕</span>
-                      </span>
+                      <button
+                        type="button"
+                        className="activity-th-sort activity-th-sort--button"
+                        onClick={handleSortTime}
+                      >
+                        <span>Thời gian</span>
+
+                        <span
+                          className={`activity-sort-icon ${
+                            sortDirection === "asc" ? "is-asc" : "is-desc"
+                          }`}
+                        >
+                          {sortDirection === "asc" ? "↑" : "↓"}
+                        </span>
+                      </button>
                     </th>
                     <th>Thao tác</th>
                     <th>Tài nguyên</th>
@@ -943,8 +1131,8 @@ export default function ActivityLog() {
 
             <div className="activity-footer">
               <span>
-                Hiển thị {firstItem} - {lastItem} của {activities.length} hoạt
-                động
+                Hiển thị {firstItem} - {lastItem} của{" "}
+                {filteredActivities.length} hoạt động
               </span>
 
               <div className="activity-pagination">

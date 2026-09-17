@@ -346,6 +346,15 @@
   height: 19px;
 }
 
+.activity-action--delete .activity-action__icon {
+  transform: translateY(1px);
+}
+
+.activity-action--delete .activity-action__icon svg {
+  display: block;
+  transform: translateY(1px);
+}
+
 /* Upload / download / restore */
 
 .activity-action--upload,
@@ -688,5 +697,216 @@
   .activity-pagination {
     width: 100%;
     justify-content: flex-end;
+  }
+}
+
+/* =========================================================
+   FILTERS
+   ========================================================= */
+
+.activity-filters {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+}
+
+.activity-filter-select {
+  min-width: 155px;
+  height: 40px;
+  padding: 0 34px 0 12px;
+
+  border: 1px solid #d8dff0;
+  border-radius: 9px;
+
+  background: #ffffff;
+  color: #45679f;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+
+  cursor: pointer;
+  outline: none;
+}
+
+.activity-filter-select:focus {
+  border-color: #6d7fd5;
+  box-shadow: 0 0 0 3px rgba(109, 127, 213, 0.1);
+}
+
+/* =========================================================
+   TIME SEARCH
+   ========================================================= */
+
+.activity-time-search {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+
+  padding: 14px 22px;
+
+  border-top: 1px solid #eeeaf4;
+  border-bottom: 1px solid #eeeaf4;
+
+  background: #fcfaff;
+}
+
+.activity-time-search__field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.activity-time-search__field label {
+  color: #637ba7;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.activity-time-search__field input {
+  width: 155px;
+  height: 38px;
+  box-sizing: border-box;
+
+  padding: 0 10px;
+
+  border: 1px solid #d8dff0;
+  border-radius: 8px;
+
+  background: #ffffff;
+  color: #45679f;
+
+  font-family: inherit;
+  font-size: 13px;
+
+  outline: none;
+}
+
+.activity-time-search__field input:focus {
+  border-color: #6d7fd5;
+  box-shadow: 0 0 0 3px rgba(109, 127, 213, 0.1);
+}
+
+.activity-time-search__separator {
+  padding-bottom: 10px;
+
+  color: #8295b7;
+  font-size: 16px;
+  font-weight: 700;
+}
+
+.activity-time-search__button,
+.activity-time-search__clear {
+  height: 38px;
+
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  padding: 0 15px;
+
+  border-radius: 8px;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+
+  cursor: pointer;
+}
+
+.activity-time-search__button {
+  border: 1px solid #5269cf;
+  background: #5269cf;
+  color: #ffffff;
+}
+
+.activity-time-search__button:hover {
+  background: #465dc2;
+}
+
+.activity-time-search__clear {
+  border: 1px solid #dce2ef;
+  background: #ffffff;
+  color: #637ba7;
+}
+
+.activity-time-search__clear:hover {
+  background: #f3f6fc;
+}
+
+/* =========================================================
+   SORT BUTTON
+   ========================================================= */
+
+.activity-th-sort--button {
+  border: 0;
+  background: transparent;
+
+  color: inherit;
+  font: inherit;
+  font-weight: inherit;
+
+  cursor: pointer;
+}
+
+.activity-th-sort--button:hover {
+  color: #315ba4;
+}
+
+.activity-sort-icon.is-asc,
+.activity-sort-icon.is-desc {
+  color: #315fc0;
+}
+
+@media (max-width: 1050px) {
+  .activity-card__header {
+    align-items: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .activity-filters {
+    width: 100%;
+    margin-left: 0;
+  }
+
+  .activity-filter-select {
+    flex: 1;
+  }
+
+  .activity-time-search {
+    flex-wrap: wrap;
+  }
+}
+
+@media (max-width: 700px) {
+  .activity-time-search {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .activity-time-search__field {
+    width: 100%;
+  }
+
+  .activity-time-search__field input {
+    width: 100%;
+  }
+
+  .activity-time-search__separator {
+    display: none;
+  }
+
+  .activity-time-search__button,
+  .activity-time-search__clear {
+    width: 100%;
+  }
+
+  .activity-filters {
+    flex-direction: column;
+  }
+
+  .activity-filter-select {
+    width: 100%;
   }
 }
