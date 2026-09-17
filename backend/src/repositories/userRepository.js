@@ -14,17 +14,31 @@ exports.findByLoginName = async (username) => {
 };
 
 // cập nhật thông tin người dùng
+// cập nhật thông tin người dùng
 exports.updateProfile = (id, data) => {
-  const allowedData = {
-    username: data.username,
-    email: data.email,
-    avatar: data.avatar,
-  };
+  const allowedData = {};
 
-  return User.findByIdAndUpdate(id, allowedData, {
-    new: true,
-    runValidators: true,
-  }).select("-password");
+  if (data.username !== undefined) {
+    allowedData.username = data.username;
+  }
+  if (data.email !== undefined) {
+    allowedData.email = data.email;
+  }
+  if (data.firstName !== undefined) {
+    allowedData.firstName = data.firstName;
+  }
+  if (data.lastName !== undefined) {
+    allowedData.lastName = data.lastName;
+  }
+  if (data.avatar !== undefined) {
+    allowedData.avatar = data.avatar;
+  }
+
+  return User.findByIdAndUpdate(
+    id,
+    { $set: allowedData },
+    { new: true, runValidators: true },
+  ).select("-password");
 };
 
 exports.findByIdWithPassword = (userId) => {
@@ -37,4 +51,9 @@ exports.updatePassword = (userId, password) => {
     { $set: { password } },
     { new: true, runValidators: true },
   ).select("-password");
+};
+
+// xóa tài khoản
+exports.deleteById = (id) => {
+  return User.findByIdAndDelete(id);
 };

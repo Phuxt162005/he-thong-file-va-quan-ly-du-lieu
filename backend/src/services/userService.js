@@ -190,3 +190,21 @@ exports.getStorageQuota = async (userId) => {
     usagePercent,
   };
 };
+
+exports.deleteAccount = async (userId) => {
+  if (!userId) {
+    throw httpError("User ID is required", 400);
+  }
+
+  const user = await userRepository.findById(userId);
+  if (!user) {
+    throw httpError("User not found", 404);
+  }
+
+  const RefreshToken = require("../models/RefreshToken");
+  await RefreshToken.deleteMany({
+    user: userId,
+  });
+  await userRepository.deleteById(userId);
+  return { message: "Tài khoản đã được xóa thành công." };
+};

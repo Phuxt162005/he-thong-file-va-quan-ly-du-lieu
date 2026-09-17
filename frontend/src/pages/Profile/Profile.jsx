@@ -5,12 +5,14 @@ import FormInput from "../../components/FormInput/FormInput";
 import Loading from "../../components/Loading/Loading";
 import userService from "../../services/userService";
 
+import { useAuth } from "../../context/AuthContext";
+
 import "./Profile.css";
 
 function Profile() {
   const navigate = useNavigate();
+  const { logout } = useAuth();
   const avatarInputRef = useRef(null);
-
   const [user, setUser] = useState(null);
   const [avatarPreview, setAvatarPreview] = useState("");
   const [formData, setFormData] = useState({
@@ -22,6 +24,8 @@ function Profile() {
 
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const [avatarSaving, setAvatarSaving] = useState(false);
+  const [deletingAccount, setDeletingAccount] = useState(false);
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
@@ -46,6 +50,7 @@ function Profile() {
       const data = response?.data || response;
 
       setUser(data);
+      setAvatarPreview(data?.avatar || "");
       setFormData({
         username: data?.username || "",
         email: data?.email || "",
@@ -73,28 +78,55 @@ function Profile() {
 
   const handleAvatarChange = (event) => {
     const file = event.target.files?.[0];
-
     if (!file) {
       return;
     }
-
     if (!file.type.startsWith("image/")) {
       setError("Vui lòng chọn một file hình ảnh.");
+      event.target.value = "";
       return;
     }
-
     if (file.size > 5 * 1024 * 1024) {
       setError("Ảnh đại diện không được vượt quá 5 MB.");
+      event.target.value = "";
       return;
     }
 
-    if (avatarPreview?.startsWith("blob:")) {
-      URL.revokeObjectURL(avatarPreview);
-    }
+    const previousAvatar = user?.avatar || "";
+    const reader = new FileReader();
 
-    setAvatarPreview(URL.createObjectURL(file));
-    setError("");
-    setMessage("Ảnh đại diện đã được chọn.");
+    reader.onload = async () => {
+      const avatar = String(reader.result || "");
+      if (!avatar) {
+        setError("Không thể đọc ảnh đại diện.");
+        return;
+      }
+
+      try {
+        setAvatarSaving(true);
+        setError("");
+        setMessage("");
+        setAvatarPreview(avatar);
+
+        const response = await userService.updateProfile({ avatar });
+        const data = response?.data || response;
+
+        setUser((prev) => ({ ...prev, ...data }));
+        setAvatarPreview(data?.avatar || avatar);
+        setMessage("Ảnh đại diện đã được cập nhật.");
+      } catch (err) {
+        setAvatarPreview(previousAvatar);
+        setError(err?.message || "Không thể cập nhật ảnh đại diện.");
+      } finally {
+        setAvatarSaving(false);
+        event.target.value = "";
+      }
+    };
+    reader.onerror = () => {
+      setError("Không thể đọc ảnh đại diện.");
+      event.target.value = "";
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (event) => {
@@ -198,6 +230,7 @@ function Profile() {
               type="button"
               className="profile-account__camera"
               onClick={() => avatarInputRef.current?.click()}
+              disabled={avatarSaving}
               aria-label="Đổi ảnh đại diện"
             >
               <CameraIcon />
@@ -210,15 +243,6 @@ function Profile() {
                 <h2>{displayName}</h2>
                 <p>{formData.email}</p>
               </div>
-
-              <button
-                type="button"
-                className="profile-change-photo"
-                onClick={() => avatarInputRef.current?.click()}
-              >
-                <CameraIcon />
-                Đổi ảnh
-              </button>
             </div>
 
             <span className="profile-role">
@@ -358,7 +382,13 @@ function Profile() {
               <ArrowIcon />
             </button>
 
-            <div className="profile-security-item profile-security-item--purple">
+            <button
+              type="button"
+              className="profile-security-item profile-security-item--purple"
+              onClick={() => {
+                window.dispatchEvent(new CustomEvent("open-notifications"));
+              }}
+            >
               <span className="profile-security-item__icon">
                 <BellIcon />
               </span>
@@ -369,20 +399,29 @@ function Profile() {
               </span>
 
               <ArrowIcon />
-            </div>
+            </button>
 
-            <div className="profile-security-item profile-security-item--danger">
+            <button
+              type="button"
+              className="profile-security-item profile-security-item--danger"
+              disabled={deletingAccount}
+              onClick={handleDeleteAccount}
+            >
               <span className="profile-security-item__icon">
                 <TrashIcon />
               </span>
 
               <span className="profile-security-item__content">
                 <strong>Xóa tài khoản</strong>
-                <small>Hành động này không thể hoàn tác</small>
+                <small>
+                  {deletingAccount
+                    ? "Đang xóa tài khoản..."
+                    : "Hành động này không thể hoàn tác"}
+                </small>
               </span>
 
               <ArrowIcon />
-            </div>
+            </button>
           </div>
         </section>
       </div>
@@ -431,6 +470,30 @@ function StorageQuota() {
       setError(err?.message || "Không thể tải thông tin dung lượng.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      "Bạn có chắc chắn muốn xóa tài khoản không?\n\nHành động này không thể hoàn tác.",
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeletingAccount(true);
+      setError("");
+      setMessage("");
+      await userService.deleteAccount();
+      await logout();
+      navigate("/login", {
+        replace: true,
+      });
+    } catch (err) {
+      setError(err?.message || "Không thể xóa tài khoản.");
+    } finally {
+      setDeletingAccount(false);
     }
   };
 
@@ -705,14 +768,39 @@ function BellIcon() {
 
 function TrashIcon() {
   return (
-    <svg viewBox="0 0 24 24" aria-hidden="true">
+    <svg viewBox="0 0 24 24" aria-hidden="true" className="profile-trash-icon">
       <path
-        d="M5 7h14M9 7V4h6v3M8 7l1 14h6l1-14M10 11v6M14 11v6"
+        d="M5 7h14"
         fill="none"
         stroke="currentColor"
-        strokeWidth="2"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+      />
+
+      <path
+        d="M9 7V4h6v3"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
         strokeLinecap="round"
         strokeLinejoin="round"
+      />
+
+      <path
+        d="M7.5 7h9l-1 13h-7l-1-13Z"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+
+      <path
+        d="M10 11v5M14 11v5"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.9"
+        strokeLinecap="round"
       />
     </svg>
   );

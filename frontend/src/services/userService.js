@@ -22,6 +22,11 @@ const userService = {
     });
     return response.data;
   },
+
+  async deleteAccount() {
+    const response = await api.delete("/users/profile");
+    return response.data;
+  },
 };
 
 export default userService;

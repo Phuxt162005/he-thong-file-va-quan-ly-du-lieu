@@ -28,11 +28,9 @@ function BellIcon() {
 
 function formatDate(value) {
   const date = new Date(value);
-
   if (Number.isNaN(date.getTime())) {
     return "";
   }
-
   return date.toLocaleString("vi-VN", {
     day: "2-digit",
     month: "2-digit",
@@ -72,6 +70,20 @@ export default function NotificationBell() {
         setOpen(false);
       }
     };
+
+    useEffect(() => {
+      const handleOpenNotifications = () => {
+        setOpen(true);
+        loadNotifications();
+      };
+      window.addEventListener("open-notifications", handleOpenNotifications);
+      return () => {
+        window.removeEventListener(
+          "open-notifications",
+          handleOpenNotifications,
+        );
+      };
+    }, []);
 
     document.addEventListener("mousedown", handleOutsideClick);
     return () => document.removeEventListener("mousedown", handleOutsideClick);

@@ -38,3 +38,10 @@ exports.getStorageQuota = asyncHandler(async (req, res) => {
 
   return res.json(storage);
 });
+
+// xóa tài khoản
+exports.deleteAccount = asyncHandler(async (req, res) => {
+  const result = await userService.deleteAccount(req.user.id);
+
+  return res.json(result);
+});

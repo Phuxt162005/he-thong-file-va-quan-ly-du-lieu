@@ -15,4 +15,7 @@ router.get("/search", auth, controller.findByLoginName);
 // cập nhật hồ sơ
 router.put("/profile", auth, controller.updateProfile);
 
+// xóa tài khoản
+router.delete("/profile", auth, controller.deleteAccount);
+
 module.exports = router;
