@@ -123,6 +123,7 @@ export default function FolderTree({
             onSelect={onSelect}
             expandedIds={expandedIds}
             childrenMap={childrenMap}
+            filesMap={filesMap}
             onToggle={handleToggle}
           />
         ))
@@ -196,15 +197,15 @@ function FolderTreeItem({
         <>
           {children.map((child) => (
             <FolderTreeItem
-              key={folder._id}
-              folder={folder}
-              level={0}
+              key={child._id}
+              folder={child}
+              level={level + 1}
               selectedFolderId={selectedFolderId}
               onSelect={onSelect}
               expandedIds={expandedIds}
               childrenMap={childrenMap}
               filesMap={filesMap}
-              onToggle={handleToggle}
+              onToggle={onToggle}
             />
           ))}
 

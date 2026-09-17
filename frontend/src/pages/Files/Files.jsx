@@ -500,6 +500,38 @@ export default function Files() {
     }
   }
 
+  async function handleBulkCopy() {
+    if (selectedFileIds.length === 0 && selectedFolderIds.length === 0) {
+      return;
+    }
+
+    try {
+      setBulkProcessing(true);
+      setError("");
+      for (const folderId of selectedFolderIds) {
+        await folderService.copyFolder(folderId, bulkDestinationFolderId);
+      }
+      for (const fileId of selectedFileIds) {
+        await fileService.copyFile(fileId, bulkDestinationFolderId);
+      }
+
+      setSelectedFileIds([]);
+      setSelectedFolderIds([]);
+      setBulkDestinationFolderId(null);
+      setBulkCopyModal(false);
+
+      refreshFolders();
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Không thể sao chép các mục đã chọn.",
+      );
+    } finally {
+      setBulkProcessing(false);
+    }
+  }
+
   async function handleBulkDeleteAll() {
     if (selectedFileIds.length === 0 && selectedFolderIds.length === 0) {
       return;
@@ -810,11 +842,12 @@ export default function Files() {
                 <FileList
                   selectAllRequest={selectAllRequest}
                   onSelectionStateChange={setAllFilesSelected}
+                  onSelectionChange={setSelectedFileIds}
+                  sortConfig={sortConfig}
                   viewMode={viewMode}
                   onFilesChanged={refreshFolders}
                   openFileId={previewFileId}
                   showSelectionToolbar={false}
-                  onSelectionChange={setSelectedFileIds}
                 />
               </div>
             </div>

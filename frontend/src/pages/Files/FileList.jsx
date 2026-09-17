@@ -21,6 +21,7 @@ export default function FileList({
   selectAllRequest,
   onSelectionStateChange,
   onSelectionChange,
+  sortConfig = { key: "name", direction: "asc" },
   viewMode = "list",
   onFilesChanged,
   openFileId = null,
@@ -53,10 +54,6 @@ export default function FileList({
   const [clipboardFiles, setClipboardFiles] = useState([]);
   const [pasting, setPasting] = useState(false);
   const [rangeSelecting, setRangeSelecting] = useState(false);
-  const [sortConfig, setSortConfig] = useState({
-    key: "name",
-    direction: "asc",
-  });
 
   useEffect(() => {
     loadFiles();
@@ -180,14 +177,6 @@ export default function FileList({
     } finally {
       setLoading(false);
     }
-  }
-
-  function handleSort(key) {
-    setSortConfig((current) => ({
-      key,
-      direction:
-        current.key === key && current.direction === "asc" ? "desc" : "asc",
-    }));
   }
 
   function getSortedFiles() {

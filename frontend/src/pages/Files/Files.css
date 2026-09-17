@@ -298,7 +298,7 @@
 .files-unified-table__header {
   min-height: 46px;
   display: grid;
-  grid-template-columns: 42px minmax(260px, 1fr) 115px 125px 165px 220px;
+  grid-template-columns: 42px minmax(220px, 1fr) 90px 120px 145px 200px;
   align-items: center;
   padding: 0 14px;
   color: #234b87;
@@ -535,7 +535,7 @@
 
 @media (max-width: 1250px) {
   .files-unified-table__header {
-    grid-template-columns: 40px minmax(220px, 1fr) 100px 110px 145px 205px;
+    grid-template-columns: 42px minmax(220px, 1fr) 90px 120px 145px 200px;
   }
 
   .files-page__storage-usage {
