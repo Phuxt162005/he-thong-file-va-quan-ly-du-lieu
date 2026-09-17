@@ -14,6 +14,12 @@ const shareLinkSchema = new mongoose.Schema(
     expiresAt: { type: Date, default: null },
     maxDownloads: { type: Number, default: null },
     downloadCount: { type: Number, default: 0 },
+    // Mỗi user/visitor chỉ xuất hiện 1 lần. select:false để không trả danh sách ID này ra frontend.
+    downloadedBy: {
+      type: [String],
+      default: [],
+      select: false,
+    },
     isActive: { type: Boolean, default: true },
     visibility: {
       type: String,

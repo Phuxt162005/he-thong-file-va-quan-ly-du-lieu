@@ -3,6 +3,17 @@ const File = require("../models/File");
 const Folder = require("../models/Folder");
 const asyncHandler = require("../middleware/asyncHandler");
 
+function getDownloaderKey(req) {
+  if (req.user?.id) {
+    return `user:${req.user.id}`;
+  }
+  const visitorId = req.get("x-share-visitor-id");
+  if (visitorId) {
+    return `guest:${visitorId}`;
+  }
+  return `guest-ip:${req.ip}`;
+}
+
 // tạo liên kết chia sẻ
 exports.create = asyncHandler(async (req, res) => {
   const share = await shareService.createShare(req.user.id, req.body);
@@ -72,7 +83,7 @@ exports.download = asyncHandler(async (req, res) => {
 
   const result = await shareService.getSharedFile(share);
 
-  await shareService.completeSharedDownload(share._id);
+  await shareService.completeSharedDownload(share._id, getDownloaderKey(req));
   return res.download(result.filePath, result.file.name, (error) => {
     if (error) {
       console.error("Shared file download error:", error);
@@ -143,6 +154,27 @@ exports.list = asyncHandler(async (req, res) => {
   const enrichedShares = await Promise.all(
     shares.map(async (share) => {
       const shareData = share.toObject ? share.toObject() : { ...share };
+      const owner = shareData.owner;
+
+      if (owner && typeof owner === "object") {
+        const displayName =
+          [owner.firstName, owner.lastName].filter(Boolean).join(" ").trim() ||
+          owner.username;
+
+        shareData.ownerName = displayName || "Người dùng";
+        shareData.ownerUsername = owner.username || "";
+        shareData.ownerEmail = owner.email || "";
+        shareData.ownerFirstName = owner.firstName || "";
+        shareData.ownerLastName = owner.lastName || "";
+        shareData.ownerAvatar = owner.avatar || null;
+      } else {
+        shareData.ownerName = "Người dùng";
+        shareData.ownerUsername = "";
+        shareData.ownerEmail = "";
+        shareData.ownerFirstName = "";
+        shareData.ownerLastName = "";
+        shareData.ownerAvatar = null;
+      }
       let resource = null;
 
       if (share.resourceType === "file") {
@@ -157,11 +189,9 @@ exports.list = asyncHandler(async (req, res) => {
           .select("name isDeleted")
           .lean();
       }
-
       if (resource) {
         shareData.resourceName = resource.name || "Tài nguyên";
         shareData.isResourceDeleted = resource.isDeleted === true;
-
         if (share.resourceType === "file") {
           shareData.fileType = resource.mimeType || "";
           shareData.mimeType = resource.mimeType || "";
@@ -176,7 +206,6 @@ exports.list = asyncHandler(async (req, res) => {
       return shareData;
     }),
   );
-
   return res.json(enrichedShares);
 });
 
@@ -217,8 +246,7 @@ exports.folderDownload = asyncHandler(async (req, res) => {
     share,
     req.params.fileId,
   );
-  await shareService.completeSharedDownload(share._id);
-
+  await shareService.completeSharedDownload(share._id, getDownloaderKey(req));
   return res.download(result.filePath, result.file.name, (error) => {
     if (error) {
       console.error("Shared file download error:", error);

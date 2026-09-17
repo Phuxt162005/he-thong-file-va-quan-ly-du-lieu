@@ -16,19 +16,41 @@ exports.findById = (shareId) => {
 };
 
 // tăng số lượt download
-exports.increaseDownloadCount = (id) => {
+// Tăng số user duy nhất đã Download
+exports.increaseDownloadCount = async (id, downloaderKey) => {
+  const key = String(downloaderKey || "").trim();
+
+  if (!key) {
+    throw new Error("Downloader identity is required");
+  }
+
+  // User này đã Download trước đó:
+  // cho phép tải lại nhưng KHÔNG tăng downloadCount.
+  const alreadyDownloaded = await ShareLink.findOne({
+    _id: id,
+    isActive: true,
+    downloadedBy: key,
+  }).select("_id downloadCount maxDownloads");
+
+  if (alreadyDownloaded) {
+    return alreadyDownloaded;
+  }
+
+  // User mới:
+  // chỉ thêm nếu chưa vượt maxDownloads.
   return ShareLink.findOneAndUpdate(
     {
       _id: id,
       isActive: true,
+      downloadedBy: { $ne: key },
       $or: [
         { maxDownloads: null },
         { $expr: { $lt: ["$downloadCount", "$maxDownloads"] } },
       ],
     },
-    { $inc: { downloadCount: 1 } },
+    { $inc: { downloadCount: 1 }, $addToSet: { downloadedBy: key } },
     { new: true },
-  );
+  ).select("_id downloadCount maxDownloads");
 };
 
 // vô hiệu hóa link
@@ -52,9 +74,10 @@ exports.findByOwner = (ownerId, status) => {
     query.isActive = false;
   }
 
-  return ShareLink.find(query).select("-password").sort({
-    createdAt: -1,
-  });
+  return ShareLink.find(query)
+    .select("-password")
+    .populate("owner", "_id username email firstName lastName avatar")
+    .sort({ createdAt: -1 });
 };
 
 exports.update = async (shareId, data) => {

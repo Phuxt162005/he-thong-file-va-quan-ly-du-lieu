@@ -127,6 +127,64 @@
 .shares-sort-icon--active {
   color: #4966a4;
 }
+
+.shares-selection-toolbar {
+  width: 100%;
+  min-height: 54px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  box-sizing: border-box;
+  margin-bottom: 12px;
+  padding: 8px 14px;
+  background: #ffffff;
+  border: 1px solid #dce5f4;
+  border-radius: 11px;
+  box-shadow: 0 3px 12px rgba(53, 87, 143, 0.04);
+}
+
+.shares-selection-toolbar__info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #45659f;
+  font-size: 14px;
+}
+
+.shares-selection-toolbar__info strong {
+  color: #3459a1;
+  font-size: 16px;
+}
+
+.shares-selection-toolbar__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.shares-selection-toolbar__clear,
+.shares-selection-toolbar__revoke {
+  height: 36px;
+  padding: 0 14px;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.shares-selection-toolbar__clear {
+  color: #4e679a;
+  background: #f4f7fc;
+  border: 1px solid #dce5f4;
+}
+
+.shares-selection-toolbar__revoke {
+  color: #ffffff;
+  background: #d9536f;
+  border: 1px solid #d9536f;
+}
 /* =========================================================
    SORT DROPDOWN
    ========================================================= */
@@ -271,12 +329,15 @@
 .share-item {
   display: grid;
   grid-template-columns:
-    48px
-    minmax(310px, 1.55fr)
-    minmax(230px, 1.1fr)
-    minmax(210px, 1fr)
-    minmax(190px, 0.9fr)
-    150px;
+    44px
+    minmax(250px, 1.5fr)
+    minmax(190px, 1.05fr)
+    minmax(180px, 1fr)
+    minmax(125px, 0.75fr)
+    minmax(125px, 0.7fr)
+    minmax(115px, 0.7fr)
+    minmax(150px, 0.8fr)
+    120px;
   align-items: center;
   box-sizing: border-box;
   padding: 0 18px;
@@ -313,11 +374,13 @@
   cursor: pointer;
   position: relative;
 }
+
 .shares-list__checkbox input:checked,
 .share-item__checkbox input:checked {
   background: #4389ea;
   border-color: #4389ea;
 }
+
 .shares-list__checkbox input:checked::after,
 .share-item__checkbox input:checked::after {
   content: "";
@@ -330,11 +393,28 @@
   border-width: 0 2px 2px 0;
   transform: rotate(45deg);
 }
+
 .shares-sort-icon {
   margin-left: 7px;
   color: #7185af;
   font-size: 15px;
   font-weight: 700;
+}
+
+.share-item__expires,
+.share-item__download-limit {
+  min-width: 0;
+  overflow: hidden;
+  color: #6682b4;
+  font-size: 14px;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.share-item__download-limit {
+  color: #49689f;
+  font-weight: 600;
 }
 /* =========================================================
    ROW
@@ -366,6 +446,32 @@
   align-items: center;
   gap: 18px;
 }
+
+.share-item__resource--previewable {
+  cursor: pointer;
+}
+
+.share-item__resource--previewable .share-item__resource-info strong {
+  transition: color 0.15s ease;
+}
+
+.share-item__resource--previewable:hover .share-item__resource-info strong {
+  color: #4389ea;
+}
+
+.share-access--previewable {
+  border: 0;
+  cursor: pointer;
+}
+
+.share-access--previewable:hover {
+  filter: brightness(0.97);
+}
+
+.share-access:disabled {
+  cursor: default;
+}
+
 .share-item__icon {
   width: 42px;
   height: 42px;

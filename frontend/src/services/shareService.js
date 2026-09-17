@@ -1,5 +1,18 @@
 import api from "./api";
 
+function getShareVisitorId() {
+  const storageKey = "file-manager-share-visitor-id";
+  let visitorId = localStorage.getItem(storageKey);
+
+  if (!visitorId) {
+    visitorId =
+      window.crypto?.randomUUID?.() ||
+      `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+    localStorage.setItem(storageKey, visitorId);
+  }
+  return visitorId;
+}
+
 const shareService = {
   // tạo link share
   async createShare(data) {
@@ -44,7 +57,10 @@ const shareService = {
     const response = await api.post(
       `/shares/download/${token}`,
       { password },
-      { responseType: "blob" },
+      {
+        responseType: "blob",
+        headers: { "X-Share-Visitor-Id": getShareVisitorId() },
+      },
     );
     return response;
   },
@@ -54,7 +70,10 @@ const shareService = {
     const response = await api.post(
       `/shares/folder-download/${token}/${fileId}`,
       { password },
-      { responseType: "blob" },
+      {
+        responseType: "blob",
+        headers: { "X-Share-Visitor-Id": getShareVisitorId() },
+      },
     );
     return response;
   },

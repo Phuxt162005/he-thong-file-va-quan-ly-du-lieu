@@ -4,6 +4,7 @@ import Loading from "../../components/Loading/Loading";
 import Modal from "../../components/Modal/Modal";
 import ConfirmDialog from "../../components/ConfirmDialog/ConfirmDialog";
 import FormInput from "../../components/FormInput/FormInput";
+import FilePreview from "../../components/FilePreview/FilePreview";
 
 import shareService from "../../services/shareService";
 
@@ -23,7 +24,10 @@ export default function Shares() {
   const [editModal, setEditModal] = useState(false);
   const [revokeModal, setRevokeModal] = useState(false);
   const [saving, setSaving] = useState(false);
-
+  const [previewFile, setPreviewFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+  const [previewLoading, setPreviewLoading] = useState(false);
+  const [bulkRevokeModal, setBulkRevokeModal] = useState(false);
   const [formData, setFormData] = useState({
     visibility: "public",
     accessType: "download",
@@ -36,6 +40,109 @@ export default function Shares() {
   useEffect(() => {
     loadShares();
   }, []);
+
+  useEffect(() => {
+    return () => {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+      }
+    };
+  }, [previewUrl]);
+
+  const handlePreview = async (share) => {
+    if (share.resourceType !== "file" || share.visibility !== "public") {
+      return;
+    }
+
+    try {
+      setPreviewLoading(true);
+      setError("");
+      const response = await shareService.previewSharedFile(share.token, null);
+      if (!(response?.data instanceof Blob)) {
+        throw new Error("Dữ liệu Preview không hợp lệ.");
+      }
+      const url = URL.createObjectURL(response.data);
+      setPreviewUrl(url);
+      setPreviewFile({
+        _id: share.resourceId,
+        name: share.resourceName || share.name || "File",
+        mimeType: share.mimeType || share.fileType || "",
+        size: share.size || 0,
+      });
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Không thể xem trước file.",
+      );
+    } finally {
+      setPreviewLoading(false);
+    }
+  };
+
+  const handleClosePreview = () => {
+    if (previewUrl) {
+      URL.revokeObjectURL(previewUrl);
+    }
+    setPreviewUrl(null);
+    setPreviewFile(null);
+  };
+
+  const handleDownload = async (share) => {
+    if (share.resourceType !== "file" || share.accessType === "view") {
+      return;
+    }
+
+    try {
+      setError("");
+      const response = await shareService.downloadSharedFile(share.token, null);
+      const url = URL.createObjectURL(response.data);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = share.resourceName || share.name || "download";
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      URL.revokeObjectURL(url);
+      await loadShares();
+    } catch (err) {
+      setError(
+        err?.response?.data?.message || err?.message || "Không thể tải file.",
+      );
+    }
+  };
+
+  const handleBulkRevoke = async () => {
+    if (selectedShares.length === 0) {
+      return;
+    }
+
+    try {
+      setSaving(true);
+      setError("");
+      await Promise.all(
+        selectedShares.map((shareId) => shareService.revokeShare(shareId)),
+      );
+      setShares((prev) =>
+        prev.map((share) =>
+          selectedShares.includes(share._id)
+            ? { ...share, isActive: false }
+            : share,
+        ),
+      );
+      setSelectedShares([]);
+      setBulkRevokeModal(false);
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Không thể thu hồi các Share Link đã chọn.",
+      );
+    } finally {
+      setSaving(false);
+    }
+  };
 
   const loadShares = async () => {
     try {
@@ -336,6 +443,8 @@ export default function Shares() {
                   }
                   onClick={() => {
                     setSortOrder("newest");
+                    setSortColumn("createdAt");
+                    setSortDirection("desc");
                     setSortOpen(false);
                   }}
                 >
@@ -350,7 +459,9 @@ export default function Shares() {
                       : "shares-page__sort-option"
                   }
                   onClick={() => {
-                    setSortOrder("oldest");
+                    setSortOrder("newest");
+                    setSortColumn("createdAt");
+                    setSortDirection("desc");
                     setSortOpen(false);
                   }}
                 >
@@ -362,6 +473,33 @@ export default function Shares() {
         </div>
 
         {error && <div className="error-message">{error}</div>}
+
+        {selectedShares.length > 0 && (
+          <div className="shares-selection-toolbar">
+            <div className="shares-selection-toolbar__info">
+              <strong>{selectedShares.length}</strong>
+              <span>mục đã chọn</span>
+            </div>
+
+            <div className="shares-selection-toolbar__actions">
+              <button
+                type="button"
+                className="shares-selection-toolbar__clear"
+                onClick={() => setSelectedShares([])}
+              >
+                Bỏ chọn
+              </button>
+
+              <button
+                type="button"
+                className="shares-selection-toolbar__revoke"
+                onClick={() => setBulkRevokeModal(true)}
+              >
+                Thu hồi
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* =================================================
             FILTER TABS
@@ -463,6 +601,10 @@ export default function Shares() {
               </button>
             </div>
 
+            <div>Ngày hết hạn</div>
+
+            <div>Giới hạn tải</div>
+
             <div>
               <button
                 type="button"
@@ -491,11 +633,8 @@ export default function Shares() {
                 selected={selectedShares.includes(share._id)}
                 onSelect={() => toggleSelect(share._id)}
                 onEdit={openEdit}
-                onRevoke={(item) => {
-                  setSelectedShare(item);
-                  setRevokeModal(true);
-                }}
-                onCopy={copyShareLink}
+                onPreview={handlePreview}
+                onDownload={handleDownload}
               />
             ))
           )}
@@ -644,20 +783,16 @@ export default function Shares() {
           ================================================= */}
 
       <ConfirmDialog
-        isOpen={revokeModal}
+        isOpen={bulkRevokeModal}
         title="Thu hồi Share Link"
-        message={`Bạn có chắc muốn thu hồi Share Link của "${
-          selectedShare?.resourceName || selectedShare?.name || ""
-        }"?`}
+        message={`Bạn có chắc muốn thu hồi ${selectedShares.length} Share Link đã chọn không?`}
         confirmText="Thu hồi"
         cancelText="Hủy"
-        danger
         loading={saving}
-        onConfirm={handleRevoke}
+        onConfirm={handleBulkRevoke}
         onCancel={() => {
           if (!saving) {
-            setRevokeModal(false);
-            setSelectedShare(null);
+            setBulkRevokeModal(false);
           }
         }}
       />
@@ -668,14 +803,30 @@ export default function Shares() {
 /* =========================================================
    SHARE ITEM
    ========================================================= */
-function ShareItem({ share, selected, onSelect, onEdit, onRevoke, onCopy }) {
+function ShareItem({
+  share,
+  selected,
+  onSelect,
+  onEdit,
+  onPreview,
+  onDownload,
+}) {
   const status = getStatus(share);
+
   const isFolder =
     String(share.resourceType || share.type || "").toLowerCase() === "folder";
 
+  const canPreview =
+    !isFolder && share.visibility === "public" && status !== "revoked";
+
+  const canDownload =
+    !isFolder && share.accessType === "download" && status !== "revoked";
+
+  const hasDownloadLimit =
+    share.maxDownloads !== null && share.maxDownloads !== undefined;
+
   return (
     <div className="share-item">
-      {/* CHECKBOX */}
       <div className="share-item__checkbox">
         <input
           type="checkbox"
@@ -687,8 +838,16 @@ function ShareItem({ share, selected, onSelect, onEdit, onRevoke, onCopy }) {
         />
       </div>
 
-      {/* RESOURCE */}
-      <div className="share-item__resource">
+      <div
+        className={`share-item__resource ${
+          canPreview ? "share-item__resource--previewable" : ""
+        }`}
+        onClick={() => {
+          if (canPreview) {
+            onPreview(share);
+          }
+        }}
+      >
         <span
           className={`share-item__icon ${
             isFolder ? "share-item__icon--folder" : ""
@@ -705,15 +864,14 @@ function ShareItem({ share, selected, onSelect, onEdit, onRevoke, onCopy }) {
 
           <span>
             {isFolder
-              ? `Thư mục${
-                  share.itemCount != null ? ` • ${share.itemCount} mục` : ""
-                }`
-              : getFileMeta(share)}
+              ? "Thư mục"
+              : `${share.mimeType || share.fileType || "File"}${
+                  share.size ? ` · ${formatFileSize(share.size)}` : ""
+                }`}
           </span>
         </div>
       </div>
 
-      {/* SHARED BY */}
       <div className="share-item__shared-by">
         <span className="share-item__avatar">
           {getInitials(getSharerName(share))}
@@ -721,48 +879,60 @@ function ShareItem({ share, selected, onSelect, onEdit, onRevoke, onCopy }) {
 
         <div>
           <strong>{getSharerName(share)}</strong>
-
           <span>{getSharerEmail(share)}</span>
         </div>
       </div>
 
-      {/* ACCESS */}
       <div className="share-item__access">
-        <span
+        <button
+          type="button"
           className={`share-access ${
             share.accessType === "view"
               ? "share-access--view"
               : "share-access--download"
-          }`}
+          } ${canPreview ? "share-access--previewable" : ""}`}
+          onClick={() => {
+            if (canPreview) {
+              onPreview(share);
+            }
+          }}
+          disabled={!canPreview}
         >
           <EyeIcon />
 
           <span>
             {share.accessType === "view" ? "Chỉ xem" : "Xem & Tải xuống"}
           </span>
-        </span>
+        </button>
       </div>
 
-      {/* TIME */}
+      <div className="share-item__expires">
+        {formatDisplayDate(share.expiresAt)}
+      </div>
+
+      <div className="share-item__download-limit">
+        {hasDownloadLimit
+          ? `${share.downloadCount || 0} / ${share.maxDownloads}`
+          : ""}
+      </div>
+
       <div className="share-item__time">
         {formatDisplayDate(
-          share.createdAt ||
-            share.sharedAt ||
-            share.updatedAt ||
-            share.expiresAt,
+          share.createdAt || share.sharedAt || share.updatedAt,
         )}
       </div>
 
-      {/* ACTIONS */}
       <div className="share-item__actions">
-        <button
-          type="button"
-          className="share-item__download"
-          onClick={() => onCopy(share)}
-          title="Tải xuống / Sao chép liên kết"
-        >
-          <DownloadIcon />
-        </button>
+        {canDownload && (
+          <button
+            type="button"
+            className="share-item__download"
+            onClick={() => onDownload(share)}
+            title="Tải xuống"
+          >
+            <DownloadIcon />
+          </button>
+        )}
 
         <button
           type="button"
@@ -997,27 +1167,21 @@ function getStatus(share) {
 }
 
 function getSharerName(share) {
+  const firstName = share?.owner?.firstName || share?.ownerFirstName || "";
+  const lastName = share?.owner?.lastName || share?.ownerLastName || "";
+  const fullName = `${firstName} ${lastName}`.trim();
+
   return (
-    share?.sharedBy?.name ||
-    share?.sharedBy?.fullName ||
-    share?.owner?.name ||
-    share?.owner?.fullName ||
-    share?.user?.name ||
-    share?.user?.fullName ||
-    share?.createdBy?.name ||
-    share?.createdBy?.fullName ||
+    fullName ||
+    share?.owner?.username ||
+    share?.ownerUsername ||
+    share?.ownerName ||
     "Người dùng"
   );
 }
 
 function getSharerEmail(share) {
-  return (
-    share?.sharedBy?.email ||
-    share?.owner?.email ||
-    share?.user?.email ||
-    share?.createdBy?.email ||
-    "Không có email"
-  );
+  return share?.owner?.email || share?.ownerEmail || "Không có email";
 }
 
 function getInitials(name) {
