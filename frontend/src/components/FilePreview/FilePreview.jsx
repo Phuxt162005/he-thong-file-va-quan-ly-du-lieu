@@ -96,12 +96,9 @@ export default function FilePreview({
 
         const response = await fileService.previewFile(file._id);
         const blob = response?.data;
-
+        const extension = getExtension(file?.name);
         const mimeType = file?.mimeType || blob.type || "";
-        if (
-          mimeType.startsWith("text/") &&
-          !TEXT_EXTENSIONS.includes(extension)
-        ) {
+        if (mimeType.startsWith("text/")) {
           const text = await blob.text();
           if (!cancelled) {
             setTextContent(text);
@@ -112,7 +109,6 @@ export default function FilePreview({
           throw new Error("Dữ liệu preview không hợp lệ.");
         }
 
-        const extension = getExtension(file?.name);
         if (TEXT_EXTENSIONS.includes(extension)) {
           const text = await blob.text();
           if (!cancelled) {
@@ -121,7 +117,6 @@ export default function FilePreview({
           return;
         }
         objectUrl = URL.createObjectURL(blob);
-
         if (!cancelled) {
           setUrl(objectUrl);
         }

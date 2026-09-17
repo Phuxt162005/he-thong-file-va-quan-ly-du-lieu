@@ -75,6 +75,25 @@ export default function FolderItem({
           type="checkbox"
           checked={selected}
           onChange={(event) => onSelect?.(folder, event.target.checked)}
+          onPointerDown={(event) => {
+            event.stopPropagation();
+
+            window.dispatchEvent(
+              new CustomEvent("file-manager-range-start", {
+                detail: {
+                  type: "folder",
+                  id: folder._id,
+                },
+              }),
+            );
+          }}
+          onPointerEnter={() => {
+            window.dispatchEvent(
+              new CustomEvent("file-manager-range-enter", {
+                detail: { type: "folder", id: folder._id },
+              }),
+            );
+          }}
           onClick={(event) => event.stopPropagation()}
           aria-label={`Chọn ${folder.name || "thư mục"}`}
         />

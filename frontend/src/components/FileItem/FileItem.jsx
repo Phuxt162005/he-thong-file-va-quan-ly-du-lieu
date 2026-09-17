@@ -40,6 +40,25 @@ export default function FileItem({
           type="checkbox"
           checked={selected}
           onChange={(event) => onSelect?.(file, event.target.checked)}
+          onPointerDown={(event) => {
+            event.stopPropagation();
+
+            window.dispatchEvent(
+              new CustomEvent("file-manager-range-start", {
+                detail: {
+                  type: "file",
+                  id: file._id,
+                },
+              }),
+            );
+          }}
+          onPointerEnter={() => {
+            window.dispatchEvent(
+              new CustomEvent("file-manager-range-enter", {
+                detail: { type: "file", id: file._id },
+              }),
+            );
+          }}
           onClick={(event) => event.stopPropagation()}
           aria-label={`Chọn ${file.name || "file"}`}
         />

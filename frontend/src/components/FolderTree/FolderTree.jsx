@@ -141,8 +141,8 @@ function FolderTreeItem({
   filesMap,
   onToggle,
 }) {
-  const files = filesMap[folderId] || [];
   const folderId = String(folder._id);
+  const files = filesMap?.[folderId] || [];
   const expanded = expandedIds.has(folderId);
   const children = childrenMap[folderId] || [];
 
@@ -196,15 +196,15 @@ function FolderTreeItem({
         <>
           {children.map((child) => (
             <FolderTreeItem
-              key={child._id}
-              folder={child}
-              level={level + 1}
+              key={folder._id}
+              folder={folder}
+              level={0}
               selectedFolderId={selectedFolderId}
               onSelect={onSelect}
               expandedIds={expandedIds}
               childrenMap={childrenMap}
               filesMap={filesMap}
-              onToggle={onToggle}
+              onToggle={handleToggle}
             />
           ))}
 

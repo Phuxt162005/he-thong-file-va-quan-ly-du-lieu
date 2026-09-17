@@ -63,6 +63,11 @@ export default function Files() {
   const [rangeSelecting, setRangeSelecting] = useState(false);
   const [selectedFileIds, setSelectedFileIds] = useState([]);
   const [externalDragging, setExternalDragging] = useState(false);
+  const [bulkMoveModal, setBulkMoveModal] = useState(false);
+  const [bulkCopyModal, setBulkCopyModal] = useState(false);
+  const [bulkDeleteModal, setBulkDeleteModal] = useState(false);
+  const [bulkDestinationFolderId, setBulkDestinationFolderId] = useState(null);
+  const [bulkProcessing, setBulkProcessing] = useState(false);
 
   useEffect(() => {
     const handleDragOver = (event) => {
@@ -455,6 +460,73 @@ export default function Files() {
           err?.message ||
           "Không thể di chuyển thư mục.",
       );
+    }
+  }
+
+  async function handleBulkMove() {
+    if (selectedFileIds.length === 0 && selectedFolderIds.length === 0) {
+      return;
+    }
+
+    try {
+      setBulkProcessing(true);
+      setError("");
+      for (const folderId of selectedFolderIds) {
+        if (
+          bulkDestinationFolderId &&
+          String(folderId) === String(bulkDestinationFolderId)
+        ) {
+          throw new Error("Không thể di chuyển thư mục vào chính nó.");
+        }
+        await folderService.moveFolder(folderId, bulkDestinationFolderId);
+      }
+      for (const fileId of selectedFileIds) {
+        await fileService.moveFile(fileId, bulkDestinationFolderId);
+      }
+
+      setSelectedFileIds([]);
+      setSelectedFolderIds([]);
+      setBulkDestinationFolderId(null);
+      setBulkMoveModal(false);
+      refreshFolders();
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Không thể di chuyển các mục đã chọn.",
+      );
+    } finally {
+      setBulkProcessing(false);
+    }
+  }
+
+  async function handleBulkDeleteAll() {
+    if (selectedFileIds.length === 0 && selectedFolderIds.length === 0) {
+      return;
+    }
+
+    try {
+      setBulkProcessing(true);
+      setError("");
+      for (const fileId of selectedFileIds) {
+        await fileService.deleteFile(fileId);
+      }
+      for (const folderId of selectedFolderIds) {
+        await folderService.deleteFolder(folderId);
+      }
+
+      setSelectedFileIds([]);
+      setSelectedFolderIds([]);
+      setBulkDeleteModal(false);
+      refreshFolders();
+    } catch (err) {
+      setError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Không thể xóa các mục đã chọn.",
+      );
+    } finally {
+      setBulkProcessing(false);
     }
   }
 
@@ -878,6 +950,122 @@ export default function Files() {
 
         <FileUpload folderId={currentFolderId} onUploaded={refreshFolders} />
       </div>
+
+      <Modal
+        isOpen={bulkMoveModal}
+        title="Di chuyển các mục đã chọn"
+        onClose={() => {
+          if (!bulkProcessing) {
+            setBulkMoveModal(false);
+            setBulkDestinationFolderId(null);
+          }
+        }}
+        footer={
+          <>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => {
+                setBulkMoveModal(false);
+                setBulkDestinationFolderId(null);
+              }}
+              disabled={bulkProcessing}
+            >
+              Hủy
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleBulkMove}
+              disabled={bulkProcessing || bulkDestinationFolderId === null}
+            >
+              {bulkProcessing ? "Đang di chuyển..." : "Di chuyển"}
+            </button>
+          </>
+        }
+      >
+        <p>
+          Đã chọn{" "}
+          <strong>{selectedFileIds.length + selectedFolderIds.length}</strong>{" "}
+          mục.
+        </p>
+
+        <p>Chọn thư mục đích:</p>
+
+        <FolderPicker
+          value={bulkDestinationFolderId}
+          onChange={setBulkDestinationFolderId}
+          disabledIds={selectedFolderIds}
+        />
+      </Modal>
+
+      <Modal
+        isOpen={bulkCopyModal}
+        title="Sao chép các mục đã chọn"
+        onClose={() => {
+          if (!bulkProcessing) {
+            setBulkCopyModal(false);
+            setBulkDestinationFolderId(null);
+          }
+        }}
+        footer={
+          <>
+            <button
+              type="button"
+              className="btn btn-secondary"
+              onClick={() => {
+                setBulkCopyModal(false);
+                setBulkDestinationFolderId(null);
+              }}
+              disabled={bulkProcessing}
+            >
+              Hủy
+            </button>
+
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={handleBulkCopy}
+              disabled={bulkProcessing || bulkDestinationFolderId === null}
+            >
+              {bulkProcessing ? "Đang sao chép..." : "Sao chép"}
+            </button>
+          </>
+        }
+      >
+        <p>
+          Đã chọn{" "}
+          <strong>{selectedFileIds.length + selectedFolderIds.length}</strong>{" "}
+          mục.
+        </p>
+
+        <p>Chọn thư mục đích:</p>
+
+        <FolderPicker
+          value={bulkDestinationFolderId}
+          onChange={setBulkDestinationFolderId}
+          disabledIds={selectedFolderIds}
+        />
+      </Modal>
+
+      <ConfirmDialog
+        isOpen={bulkDeleteModal}
+        title="Xóa các mục đã chọn"
+        message={`Bạn có chắc muốn xóa ${
+          selectedFileIds.length + selectedFolderIds.length
+        } mục đã chọn? Các mục sẽ được chuyển vào thùng rác.`}
+        confirmText="Xóa"
+        cancelText="Hủy"
+        danger
+        loading={bulkProcessing}
+        onConfirm={handleBulkDeleteAll}
+        onCancel={() => {
+          if (!bulkProcessing) {
+            setBulkDeleteModal(false);
+          }
+        }}
+      />
 
       <Modal
         isOpen={createModal}
