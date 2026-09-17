@@ -51,10 +51,46 @@ export default function FileList({
   const [bulkDestinationFolderId, setBulkDestinationFolderId] = useState(null);
   const [clipboardFiles, setClipboardFiles] = useState([]);
   const [pasting, setPasting] = useState(false);
+  const [rangeSelecting, setRangeSelecting] = useState(false);
 
   useEffect(() => {
     loadFiles();
   }, [folderId]);
+
+  useEffect(() => {
+    onSelectionChange?.(selectedFiles);
+  }, [selectedFiles, onSelectionChange]);
+
+  useEffect(() => {
+    const handleStart = (event) => {
+      if (event.detail?.type !== "file") {
+        return;
+      }
+      setRangeSelecting(true);
+      setSelectedFiles([event.detail.id]);
+    };
+    const handleEnter = (event) => {
+      if (!rangeSelecting || event.detail?.type !== "file") {
+        return;
+      }
+      setSelectedFiles((prev) =>
+        prev.includes(event.detail.id) ? prev : [...prev, event.detail.id],
+      );
+    };
+    const handleStop = () => {
+      setRangeSelecting(false);
+    };
+
+    window.addEventListener("file-manager-range-start", handleStart);
+    window.addEventListener("file-manager-range-enter", handleEnter);
+    window.addEventListener("pointerup", handleStop);
+
+    return () => {
+      window.removeEventListener("file-manager-range-start", handleStart);
+      window.removeEventListener("file-manager-range-enter", handleEnter);
+      window.removeEventListener("pointerup", handleStop);
+    };
+  }, [rangeSelecting]);
 
   useEffect(() => {
     if (!openFileId) {
@@ -139,6 +175,38 @@ export default function FileList({
     } finally {
       setLoading(false);
     }
+  }
+
+  function getSortedFiles() {
+    return [...files].sort((a, b) => {
+      let aValue;
+      let bValue;
+
+      switch (sortConfig.key) {
+        case "size":
+          aValue = Number(a.size || 0);
+          bValue = Number(b.size || 0);
+          break;
+        case "updatedAt":
+          aValue = new Date(a.updatedAt || a.createdAt || 0).getTime();
+          bValue = new Date(b.updatedAt || b.createdAt || 0).getTime();
+          break;
+        case "type":
+          aValue = getExtension(a.name);
+          bValue = getExtension(b.name);
+          break;
+        default:
+          aValue = String(a.name || "").toLowerCase();
+          bValue = String(b.name || "").toLowerCase();
+      }
+      if (aValue < bValue) {
+        return sortConfig.direction === "asc" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortConfig.direction === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
   }
 
   async function refreshFiles() {
@@ -507,7 +575,7 @@ export default function FileList({
             {loading ? "Đang tải file..." : ""}
           </div>
         ) : (
-          files.map((file) => (
+          getSortedFiles().map((file) => (
             <FileItem
               key={file._id}
               file={file}

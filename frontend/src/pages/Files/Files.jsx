@@ -55,6 +55,117 @@ export default function Files() {
     version: 0,
   });
   const [allFilesSelected, setAllFilesSelected] = useState(false);
+  const [sortConfig, setSortConfig] = useState({
+    key: "name",
+    direction: "asc",
+  });
+  const [selectedFolderIds, setSelectedFolderIds] = useState([]);
+  const [rangeSelecting, setRangeSelecting] = useState(false);
+  const [selectedFileIds, setSelectedFileIds] = useState([]);
+  const [externalDragging, setExternalDragging] = useState(false);
+
+  useEffect(() => {
+    const handleDragOver = (event) => {
+      if (event.dataTransfer?.types?.includes("Files")) {
+        event.preventDefault();
+        setExternalDragging(true);
+      }
+    };
+
+    const handleDragLeave = () => {
+      setExternalDragging(false);
+    };
+    const handleDrop = (event) => {
+      if (!event.dataTransfer?.files?.length) {
+        return;
+      }
+      event.preventDefault();
+      setExternalDragging(false);
+      window.dispatchEvent(
+        new CustomEvent("file-manager-external-upload", {
+          detail: {
+            files: Array.from(event.dataTransfer.files),
+          },
+        }),
+      );
+    };
+    window.addEventListener("dragover", handleDragOver);
+    window.addEventListener("dragleave", handleDragLeave);
+    window.addEventListener("drop", handleDrop);
+
+    return () => {
+      window.removeEventListener("dragover", handleDragOver);
+      window.removeEventListener("dragleave", handleDragLeave);
+      window.removeEventListener("drop", handleDrop);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleStart = (event) => {
+      if (event.detail?.type !== "folder") {
+        return;
+      }
+      setRangeSelecting(true);
+      setSelectedFolderIds([event.detail.id]);
+    };
+    const handleEnter = (event) => {
+      if (!rangeSelecting || event.detail?.type !== "folder") {
+        return;
+      }
+      setSelectedFolderIds((prev) =>
+        prev.includes(event.detail.id) ? prev : [...prev, event.detail.id],
+      );
+    };
+    const handleStop = () => {
+      setRangeSelecting(false);
+    };
+
+    window.addEventListener("file-manager-range-start", handleStart);
+    window.addEventListener("file-manager-range-enter", handleEnter);
+    window.addEventListener("pointerup", handleStop);
+    return () => {
+      window.removeEventListener("file-manager-range-start", handleStart);
+      window.removeEventListener("file-manager-range-enter", handleEnter);
+      window.removeEventListener("pointerup", handleStop);
+    };
+  }, [rangeSelecting]);
+
+  function handleSort(key) {
+    setSortConfig((current) => ({
+      key,
+      direction:
+        current.key === key && current.direction === "asc" ? "desc" : "asc",
+    }));
+  }
+
+  function sortFolders(items) {
+    return [...items].sort((a, b) => {
+      let aValue;
+      let bValue;
+
+      switch (sortConfig.key) {
+        case "size":
+          aValue = Number(a.size || 0);
+          bValue = Number(b.size || 0);
+          break;
+        case "updatedAt":
+          aValue = new Date(a.updatedAt || a.createdAt || 0).getTime();
+          bValue = new Date(b.updatedAt || b.createdAt || 0).getTime();
+          break;
+        default:
+          aValue = String(a.name || "").toLowerCase();
+          bValue = String(b.name || "").toLowerCase();
+      }
+
+      if (aValue < bValue) {
+        return sortConfig.direction === "asc" ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortConfig.direction === "asc" ? 1 : -1;
+      }
+      return 0;
+    });
+  }
 
   useEffect(() => {
     loadFolders();
@@ -325,9 +436,35 @@ export default function Files() {
     }
   }
 
+  async function handleDropFolder(folderId, destinationFolder) {
+    if (!folderId || !destinationFolder?._id) {
+      return;
+    }
+    if (String(folderId) === String(destinationFolder._id)) {
+      setDragError("Không thể di chuyển thư mục vào chính nó.");
+      return;
+    }
+
+    try {
+      setDragError("");
+      await folderService.moveFolder(folderId, destinationFolder._id);
+      refreshFolders();
+    } catch (err) {
+      setDragError(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Không thể di chuyển thư mục.",
+      );
+    }
+  }
+
   return (
     <>
-      <div className="files-page">
+      <div
+        className={`files-page ${
+          externalDragging ? "files-page--external-dragging" : ""
+        }`}
+      >
         <div className="files-page__header">
           <div>
             <h1>Tệp của tôi</h1>
@@ -503,7 +640,6 @@ export default function Files() {
                     checked={allFilesSelected}
                     onChange={(event) => {
                       setAllFilesSelected(event.target.checked);
-
                       setSelectAllRequest({
                         checked: event.target.checked,
                         version: Date.now(),
@@ -513,19 +649,52 @@ export default function Files() {
                   />
                 </div>
 
-                <div>
+                <button
+                  type="button"
+                  className="files-table-sort-button"
+                  onClick={() => handleSort("name")}
+                >
                   Tên
-                  <span className="files-table-sort">↕</span>
-                </div>
+                  <span>
+                    {sortConfig.key === "name"
+                      ? sortConfig.direction === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"}
+                  </span>
+                </button>
 
                 <div>Loại</div>
 
-                <div>Dung lượng</div>
+                <button
+                  type="button"
+                  className="files-table-sort-button"
+                  onClick={() => handleSort("size")}
+                >
+                  Dung lượng
+                  <span>
+                    {sortConfig.key === "size"
+                      ? sortConfig.direction === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"}
+                  </span>
+                </button>
 
-                <div>
+                <button
+                  type="button"
+                  className="files-table-sort-button"
+                  onClick={() => handleSort("updatedAt")}
+                >
                   Cập nhật
-                  <span className="files-table-sort">↕</span>
-                </div>
+                  <span>
+                    {sortConfig.key === "updatedAt"
+                      ? sortConfig.direction === "asc"
+                        ? "↑"
+                        : "↓"
+                      : "↕"}
+                  </span>
+                </button>
 
                 <div>Thao tác</div>
               </div>
@@ -534,7 +703,7 @@ export default function Files() {
                 {loading ? (
                   <Loading message="Đang tải thư mục..." />
                 ) : folders.length === 0 ? null : (
-                  folders.map((folder) => (
+                  sortFolders(folders).map((folder) => (
                     <FolderItem
                       key={folder._id}
                       folder={folder}
@@ -551,6 +720,15 @@ export default function Files() {
                         })
                       }
                       onContextMenu={openContextMenu}
+                      selected={selectedFolderIds.includes(folder._id)}
+                      onSelect={(item, checked) => {
+                        setSelectedFolderIds((prev) =>
+                          checked
+                            ? [...new Set([...prev, item._id])]
+                            : prev.filter((id) => id !== item._id),
+                        );
+                      }}
+                      onDropFolder={handleDropFolder}
                     />
                   ))
                 )}
@@ -563,6 +741,8 @@ export default function Files() {
                   viewMode={viewMode}
                   onFilesChanged={refreshFolders}
                   openFileId={previewFileId}
+                  showSelectionToolbar={false}
+                  onSelectionChange={setSelectedFileIds}
                 />
               </div>
             </div>
@@ -597,6 +777,55 @@ export default function Files() {
                 </button>
               </div>
             </div>
+
+            {(selectedFileIds.length > 0 || selectedFolderIds.length > 0) && (
+              <div className="files-page__selection-toolbar">
+                <div className="files-page__selection-info">
+                  Đã chọn{" "}
+                  <strong>
+                    {selectedFileIds.length + selectedFolderIds.length}
+                  </strong>{" "}
+                  mục
+                </div>
+
+                <div className="files-page__selection-actions">
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setBulkMoveModal(true)}
+                  >
+                    📂 Di chuyển
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => setBulkCopyModal(true)}
+                  >
+                    📋 Sao chép
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-danger"
+                    onClick={() => setBulkDeleteModal(true)}
+                  >
+                    🗑 Xóa
+                  </button>
+
+                  <button
+                    type="button"
+                    className="btn btn-secondary"
+                    onClick={() => {
+                      setSelectedFileIds([]);
+                      setSelectedFolderIds([]);
+                    }}
+                  >
+                    Bỏ chọn
+                  </button>
+                </div>
+              </div>
+            )}
           </section>
         </div>
 

@@ -14,6 +14,26 @@ export default function FileUpload({ folderId = null, onUploaded }) {
   const [success, setSuccess] = useState("");
   const [isDragging, setIsDragging] = useState(false);
 
+  useEffect(() => {
+    const handleExternalUpload = (event) => {
+      const droppedFiles = event.detail?.files || [];
+      if (droppedFiles.length === 0 || uploading) {
+        return;
+      }
+      uploadFiles(droppedFiles);
+    };
+    window.addEventListener(
+      "file-manager-external-upload",
+      handleExternalUpload,
+    );
+    return () => {
+      window.removeEventListener(
+        "file-manager-external-upload",
+        handleExternalUpload,
+      );
+    };
+  }, [uploading, folderId]);
+
   const setSelectedFiles = (selectedFiles) => {
     setFiles(
       selectedFiles.map((file) => ({
@@ -136,12 +156,12 @@ export default function FileUpload({ folderId = null, onUploaded }) {
     }
   };
 
-  const handleUpload = async () => {
-    if (files.length === 0) {
-      setError("Vui lòng chọn file.");
+  const uploadFiles = async (selectedFiles) => {
+    if (!selectedFiles.length) {
       return;
     }
 
+    setSelectedFiles(selectedFiles);
     setUploading(true);
     setError("");
     setSuccess("");
@@ -150,24 +170,18 @@ export default function FileUpload({ folderId = null, onUploaded }) {
     let failedCount = 0;
 
     try {
-      for (const item of files) {
-        const success = await uploadSingleFile(item.file);
+      for (const file of selectedFiles) {
+        const success = await uploadSingleFile(file);
         if (success) {
           successCount += 1;
         } else {
           failedCount += 1;
         }
       }
-
       if (successCount > 0) {
-        setSuccess(
-          `Upload thành công ${successCount} file${
-            successCount > 1 ? "s" : ""
-          }.`,
-        );
+        setSuccess(`Upload thành công ${successCount} file.`);
         onUploaded?.();
       }
-
       if (failedCount > 0) {
         setError(`Có ${failedCount} file upload thất bại.`);
       }
@@ -176,10 +190,15 @@ export default function FileUpload({ folderId = null, onUploaded }) {
       }
     } finally {
       setUploading(false);
+
       if (inputRef.current) {
         inputRef.current.value = "";
       }
     }
+  };
+
+  const handleUpload = () => {
+    uploadFiles(files.map((item) => item.file));
   };
 
   const removeFile = (index) => {

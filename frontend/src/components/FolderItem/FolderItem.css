@@ -5,13 +5,13 @@
   display: grid;
   grid-template-columns:
     42px
-    minmax(280px, 1fr)
+    minmax(220px, 1fr)
+    90px
     120px
-    140px
-    165px
-    250px;
+    145px
+    200px;
   align-items: center;
-  padding: 0 12px;
+  padding: 0 10px;
   box-sizing: border-box;
   background: #fff;
   border-bottom: 1px solid #e7edf6;
@@ -21,8 +21,14 @@
   background: #fbfcff;
 }
 
+.folder-item--selected {
+  background: #eef6ff;
+}
+
 .folder-item--drag-over {
   background: #edf6ff;
+  outline: 2px dashed #5b9ee8;
+  outline-offset: -2px;
 }
 
 .folder-item__select {
@@ -89,33 +95,34 @@
 }
 
 .folder-item__actions {
+  min-width: 0;
+  width: 100%;
   display: flex;
   align-items: center;
-  gap: 8px;
+  justify-content: flex-end;
+  gap: 4px;
   flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .folder-item__action {
-  width: 38px;
-  height: 38px;
-  flex: 0 0 38px;
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0;
   border: 1px solid #e2e8f4;
-  border-radius: 9px;
+  border-radius: 8px;
   background: #edf4ff;
   color: #2d82eb;
   cursor: pointer;
-  transition:
-    transform 0.15s ease,
-    filter 0.15s ease;
 }
 
 .folder-item__action svg {
-  width: 18px;
-  height: 18px;
+  width: 17px;
+  height: 17px;
 }
 
 .folder-item__action--share {
@@ -132,4 +139,33 @@
 .folder-item__action:hover {
   filter: brightness(0.97);
   transform: translateY(-1px);
+}
+
+.folder-item__select input {
+  appearance: none;
+  width: 18px;
+  height: 18px;
+  margin: 0;
+  border: 1.5px solid #b8c7dc;
+  border-radius: 4px;
+  background: #fff;
+  cursor: pointer;
+  position: relative;
+}
+
+.folder-item__select input:checked {
+  background: #2f82ed;
+  border-color: #2f82ed;
+}
+
+.folder-item__select input:checked::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 2px;
+  width: 5px;
+  height: 9px;
+  border: solid #fff;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
 }

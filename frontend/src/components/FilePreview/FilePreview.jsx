@@ -7,9 +7,19 @@ import fileService from "../../services/fileService";
 
 import "./FilePreview.css";
 
-const IMAGE_EXTENSIONS = ["jpg", "jpeg", "png", "gif", "webp", "bmp", "svg"];
-const VIDEO_EXTENSIONS = ["mp4", "webm", "ogg", "mov"];
-const AUDIO_EXTENSIONS = ["mp3", "wav", "ogg", "m4a"];
+const IMAGE_EXTENSIONS = [
+  "jpg",
+  "jpeg",
+  "png",
+  "gif",
+  "webp",
+  "bmp",
+  "svg",
+  "avif",
+  "ico",
+];
+const VIDEO_EXTENSIONS = ["mp4", "webm", "ogg", "mov", "m4v"];
+const AUDIO_EXTENSIONS = ["mp3", "wav", "ogg", "m4a", "aac", "flac"];
 const TEXT_EXTENSIONS = [
   "txt",
   "md",
@@ -17,7 +27,10 @@ const TEXT_EXTENSIONS = [
   "json",
   "xml",
   "html",
+  "htm",
   "css",
+  "scss",
+  "less",
   "js",
   "jsx",
   "ts",
@@ -28,8 +41,27 @@ const TEXT_EXTENSIONS = [
   "cpp",
   "h",
   "hpp",
+  "cs",
+  "go",
+  "rs",
+  "php",
+  "rb",
+  "swift",
+  "kt",
+  "kts",
   "sql",
   "log",
+  "ini",
+  "cfg",
+  "conf",
+  "yaml",
+  "yml",
+  "env",
+  "properties",
+  "bat",
+  "cmd",
+  "sh",
+  "ps1",
 ];
 
 export default function FilePreview({
@@ -64,6 +96,18 @@ export default function FilePreview({
 
         const response = await fileService.previewFile(file._id);
         const blob = response?.data;
+
+        const mimeType = file?.mimeType || blob.type || "";
+        if (
+          mimeType.startsWith("text/") &&
+          !TEXT_EXTENSIONS.includes(extension)
+        ) {
+          const text = await blob.text();
+          if (!cancelled) {
+            setTextContent(text);
+          }
+          return;
+        }
         if (!(blob instanceof Blob)) {
           throw new Error("Dữ liệu preview không hợp lệ.");
         }
@@ -102,9 +146,7 @@ export default function FilePreview({
       setLoading(false);
       return;
     }
-
     loadPreview();
-
     return () => {
       cancelled = true;
       if (objectUrl) {
@@ -120,7 +162,6 @@ export default function FilePreview({
   }, [isOpen, file?._id]);
 
   const extension = getExtension(file?.name);
-
   const IMAGE_ZOOM_MIN = 0.25;
   const IMAGE_ZOOM_MAX = 4;
   const IMAGE_ZOOM_STEP = 0.25;
@@ -150,7 +191,6 @@ export default function FilePreview({
 
   function handleImageWheel(event) {
     event.preventDefault();
-
     setImageZoom((current) => {
       const next =
         event.deltaY < 0

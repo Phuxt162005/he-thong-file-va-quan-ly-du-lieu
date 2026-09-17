@@ -353,6 +353,31 @@
   background: #ffffff;
 }
 
+.files-page__selection-toolbar {
+  min-height: 56px;
+  margin-top: 10px;
+  padding: 8px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border: 1px solid #dfe7f3;
+  border-radius: 10px;
+  background: #ffffff;
+}
+
+.files-page__selection-info {
+  color: #45658f;
+  font-size: 14px;
+}
+
+.files-page__selection-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
 .files-page__pagination {
   display: flex;
   align-items: center;
@@ -464,6 +489,48 @@
   height: 100%;
   border-radius: inherit;
   background: #2f82e8;
+}
+
+.files-page--external-dragging {
+  position: relative;
+}
+
+.files-page__external-drop {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255, 255, 255, 0.72);
+  pointer-events: none;
+}
+
+.files-page__external-drop-content {
+  width: min(440px, 80vw);
+  padding: 38px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  border: 2px dashed #5b9ee8;
+  border-radius: 16px;
+  background: #ffffff;
+  color: #315d97;
+  text-align: center;
+  box-shadow: 0 12px 40px rgba(49, 93, 151, 0.15);
+}
+
+.files-page__external-drop-icon {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  background: #edf5ff;
+  color: #2f82e8;
+  font-size: 32px;
 }
 
 @media (max-width: 1250px) {
@@ -1091,6 +1158,22 @@ TABLE
   color: #6476a8;
   font-size: 14px;
   font-weight: 700;
+}
+
+.files-table-sort-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.files-table-sort-button:hover {
+  color: #2f80e4;
 }
 
 /* ---------- HEADER CHECKBOX ---------- */

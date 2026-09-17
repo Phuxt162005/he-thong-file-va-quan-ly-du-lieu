@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import folderService from "../../services/folderService";
+import fileService from "../../services/fileService";
 
 import "./FolderTree.css";
 
@@ -15,6 +16,8 @@ export default function FolderTree({
   const [childrenMap, setChildrenMap] = useState({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [filesMap, setFilesMap] = useState({});
+  const [loadingIds, setLoadingIds] = useState(new Set());
 
   useEffect(() => {
     loadRootFolders();
@@ -39,13 +42,38 @@ export default function FolderTree({
   }
 
   async function loadChildren(folderId) {
-    const response = await folderService.getFolders(folderId);
-    const data = response?.data || response || [];
+    const id = String(folderId);
 
-    setChildrenMap((prev) => ({
-      ...prev,
-      [folderId]: Array.isArray(data) ? data : [],
-    }));
+    setLoadingIds((prev) => {
+      const next = new Set(prev);
+      next.add(id);
+      return next;
+    });
+
+    try {
+      const [folderResponse, fileResponse] = await Promise.all([
+        folderService.getFolders(folderId),
+        fileService.getFiles(folderId),
+      ]);
+      const childFolders = folderResponse?.data || folderResponse || [];
+      const childFiles =
+        fileResponse?.files || fileResponse?.data || fileResponse || [];
+
+      setChildrenMap((prev) => ({
+        ...prev,
+        [id]: Array.isArray(childFolders) ? childFolders : [],
+      }));
+      setFilesMap((prev) => ({
+        ...prev,
+        [id]: Array.isArray(childFiles) ? childFiles : [],
+      }));
+    } finally {
+      setLoadingIds((prev) => {
+        const next = new Set(prev);
+        next.delete(id);
+        return next;
+      });
+    }
   }
 
   async function handleToggle(folderId) {
@@ -60,17 +88,16 @@ export default function FolderTree({
     }
 
     try {
-      if (childrenMap[id] === undefined) {
+      if (childrenMap[id] === undefined || filesMap[id] === undefined) {
         await loadChildren(folderId);
       }
-
       setExpandedIds((prev) => {
         const next = new Set(prev);
         next.add(id);
         return next;
       });
     } catch (err) {
-      setError(err?.message || "Không thể tải thư mục con.");
+      setError(err?.message || "Không thể tải nội dung thư mục.");
     }
   }
 
@@ -111,8 +138,10 @@ function FolderTreeItem({
   onSelect,
   expandedIds,
   childrenMap,
+  filesMap,
   onToggle,
 }) {
+  const files = filesMap[folderId] || [];
   const folderId = String(folder._id);
   const expanded = expandedIds.has(folderId);
   const children = childrenMap[folderId] || [];
@@ -163,19 +192,37 @@ function FolderTreeItem({
         <span className="folder-tree__name">{folder.name}</span>
       </div>
 
-      {expanded &&
-        children.map((child) => (
-          <FolderTreeItem
-            key={child._id}
-            folder={child}
-            level={level + 1}
-            selectedFolderId={selectedFolderId}
-            onSelect={onSelect}
-            expandedIds={expandedIds}
-            childrenMap={childrenMap}
-            onToggle={onToggle}
-          />
-        ))}
+      {expanded && (
+        <>
+          {children.map((child) => (
+            <FolderTreeItem
+              key={child._id}
+              folder={child}
+              level={level + 1}
+              selectedFolderId={selectedFolderId}
+              onSelect={onSelect}
+              expandedIds={expandedIds}
+              childrenMap={childrenMap}
+              filesMap={filesMap}
+              onToggle={onToggle}
+            />
+          ))}
+
+          {files.map((file) => (
+            <div
+              key={file._id}
+              className="folder-tree__file"
+              style={{
+                paddingLeft: `${(level + 1) * 18 + 24}px`,
+              }}
+              title={file.name}
+            >
+              <span>📄</span>
+              <span>{file.name}</span>
+            </div>
+          ))}
+        </>
+      )}
     </div>
   );
 }

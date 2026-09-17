@@ -77,3 +77,19 @@
   color: #7b8fac;
   font-size: 13px;
 }
+
+.folder-tree__file {
+  min-height: 34px;
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  color: #7890b5;
+  font-size: 13px;
+  overflow: hidden;
+}
+
+.folder-tree__file span:last-child {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

@@ -2,6 +2,8 @@ import "./FolderItem.css";
 
 export default function FolderItem({
   folder,
+  selected = false,
+  onSelect,
   onOpen,
   onRename,
   onMove,
@@ -10,6 +12,7 @@ export default function FolderItem({
   onShare,
   onContextMenu,
   onDropFile,
+  onDropFolder,
 }) {
   const action = (event, callback) => {
     event.preventDefault();
@@ -38,25 +41,43 @@ export default function FolderItem({
   const handleDrop = (event) => {
     event.preventDefault();
     event.stopPropagation();
-
     event.currentTarget.classList.remove("folder-item--drag-over");
 
     const fileId = event.dataTransfer.getData("application/x-file-id");
+    const folderId = event.dataTransfer.getData("application/x-folder-id");
     if (fileId) {
       onDropFile?.(fileId, folder);
+      return;
+    }
+    if (folderId) {
+      onDropFolder?.(folderId, folder);
     }
   };
 
   return (
     <div
-      className="folder-item"
+      className={`folder-item ${selected ? "folder-item--selected" : ""}`}
+      draggable
+      onDragStart={(event) => {
+        event.dataTransfer.effectAllowed = "move";
+        event.dataTransfer.setData(
+          "application/x-folder-id",
+          String(folder._id),
+        );
+      }}
       onContextMenu={handleContextMenu}
       onDragOver={handleDragOver}
       onDragLeave={handleDragLeave}
       onDrop={handleDrop}
     >
       <div className="folder-item__select">
-        <span />
+        <input
+          type="checkbox"
+          checked={selected}
+          onChange={(event) => onSelect?.(folder, event.target.checked)}
+          onClick={(event) => event.stopPropagation()}
+          aria-label={`Chọn ${folder.name || "thư mục"}`}
+        />
       </div>
 
       <button

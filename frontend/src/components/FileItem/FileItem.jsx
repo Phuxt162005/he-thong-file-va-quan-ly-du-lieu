@@ -31,9 +31,7 @@ export default function FileItem({
       }}
       onDragStart={(event) => {
         event.dataTransfer.effectAllowed = "move";
-
         event.dataTransfer.setData("application/x-file-id", String(file._id));
-
         onDragStart?.(file);
       }}
     >

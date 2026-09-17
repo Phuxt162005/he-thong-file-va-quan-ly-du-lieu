@@ -499,3 +499,61 @@
     min-height: 350px;
   }
 }
+
+.file-preview-modal .modal-component__header {
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.file-preview-modal .modal-component__header h2 {
+  color: #334155;
+}
+
+.file-preview-modal .modal-component__body {
+  background: #ffffff;
+}
+
+.file-preview__image-wrapper {
+  background: #ffffff;
+}
+
+.file-preview__image-toolbar {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.08);
+}
+
+.file-preview__image-tool {
+  color: #475569;
+}
+
+.file-preview__image-tool:hover:not(:disabled) {
+  background: #f1f5f9;
+  color: #1e293b;
+}
+
+.file-preview__frame {
+  background: #ffffff;
+  border: 0;
+}
+
+.file-preview__text {
+  background: #ffffff;
+  color: #334155;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+}
+
+.file-preview__unsupported,
+.file-preview__error {
+  color: #475569;
+}
+
+.file-preview__unsupported h3 {
+  color: #334155;
+}
+
+.file-preview__unsupported p {
+  color: #64748b;
+}
