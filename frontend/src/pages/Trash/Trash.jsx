@@ -75,7 +75,7 @@ export default function Trash() {
         ...folder,
         _trashType: "folder",
         _trashId: `folder-${folder._id}`,
-        _deletedAt: folder.deletedAt || folder.updatedAt || null,
+        _deletedAt: folder.deletedAt || null,
       })),
 
       ...files.map((file) => ({

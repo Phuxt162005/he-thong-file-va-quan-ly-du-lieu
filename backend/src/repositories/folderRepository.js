@@ -41,7 +41,7 @@ exports.rename = (folderId, name) => {
 exports.softDelete = (folderId) => {
   return Folder.findOneAndUpdate(
     { _id: folderId, isDeleted: false },
-    { isDeleted: true },
+    { $set: { isDeleted: true, deletedAt: new Date() } },
     { new: true },
   );
 };
@@ -80,9 +80,11 @@ exports.softDeleteCascade = async (folderId) => {
     currentIds = childIds;
   }
 
+  const deletedAt = new Date();
+
   await Folder.updateMany(
     { _id: { $in: folderIds }, isDeleted: false },
-    { $set: { isDeleted: true } },
+    { $set: { isDeleted: true, deletedAt } },
   );
   return Folder.findOne({ _id: folderId });
 };
@@ -128,7 +130,7 @@ exports.restoreTree = async (folderId) => {
 
   await Folder.updateMany(
     { _id: { $in: folderIds }, isDeleted: true },
-    { $set: { isDeleted: false } },
+    { $set: { isDeleted: false, deletedAt: null } },
   );
 
   return Folder.findOne({ _id: folderId });

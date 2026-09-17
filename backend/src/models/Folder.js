@@ -14,6 +14,7 @@ const folderSchema = new mongoose.Schema(
     },
     path: { type: String, default: "/" },
     isDeleted: { type: Boolean, default: false },
+    deletedAt: { type: Date, default: null },
   },
   { timestamps: true },
 );
