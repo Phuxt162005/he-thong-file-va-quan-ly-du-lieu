@@ -70,23 +70,22 @@ export default function NotificationBell() {
         setOpen(false);
       }
     };
-
-    useEffect(() => {
-      const handleOpenNotifications = () => {
-        setOpen(true);
-        loadNotifications();
-      };
-      window.addEventListener("open-notifications", handleOpenNotifications);
-      return () => {
-        window.removeEventListener(
-          "open-notifications",
-          handleOpenNotifications,
-        );
-      };
-    }, []);
-
     document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleOpenNotifications = () => {
+      setOpen(true);
+      loadNotifications();
+    };
+
+    window.addEventListener("open-notifications", handleOpenNotifications);
+    return () => {
+      window.removeEventListener("open-notifications", handleOpenNotifications);
+    };
   }, []);
 
   const handleToggle = () => {

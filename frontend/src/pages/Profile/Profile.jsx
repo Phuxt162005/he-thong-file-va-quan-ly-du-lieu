@@ -131,14 +131,11 @@ function Profile() {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     const email = formData.email.trim();
-
     if (!email) {
       setError("Vui lòng nhập email.");
       return;
     }
-
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
       setError("Email không hợp lệ.");
       return;
@@ -154,26 +151,42 @@ function Profile() {
         firstName: formData.firstName.trim(),
         lastName: formData.lastName.trim(),
       });
-
       const data = response?.data || response;
 
-      setUser((prev) => ({
-        ...prev,
-        ...data,
-      }));
-
+      setUser((prev) => ({ ...prev, ...data }));
       setFormData((prev) => ({
         ...prev,
         email: data?.email ?? prev.email,
         firstName: data?.firstName ?? prev.firstName,
         lastName: data?.lastName ?? prev.lastName,
       }));
-
       setMessage("Cập nhật thông tin thành công.");
     } catch (err) {
       setError(err?.message || "Không thể cập nhật thông tin.");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    const confirmed = window.confirm(
+      "Bạn có chắc chắn muốn xóa tài khoản không?\n\nHành động này không thể hoàn tác.",
+    );
+    if (!confirmed) {
+      return;
+    }
+
+    try {
+      setDeletingAccount(true);
+      setError("");
+      setMessage("");
+      await userService.deleteAccount();
+      await logout();
+      navigate("/login", { replace: true });
+    } catch (err) {
+      setError(err?.message || "Không thể xóa tài khoản.");
+    } finally {
+      setDeletingAccount(false);
     }
   };
 
@@ -470,30 +483,6 @@ function StorageQuota() {
       setError(err?.message || "Không thể tải thông tin dung lượng.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleDeleteAccount = async () => {
-    const confirmed = window.confirm(
-      "Bạn có chắc chắn muốn xóa tài khoản không?\n\nHành động này không thể hoàn tác.",
-    );
-    if (!confirmed) {
-      return;
-    }
-
-    try {
-      setDeletingAccount(true);
-      setError("");
-      setMessage("");
-      await userService.deleteAccount();
-      await logout();
-      navigate("/login", {
-        replace: true,
-      });
-    } catch (err) {
-      setError(err?.message || "Không thể xóa tài khoản.");
-    } finally {
-      setDeletingAccount(false);
     }
   };
 
