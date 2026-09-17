@@ -459,9 +459,9 @@ export default function Shares() {
                       : "shares-page__sort-option"
                   }
                   onClick={() => {
-                    setSortOrder("newest");
+                    setSortOrder("oldest");
                     setSortColumn("createdAt");
-                    setSortDirection("desc");
+                    setSortDirection("asc");
                     setSortOpen(false);
                   }}
                 >
