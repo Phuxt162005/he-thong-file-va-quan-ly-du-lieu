@@ -12,6 +12,7 @@ import FolderTree from "../../components/FolderTree/FolderTree";
 import FolderItem from "../../components/FolderItem/FolderItem";
 import FolderMoveDialog from "../../components/FolderMoveDialog/FolderMoveDialog";
 import FolderCopyDialog from "../../components/FolderCopyDialog/FolderCopyDialog";
+import FolderPicker from "../../components/FolderPicker/FolderPicker";
 
 import folderService from "../../services/folderService";
 import fileService from "../../services/fileService";

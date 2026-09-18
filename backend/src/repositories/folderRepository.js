@@ -300,7 +300,15 @@ exports.findVisibleByParent = async (userId, parentFolder = null) => {
 };
 
 exports.search = (keyword) => {
-  const regex = new RegExp(keyword, "i");
+  const escapedKeyword = String(keyword || "").replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&",
+  );
 
-  return Folder.find({ isDeleted: false, name: regex }).sort({ updatedAt: -1 });
+  const regex = new RegExp(escapedKeyword, "i");
+
+  return Folder.find({
+    isDeleted: false,
+    name: regex,
+  }).sort({ updatedAt: -1 });
 };

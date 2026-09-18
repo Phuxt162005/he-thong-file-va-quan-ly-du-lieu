@@ -121,16 +121,12 @@ export default function Shares() {
     try {
       setSaving(true);
       setError("");
+
       await Promise.all(
         selectedShares.map((shareId) => shareService.revokeShare(shareId)),
       );
-      setShares((prev) =>
-        prev.map((share) =>
-          selectedShares.includes(share._id)
-            ? { ...share, isActive: false }
-            : share,
-        ),
-      );
+      await loadShares();
+
       setSelectedShares([]);
       setBulkRevokeModal(false);
     } catch (err) {
@@ -679,6 +675,24 @@ export default function Shares() {
         footer={
           <>
             <button
+              type="button"
+              className="btn btn-danger"
+              onClick={() => {
+                if (!selectedShare) {
+                  return;
+                }
+
+                setEditModal(false);
+                setSelectedShares([selectedShare._id]);
+                setBulkRevokeModal(true);
+              }}
+              disabled={saving || !selectedShare}
+            >
+              Thu hồi
+            </button>
+
+            <button
+              type="button"
               className="btn btn-secondary"
               onClick={() => {
                 setEditModal(false);
@@ -690,6 +704,7 @@ export default function Shares() {
             </button>
 
             <button
+              type="button"
               className="btn btn-primary"
               onClick={handleUpdate}
               disabled={saving}
