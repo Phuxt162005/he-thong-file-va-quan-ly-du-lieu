@@ -4,8 +4,6 @@ import fileService from "../../services/fileService";
 
 import "./FileUpload.css";
 
-const NORMAL_UPLOAD_LIMIT = 50 * 1024 * 1024;
-
 export default function FileUpload({ folderId = null, onUploaded }) {
   const inputRef = useRef(null);
   const [files, setFiles] = useState([]);
@@ -140,12 +138,8 @@ export default function FileUpload({ folderId = null, onUploaded }) {
       if (file.size === 0) {
         throw new Error("Không thể upload file rỗng.");
       }
-      if (file.size <= NORMAL_UPLOAD_LIMIT) {
-        await uploadNormalFile(file);
-      } else {
-        await uploadChunkedFile(file);
-      }
 
+      await uploadChunkedFile(file);
       return true;
     } catch (err) {
       const message =

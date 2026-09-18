@@ -5,7 +5,10 @@ import FormInput from "../../components/FormInput/FormInput";
 import Loading from "../../components/Loading/Loading";
 import userService from "../../services/userService";
 
+import { setCurrentUser } from "../../utils/authStorage";
 import { useAuth } from "../../context/AuthContext";
+
+import "./Profile.css";
 
 import "./Profile.css";
 

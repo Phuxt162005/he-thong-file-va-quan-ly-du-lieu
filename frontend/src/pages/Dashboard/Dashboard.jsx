@@ -271,20 +271,11 @@ export default function Dashboard() {
       ]);
       const summaryData = summaryResponse?.data || summaryResponse || {};
       const storageData = storageResponse?.data || storageResponse || null;
-      const fileData = fileResponse?.data || fileResponse || [];
-      const normalizedFiles = Array.isArray(fileData)
-        ? fileData
-        : Array.isArray(fileData?.files)
-          ? fileData.files
-          : [];
-
       setFiles(
         Array.isArray(summaryData?.recentFiles) ? summaryData.recentFiles : [],
       );
       setStorage(storageData);
       setFileCount(Number(summaryData?.fileCount || 0));
-      setFiles(normalizedFiles);
-      setStorage(storageData);
     } catch (err) {
       setError(err?.message || "Không thể tải dữ liệu Dashboard.");
     } finally {
