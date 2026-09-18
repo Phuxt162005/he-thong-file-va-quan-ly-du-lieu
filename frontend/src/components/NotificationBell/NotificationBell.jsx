@@ -6,29 +6,6 @@ import notificationService from "../../services/notificationService";
 import "./NotificationBell.css";
 
 function BellIcon() {
-  const navigate = useNavigate();
-
-  const handleReadAll = async () => {
-    try {
-      if (unreadCount > 0) {
-        await notificationService.markAllRead();
-        const now = new Date().toISOString();
-        setNotifications((current) =>
-          current.map((item) => ({
-            ...item,
-            readAt: item.readAt || now,
-          })),
-        );
-        setUnreadCount(0);
-      }
-    } catch {
-      // Trang Thông báo vẫn được mở.
-    } finally {
-      setOpen(false);
-      navigate("/notifications");
-    }
-  };
-
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path
@@ -65,6 +42,7 @@ function formatDate(value) {
 }
 
 export default function NotificationBell() {
+  const navigate = useNavigate();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -144,23 +122,26 @@ export default function NotificationBell() {
   };
 
   const handleReadAll = async () => {
-    if (unreadCount === 0) {
-      return;
-    }
-
     try {
-      await notificationService.markAllRead();
-      const now = new Date().toISOString();
-      setNotifications((current) =>
-        current.map((item) => ({
-          ...item,
-          readAt: item.readAt || now,
-        })),
-      );
+      if (unreadCount > 0) {
+        await notificationService.markAllRead();
 
-      setUnreadCount(0);
+        const now = new Date().toISOString();
+
+        setNotifications((current) =>
+          current.map((item) => ({
+            ...item,
+            readAt: item.readAt || now,
+          })),
+        );
+
+        setUnreadCount(0);
+      }
     } catch {
-      // Giữ nguyên panel.
+      // Vẫn chuyển tới trang Thông báo.
+    } finally {
+      setOpen(false);
+      navigate("/notifications");
     }
   };
 

@@ -151,7 +151,14 @@ exports.getStorageUsedByOwner = async (ownerId) => {
 };
 
 exports.search = (keyword) => {
-  const regex = new RegExp(keyword, "i");
+  const escapedKeyword = String(keyword || "").replace(
+    /[.*+?^${}()|[\]\\]/g,
+    "\\$&",
+  );
+  if (!escapedKeyword) {
+    return [];
+  }
 
+  const regex = new RegExp(escapedKeyword, "i");
   return File.find({ isDeleted: false, name: regex }).sort({ updatedAt: -1 });
 };

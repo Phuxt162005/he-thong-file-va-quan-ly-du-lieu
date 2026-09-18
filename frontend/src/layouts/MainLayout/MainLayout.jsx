@@ -205,8 +205,16 @@ export default function MainLayout({ children }) {
           return;
         }
 
+        const results = Array.isArray(response?.results)
+          ? response.results
+          : [];
         setSearchResults(
-          Array.isArray(response?.results) ? response.results : [],
+          results.filter(
+            (item) =>
+              item &&
+              item._id &&
+              (item.resourceType === "file" || item.resourceType === "folder"),
+          ),
         );
       } catch (error) {
         if (cancelled) {
@@ -246,6 +254,10 @@ export default function MainLayout({ children }) {
   }, []);
 
   function handleSearchResultClick(result) {
+    if (!result?._id) {
+      return;
+    }
+
     setSearchQuery("");
     setSearchResults([]);
     setSearchOpen(false);
@@ -255,8 +267,9 @@ export default function MainLayout({ children }) {
       navigate(`/files?folder=${result._id}`);
       return;
     }
-
-    navigate(`/files?preview=${result._id}`);
+    if (result.resourceType === "file") {
+      navigate(`/files?preview=${result._id}`);
+    }
   }
 
   const isActive = (path) => {
