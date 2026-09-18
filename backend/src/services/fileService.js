@@ -102,6 +102,22 @@ exports.getFilesByFolder = async (userId, folderId = null) => {
   return visibleFiles;
 };
 
+exports.getDashboardSummary = async (userId) => {
+  if (!userId) {
+    throw httpError("User ID is required", 400);
+  }
+
+  const [fileCount, recentFiles] = await Promise.all([
+    fileRepository.countByOwner(userId),
+    fileRepository.findRecentByOwner(userId, 5),
+  ]);
+
+  return {
+    fileCount,
+    recentFiles,
+  };
+};
+
 exports.copyFile = async (userId, fileId, destinationFolderId = null) => {
   const sourceFile = await fileRepository.findById(fileId);
 

@@ -169,13 +169,13 @@ export default function MainLayout({ children }) {
   const location = useLocation();
   const { logout } = useAuth();
   const searchRef = useRef(null);
+  const [currentUser, setCurrentUser] = useState(getCurrentUser);
   const [searchQuery, setSearchQuery] = useState("");
   const [searchSort, setSearchSort] = useState("updatedAt");
   const [searchResults, setSearchResults] = useState([]);
   const [searchLoading, setSearchLoading] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchError, setSearchError] = useState("");
-  const currentUser = getCurrentUser();
   const username = currentUser?.username || currentUser?.name || "User";
   const avatarLetter = username.charAt(0).toUpperCase();
 
@@ -183,6 +183,18 @@ export default function MainLayout({ children }) {
     await logout();
     navigate("/login", { replace: true });
   };
+
+  useEffect(() => {
+    const handleUserUpdated = (event) => {
+      const updatedUser = event.detail || getCurrentUser();
+      setCurrentUser(updatedUser);
+    };
+
+    window.addEventListener("user-profile-updated", handleUserUpdated);
+    return () => {
+      window.removeEventListener("user-profile-updated", handleUserUpdated);
+    };
+  }, []);
 
   useEffect(() => {
     const keyword = searchQuery.trim();
@@ -458,7 +470,13 @@ export default function MainLayout({ children }) {
               onClick={() => navigate("/profile")}
               aria-label="Mở hồ sơ"
             >
-              <span className="main-layout__avatar">{avatarLetter}</span>
+              <span className="main-layout__avatar">
+                {currentUser?.avatar ? (
+                  <img src={currentUser.avatar} alt="Ảnh đại diện" />
+                ) : (
+                  avatarLetter
+                )}
+              </span>
 
               <span className="main-layout__username">{username}</span>
 

@@ -249,6 +249,7 @@ function ArrowIcon() {
 
 export default function Dashboard() {
   const [files, setFiles] = useState([]);
+  const [fileCount, setFileCount] = useState(0);
   const [storage, setStorage] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -264,21 +265,24 @@ export default function Dashboard() {
       setLoading(true);
       setError("");
 
-      const [fileResponse, storageResponse] = await Promise.all([
-        fileService.getFiles(),
+      const [summaryResponse, storageResponse] = await Promise.all([
+        fileService.getDashboardSummary(),
         userService.getStorageQuota(),
       ]);
-
-      const fileData = fileResponse?.data || fileResponse || [];
-
+      const summaryData = summaryResponse?.data || summaryResponse || {};
       const storageData = storageResponse?.data || storageResponse || null;
-
+      const fileData = fileResponse?.data || fileResponse || [];
       const normalizedFiles = Array.isArray(fileData)
         ? fileData
         : Array.isArray(fileData?.files)
           ? fileData.files
           : [];
 
+      setFiles(
+        Array.isArray(summaryData?.recentFiles) ? summaryData.recentFiles : [],
+      );
+      setStorage(storageData);
+      setFileCount(Number(summaryData?.fileCount || 0));
       setFiles(normalizedFiles);
       setStorage(storageData);
     } catch (err) {
@@ -347,9 +351,9 @@ export default function Dashboard() {
           <div className="dashboard-stat-card__content">
             <span>Tổng số file</span>
 
-            <strong>{files.length}</strong>
+            <strong>{fileCount}</strong>
 
-            <small>+0 file so với tuần trước</small>
+            <small>Tổng số file đang lưu trữ</small>
           </div>
         </div>
 

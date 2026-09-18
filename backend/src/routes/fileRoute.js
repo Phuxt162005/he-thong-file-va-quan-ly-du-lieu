@@ -32,6 +32,8 @@ router.get("/search", auth, controller.search);
 // ========================
 router.get("/", auth, controller.getFilesByFolder);
 
+router.get("/dashboard-summary", auth, controller.getDashboardSummary);
+
 // download
 router.get("/:id/download", auth, controller.download);
 

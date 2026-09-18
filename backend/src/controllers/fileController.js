@@ -159,3 +159,9 @@ exports.search = asyncHandler(async (req, res) => {
 
   return res.json({ results });
 });
+
+exports.getDashboardSummary = asyncHandler(async (req, res) => {
+  const summary = await fileService.getDashboardSummary(req.user.id);
+
+  return res.json(summary);
+});

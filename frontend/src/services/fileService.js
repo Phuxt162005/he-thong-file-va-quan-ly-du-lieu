@@ -148,6 +148,11 @@ const fileService = {
 
     return response.data;
   },
+
+  async getDashboardSummary() {
+    const response = await api.get("/files/dashboard-summary");
+    return response.data;
+  },
 };
 
 async function calculateChecksum(blob) {

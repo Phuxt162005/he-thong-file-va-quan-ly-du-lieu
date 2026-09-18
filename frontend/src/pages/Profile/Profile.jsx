@@ -111,9 +111,16 @@ function Profile() {
         const response = await userService.updateProfile({ avatar });
         const data = response?.data || response;
 
-        setUser((prev) => ({ ...prev, ...data }));
-        setAvatarPreview(data?.avatar || avatar);
-        setMessage("Ảnh đại diện đã được cập nhật.");
+        setUser((prev) => {
+          const updatedUser = { ...prev, ...data };
+          setCurrentUser(updatedUser);
+          window.dispatchEvent(
+            new CustomEvent("user-profile-updated", {
+              detail: updatedUser,
+            }),
+          );
+          return updatedUser;
+        });
       } catch (err) {
         setAvatarPreview(previousAvatar);
         setError(err?.message || "Không thể cập nhật ảnh đại diện.");

@@ -369,6 +369,18 @@
   box-shadow: 0 3px 10px rgba(58, 105, 164, 0.08);
 }
 
+.main-layout__avatar {
+  overflow: hidden;
+}
+
+.main-layout__avatar img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  object-fit: cover;
+  border-radius: 50%;
+}
+
 .main-layout__username {
   max-width: 100px;
   overflow: hidden;

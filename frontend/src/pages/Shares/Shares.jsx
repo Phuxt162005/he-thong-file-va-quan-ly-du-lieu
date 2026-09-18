@@ -889,7 +889,14 @@ function ShareItem({
 
       <div className="share-item__shared-by">
         <span className="share-item__avatar">
-          {getInitials(getSharerName(share))}
+          {share?.owner?.avatar ? (
+            <img
+              src={share.owner.avatar}
+              alt={`Ảnh đại diện của ${getSharerName(share)}`}
+            />
+          ) : (
+            getInitials(getSharerName(share))
+          )}
         </span>
 
         <div>

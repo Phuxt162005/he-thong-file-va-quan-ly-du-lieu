@@ -150,6 +150,22 @@ exports.getStorageUsedByOwner = async (ownerId) => {
   return result[0]?.total || 0;
 };
 
+exports.countByOwner = async (ownerId) => {
+  return await File.countDocuments({
+    owner: ownerId,
+    isDeleted: false,
+  });
+};
+
+exports.findRecentByOwner = async (ownerId, limit = 5) => {
+  return await File.find({
+    owner: ownerId,
+    isDeleted: false,
+  })
+    .sort({ updatedAt: -1, createdAt: -1 })
+    .limit(limit);
+};
+
 exports.search = (keyword) => {
   const escapedKeyword = String(keyword || "").replace(
     /[.*+?^${}()|[\]\\]/g,
