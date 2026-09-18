@@ -1,11 +1,17 @@
 import api from "./api";
 
 const notificationService = {
-  async getNotifications(limit = 50) {
-    const response = await api.get("/notifications", {
-      params: { limit },
-    });
-
+  async getNotifications(options = 50) {
+    const params =
+      typeof options === "number"
+        ? { limit: options }
+        : {
+            limit: options?.limit ?? 50,
+            search: options?.search || undefined,
+            from: options?.from || undefined,
+            to: options?.to || undefined,
+          };
+    const response = await api.get("/notifications", { params });
     return response.data;
   },
 

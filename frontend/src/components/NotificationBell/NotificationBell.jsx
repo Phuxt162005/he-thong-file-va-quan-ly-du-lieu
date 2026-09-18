@@ -1,10 +1,34 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import notificationService from "../../services/notificationService";
 
 import "./NotificationBell.css";
 
 function BellIcon() {
+  const navigate = useNavigate();
+
+  const handleReadAll = async () => {
+    try {
+      if (unreadCount > 0) {
+        await notificationService.markAllRead();
+        const now = new Date().toISOString();
+        setNotifications((current) =>
+          current.map((item) => ({
+            ...item,
+            readAt: item.readAt || now,
+          })),
+        );
+        setUnreadCount(0);
+      }
+    } catch {
+      // Trang Thông báo vẫn được mở.
+    } finally {
+      setOpen(false);
+      navigate("/notifications");
+    }
+  };
+
   return (
     <svg viewBox="0 0 24 24" aria-hidden="true">
       <path
@@ -174,7 +198,6 @@ export default function NotificationBell() {
             <button
               type="button"
               className="notification-bell__read-all"
-              disabled={unreadCount === 0}
               onClick={handleReadAll}
             >
               Đọc tất cả

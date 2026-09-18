@@ -303,20 +303,19 @@ exports.syncSystemNotifications = async (userId) => {
     (item) => item.deletedAt,
   );
 
-  /*
-   * Folder hiện tại chưa có deletedAt.
-   * Khi soft-delete Folder, updatedAt được cập nhật.
-   */
   const folders = await Folder.find({
     owner: userId,
     isDeleted: true,
-  }).select("_id name updatedAt");
+    deletedAt: {
+      $ne: null,
+    },
+  }).select("_id name deletedAt");
 
   await syncTrashExpiringForCollection(
     userId,
     folders,
     "folder",
-    (item) => item.updatedAt,
+    (item) => item.deletedAt,
   );
 };
 
@@ -325,20 +324,46 @@ exports.syncSystemNotifications = async (userId) => {
  * LẤY DANH SÁCH
  * =========================================================
  */
-exports.list = async (userId, limit = 50) => {
+exports.list = async (userId, options = {}) => {
   await exports.syncSystemNotifications(userId);
 
-  const parsedLimit = Number(limit);
+  const parsedLimit = Number(options.limit ?? 50);
   if (!Number.isInteger(parsedLimit) || parsedLimit < 1) {
     throw httpError("Invalid limit", 400);
   }
 
-  const safeLimit = Math.min(parsedLimit, 100);
+  const safeLimit = Math.min(parsedLimit, 1000);
+  const search = String(options.search || "").trim();
+
+  let from = null;
+  let to = null;
+
+  if (options.from) {
+    from = new Date(options.from);
+    if (Number.isNaN(from.getTime())) {
+      throw httpError("Invalid from date", 400);
+    }
+  }
+  if (options.to) {
+    to = new Date(options.to);
+    if (Number.isNaN(to.getTime())) {
+      throw httpError("Invalid to date", 400);
+    }
+    to.setHours(23, 59, 59, 999);
+  }
+  if (from && to && from > to) {
+    throw httpError("From date must be before to date", 400);
+  }
+
   const [notifications, unreadCount] = await Promise.all([
-    repository.findByUser(userId, safeLimit),
+    repository.findByUser(userId, {
+      limit: safeLimit,
+      search,
+      from,
+      to,
+    }),
     repository.countUnreadByUser(userId),
   ]);
-
   return { notifications, unreadCount };
 };
 

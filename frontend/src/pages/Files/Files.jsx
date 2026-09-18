@@ -658,7 +658,12 @@ export default function Files() {
 
           <section className="folder-manager__content">
             <div className="folder-manager__content-header">
-              <h2>Tất cả tệp</h2>
+              <h2>
+                {currentFolderId
+                  ? breadcrumbItems[breadcrumbItems.length - 1]?.name ||
+                    "Thư mục"
+                  : "Tất cả tệp"}
+              </h2>
 
               <div className="folder-manager__view-toggle">
                 <button

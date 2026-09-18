@@ -1516,40 +1516,201 @@ FileUpload vẫn tồn tại để nút Tải lên sử dụng input.
 }
 
 /* =========================================================
-GRID VIEW
-========================================================= */
+   GRID VIEW - FILE EXPLORER STYLE
+   ========================================================= */
 
+.files-unified-table--grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 14px;
+  padding: 14px;
+  box-sizing: border-box;
+  background: #ffffff;
+  border: 1px solid #dce5f2;
+  border-radius: 11px;
+}
+
+/* Không hiển thị header khi ở dạng grid */
 .files-unified-table--grid .files-unified-table__header {
   display: none;
 }
 
+/*
+ * Cho folder và file cùng tham gia vào một grid.
+ * Vì vậy folder + file sẽ nằm xen kẽ như File Explorer.
+ */
 .files-unified-table--grid .files-unified-table__folders,
-.files-unified-table--grid .files-unified-table__files {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
-  gap: 12px;
-  padding: 12px;
+.files-unified-table--grid .files-unified-table__files,
+.files-unified-table--grid .file-list {
+  display: contents;
 }
 
+/* =========================================================
+   GRID CARD
+   ========================================================= */
 .files-unified-table--grid .folder-item,
 .files-unified-table--grid .file-item {
+  width: 100%;
   min-width: 0;
-  min-height: 190px;
+  min-height: 210px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
-  padding: 16px;
-  border: 1px solid #e2e9f5;
-  border-radius: 12px;
+  align-items: stretch;
+  box-sizing: border-box;
+  padding: 14px;
+  background: #ffffff;
+  border: 1px solid #e1e8f3;
+  border-radius: 14px;
+  box-shadow: 0 2px 7px rgba(65, 99, 150, 0.04);
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    box-shadow 0.15s ease,
+    background-color 0.15s ease;
 }
 
+.files-unified-table--grid .folder-item:hover,
+.files-unified-table--grid .file-item:hover {
+  background: #fbfdff;
+  border-color: #cbdcf4;
+  box-shadow: 0 6px 16px rgba(65, 99, 150, 0.08);
+  transform: translateY(-1px);
+}
+
+.files-unified-table--grid .folder-item--selected,
+.files-unified-table--grid .file-item--selected {
+  background: #eef6ff;
+  border-color: #8fbaf0;
+}
+
+/* =========================================================
+   CHECKBOX
+   ========================================================= */
+.files-unified-table--grid .folder-item__select,
+.files-unified-table--grid .file-item__select {
+  width: 100%;
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  flex-shrink: 0;
+}
+
+/* =========================================================
+   NAME / ICON
+   ========================================================= */
+.files-unified-table--grid .folder-item__name-cell,
+.files-unified-table--grid .file-item__name-cell {
+  width: 100%;
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 12px 4px;
+  text-align: center;
+}
+
+/* Folder icon */
+.files-unified-table--grid .folder-item__icon {
+  width: 76px;
+  height: 66px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.files-unified-table--grid .folder-item__icon svg {
+  width: 68px;
+  height: 68px;
+}
+
+/* File icon */
+.files-unified-table--grid .file-item__icon {
+  width: 64px;
+  height: 74px;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.files-unified-table--grid .file-type-icon {
+  width: 52px;
+  height: 62px;
+}
+
+/* Tên */
+.files-unified-table--grid .folder-item__name,
+.files-unified-table--grid .file-item__name {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  color: #173f80;
+  font-size: 15px;
+  font-weight: 650;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* =========================================================
+   THÔNG TIN PHỤ
+   ========================================================= */
 .files-unified-table--grid .folder-item__type,
 .files-unified-table--grid .folder-item__size,
-.files-unified-table--grid .folder-item__date,
+.files-unified-table--grid .folder-item__date {
+  display: none;
+}
+
 .files-unified-table--grid .file-item__type,
-.files-unified-table--grid .file-item__size,
 .files-unified-table--grid .file-item__date {
   display: none;
+}
+
+.files-unified-table--grid .file-item__size {
+  display: block;
+  width: 100%;
+  margin-bottom: 8px;
+  color: #8294b3;
+  font-size: 12px;
+  text-align: center;
+}
+
+/* =========================================================
+   ACTIONS
+   ========================================================= */
+.files-unified-table--grid .folder-item__actions,
+.files-unified-table--grid .file-item__actions {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex-shrink: 0;
+  overflow: visible;
+}
+
+.files-unified-table--grid .folder-item__action,
+.files-unified-table--grid .file-item__action {
+  width: 36px;
+  height: 36px;
+  min-width: 36px;
+  flex: 0 0 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.files-unified-table--grid .folder-item__action svg,
+.files-unified-table--grid .file-item__action svg {
+  width: 17px;
+  height: 17px;
 }
 
 /* =========================================================

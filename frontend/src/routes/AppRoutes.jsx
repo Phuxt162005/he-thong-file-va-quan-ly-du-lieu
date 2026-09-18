@@ -13,6 +13,7 @@ import ResetPassword from "../pages/ResetPassword/ResetPassword";
 import Admin from "../pages/Admin/Admin";
 import Trash from "../pages/Trash/Trash";
 import ActivityLog from "../pages/ActivityLog/ActivityLog";
+import Notifications from "../pages/Notifications/Notifications";
 
 import MainLayout from "../layouts/MainLayout/MainLayout";
 import ProtectedRoute from "./ProtectedRoute";
@@ -67,6 +68,17 @@ function AppRoutes() {
           <ProtectedRoute>
             <MainLayout>
               <Profile />
+            </MainLayout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/notifications"
+        element={
+          <ProtectedRoute>
+            <MainLayout>
+              <Notifications />
             </MainLayout>
           </ProtectedRoute>
         }

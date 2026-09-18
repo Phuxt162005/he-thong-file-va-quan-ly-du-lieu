@@ -145,7 +145,7 @@ export default function Shares() {
       setLoading(true);
       setError("");
 
-      const response = await shareService.getShares();
+      const response = await shareService.getShares({ status: "active" });
       const allShares = response?.data || response || [];
 
       setShares(Array.isArray(allShares) ? allShares : []);

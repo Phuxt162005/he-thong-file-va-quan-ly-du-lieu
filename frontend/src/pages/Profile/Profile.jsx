@@ -398,9 +398,7 @@ function Profile() {
             <button
               type="button"
               className="profile-security-item profile-security-item--purple"
-              onClick={() => {
-                window.dispatchEvent(new CustomEvent("open-notifications"));
-              }}
+              onClick={() => navigate("/notifications")}
             >
               <span className="profile-security-item__icon">
                 <BellIcon />

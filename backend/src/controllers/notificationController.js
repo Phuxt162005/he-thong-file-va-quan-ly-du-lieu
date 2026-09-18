@@ -2,7 +2,12 @@ const service = require("../services/notificationService");
 
 exports.list = async (req, res) => {
   try {
-    const result = await service.list(req.user.id, req.query.limit);
+    const result = await service.list(req.user.id, {
+      limit: req.query.limit,
+      search: req.query.search,
+      from: req.query.from,
+      to: req.query.to,
+    });
 
     return res.json(result);
   } catch (error) {

@@ -4,10 +4,31 @@ exports.create = (data) => {
   return Notification.create(data);
 };
 
-exports.findByUser = (userId, limit = 50) => {
-  return Notification.find({ user: userId })
-    .sort({ createdAt: -1 })
-    .limit(limit);
+exports.findByUser = (
+  userId,
+  { limit = 50, search = "", from = null, to = null } = {},
+) => {
+  const query = {
+    user: userId,
+  };
+  const keyword = String(search || "").trim();
+
+  if (keyword) {
+    const escapedKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const regex = new RegExp(escapedKeyword, "i");
+    query.$or = [{ title: regex }, { message: regex }];
+  }
+
+  if (from || to) {
+    query.createdAt = {};
+    if (from) {
+      query.createdAt.$gte = new Date(from);
+    }
+    if (to) {
+      query.createdAt.$lte = new Date(to);
+    }
+  }
+  return Notification.find(query).sort({ createdAt: -1 }).limit(limit);
 };
 
 exports.countUnreadByUser = (userId) => {
