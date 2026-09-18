@@ -650,3 +650,41 @@
     align-items: flex-start;
   }
 }
+
+/* =========================================================
+   GLOBAL TYPOGRAPHY OVERRIDE
+   Đồng bộ font với toàn bộ hệ thống
+   ========================================================= */
+
+.profile-page,
+.profile-page *,
+.profile-page h1,
+.profile-page h2,
+.profile-page h3,
+.profile-page h4,
+.profile-page h5,
+.profile-page h6,
+.profile-page p,
+.profile-page span,
+.profile-page strong,
+.profile-page small,
+.profile-page label,
+.profile-page button,
+.profile-page input {
+  font-family: var(--font-family);
+}
+
+/* Chữ không có nền riêng */
+.profile-page h1,
+.profile-page h2,
+.profile-page h3,
+.profile-page h4,
+.profile-page h5,
+.profile-page h6,
+.profile-page p,
+.profile-page span,
+.profile-page strong,
+.profile-page small,
+.profile-page label {
+  background: transparent;
+}

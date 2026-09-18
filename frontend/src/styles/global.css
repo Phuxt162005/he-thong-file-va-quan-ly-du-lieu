@@ -27,10 +27,13 @@ h4,
 h5,
 h6 {
   font-family: var(--font-family);
-  font-size: var(--font-size-md);
   color: var(--color-text);
-  background-color: var(--color-background);
   line-height: 1.5;
+}
+
+body {
+  font-size: var(--font-size-md);
+  background-color: var(--color-background);
 }
 
 button,
