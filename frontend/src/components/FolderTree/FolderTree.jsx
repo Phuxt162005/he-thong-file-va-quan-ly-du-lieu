@@ -103,36 +103,6 @@ export default function FolderTree({
     }
   }
 
-  const handleDragOver = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    event.dataTransfer.dropEffect = "move";
-    event.currentTarget.classList.add("folder-tree__item--drag-over");
-  };
-
-  const handleDragLeave = (event) => {
-    event.currentTarget.classList.remove("folder-tree__item--drag-over");
-  };
-
-  const handleDrop = (event) => {
-    event.preventDefault();
-    event.stopPropagation();
-    event.currentTarget.classList.remove("folder-tree__item--drag-over");
-
-    const fileId = event.dataTransfer.getData("application/x-file-id");
-    const folderId = event.dataTransfer.getData("application/x-folder-id");
-    if (fileId) {
-      onDropFile?.(fileId, folder);
-      return;
-    }
-    if (folderId) {
-      if (String(folderId) === String(folder._id)) {
-        return;
-      }
-      onDropFolder?.(folderId, folder);
-    }
-  };
-
   if (loading) {
     return <div className="folder-tree__loading">Đang tải thư mục...</div>;
   }
@@ -179,6 +149,36 @@ function FolderTreeItem({
   const files = filesMap?.[folderId] || [];
   const expanded = expandedIds.has(folderId);
   const children = childrenMap[folderId] || [];
+
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = "move";
+    event.currentTarget.classList.add("folder-tree__item--drag-over");
+  };
+
+  const handleDragLeave = (event) => {
+    event.currentTarget.classList.remove("folder-tree__item--drag-over");
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.classList.remove("folder-tree__item--drag-over");
+
+    const fileId = event.dataTransfer.getData("application/x-file-id");
+    const folderId = event.dataTransfer.getData("application/x-folder-id");
+    if (fileId) {
+      onDropFile?.(fileId, folder);
+      return;
+    }
+    if (folderId) {
+      if (String(folderId) === String(folder._id)) {
+        return;
+      }
+      onDropFolder?.(folderId, folder);
+    }
+  };
 
   return (
     <div className="folder-tree__node">

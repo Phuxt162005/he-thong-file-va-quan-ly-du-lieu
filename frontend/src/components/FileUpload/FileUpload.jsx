@@ -78,7 +78,6 @@ export default function FileUpload({ folderId = null, onUploaded }) {
     event.preventDefault();
     event.stopPropagation();
     setIsDragging(false);
-
     if (uploading) {
       return;
     }
@@ -87,7 +86,7 @@ export default function FileUpload({ folderId = null, onUploaded }) {
     if (droppedFiles.length === 0) {
       return;
     }
-    setSelectedFiles(droppedFiles);
+    uploadFiles(droppedFiles);
   };
 
   const updateFileState = (file, changes) => {
