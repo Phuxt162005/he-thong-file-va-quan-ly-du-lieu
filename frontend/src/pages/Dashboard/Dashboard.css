@@ -453,7 +453,12 @@
   flex: 0 0 38px;
   background: #edf4ff;
   border-radius: 9px;
-  font-size: 19px;
+}
+
+.dashboard-file-item__icon svg {
+  width: 25px;
+  height: 29px;
+  display: block;
 }
 
 .dashboard-file-item__info {

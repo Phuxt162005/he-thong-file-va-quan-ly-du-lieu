@@ -507,7 +507,7 @@ export default function Dashboard() {
                   key={file._id || file.id || file.name}
                 >
                   <div className="dashboard-file-item__icon">
-                    {getFileIcon(file.name)}
+                    <FileTypeIcon file={file} />
                   </div>
 
                   <div className="dashboard-file-item__info">
@@ -641,32 +641,79 @@ function formatDate(date) {
   return new Date(date).toLocaleString("vi-VN");
 }
 
-function getFileIcon(name = "") {
-  const extension = name.split(".").pop().toLowerCase();
+function FileTypeIcon({ file }) {
+  const extension = getExtension(file?.name);
 
-  if (["jpg", "jpeg", "png", "gif", "webp"].includes(extension)) {
-    return "🖼️";
-  }
-  if (extension === "pdf") {
-    return "📕";
-  }
-  if (["doc", "docx"].includes(extension)) {
-    return "📘";
-  }
-  if (["xls", "xlsx"].includes(extension)) {
-    return "📗";
-  }
-  if (["ppt", "pptx"].includes(extension)) {
-    return "📙";
-  }
-  if (["zip", "rar", "7z"].includes(extension)) {
-    return "🗜️";
-  }
-  if (["mp4", "avi", "mkv", "mov"].includes(extension)) {
-    return "🎬";
-  }
-  if (["mp3", "wav"].includes(extension)) {
-    return "🎵";
-  }
-  return "📄";
+  const config = {
+    pdf: ["#ef476f", "PDF"],
+
+    doc: ["#2f80ed", "W"],
+    docx: ["#2f80ed", "W"],
+
+    xls: ["#25a66a", "X"],
+    xlsx: ["#25a66a", "X"],
+    csv: ["#25a66a", "X"],
+
+    ppt: ["#f05a24", "P"],
+    pptx: ["#f05a24", "P"],
+
+    png: ["#35b98b", "IMG"],
+    jpg: ["#35b98b", "IMG"],
+    jpeg: ["#35b98b", "IMG"],
+    gif: ["#35b98b", "IMG"],
+    webp: ["#35b98b", "IMG"],
+
+    zip: ["#9347e8", "ZIP"],
+    rar: ["#9347e8", "ZIP"],
+    "7z": ["#9347e8", "ZIP"],
+
+    txt: ["#7f9abb", "TXT"],
+    md: ["#7f9abb", "MD"],
+
+    py: ["#4d82c3", "PY"],
+    js: ["#d6a928", "JS"],
+    jsx: ["#3aa6c8", "JS"],
+    ts: ["#3478c8", "TS"],
+    tsx: ["#3478c8", "TS"],
+    html: ["#e56a3a", "HTML"],
+    css: ["#4b83c4", "CSS"],
+    json: ["#b59a2a", "JSON"],
+    ipynb: ["#c96b2c", "PY"],
+  }[extension] || [
+    "#7f9abb",
+    extension ? extension.slice(0, 4).toUpperCase() : "FILE",
+  ];
+
+  return (
+    <svg
+      viewBox="0 0 42 48"
+      aria-hidden="true"
+      style={{
+        width: "25px",
+        height: "29px",
+      }}
+    >
+      <path d="M7 2h19l9 9v33H7z" fill={config[0]} />
+
+      <path d="M26 2v10h9" fill="#fff" opacity=".45" />
+
+      <text
+        x="21"
+        y="31"
+        textAnchor="middle"
+        fill="#fff"
+        fontSize={config[1].length > 4 ? "5.5" : "9"}
+        fontWeight="700"
+        fontFamily="Arial,sans-serif"
+      >
+        {config[1]}
+      </text>
+    </svg>
+  );
+}
+
+function getExtension(name = "") {
+  const parts = name.toLowerCase().split(".");
+
+  return parts.length > 1 ? parts.pop() : "";
 }

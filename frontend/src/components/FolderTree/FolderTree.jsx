@@ -147,6 +147,7 @@ function FolderTreeItem({
   filesMap,
   onToggle,
 }) {
+  const navigate = useNavigate();
   const folderId = String(folder._id);
   const files = filesMap?.[folderId] || [];
   const expanded = expandedIds.has(folderId);
@@ -256,14 +257,95 @@ function FolderTreeItem({
               style={{
                 paddingLeft: `${(level + 1) * 18 + 24}px`,
               }}
-              title={file.name}
+              title={`Mở ${file.name}`}
+              onClick={(event) => {
+                event.stopPropagation();
+                navigate(`/files?preview=${file._id}`);
+              }}
             >
-              <span>📄</span>
-              <span>{file.name}</span>
+              <span className="folder-tree__file-icon" aria-hidden="true">
+                <FileTypeIcon file={file} />
+              </span>
+
+              <span className="folder-tree__file-name">{file.name}</span>
             </div>
           ))}
         </>
       )}
     </div>
   );
+}
+
+function FileTypeIcon({ file }) {
+  const extension = getExtension(file?.name);
+
+  const config = {
+    pdf: ["#ef476f", "PDF"],
+
+    doc: ["#2f80ed", "W"],
+    docx: ["#2f80ed", "W"],
+
+    xls: ["#25a66a", "X"],
+    xlsx: ["#25a66a", "X"],
+    csv: ["#25a66a", "X"],
+
+    ppt: ["#f05a24", "P"],
+    pptx: ["#f05a24", "P"],
+
+    png: ["#35b98b", "IMG"],
+    jpg: ["#35b98b", "IMG"],
+    jpeg: ["#35b98b", "IMG"],
+    gif: ["#35b98b", "IMG"],
+    webp: ["#35b98b", "IMG"],
+
+    zip: ["#9347e8", "ZIP"],
+    rar: ["#9347e8", "ZIP"],
+    "7z": ["#9347e8", "ZIP"],
+
+    txt: ["#7f9abb", "TXT"],
+    md: ["#7f9abb", "MD"],
+
+    py: ["#4d82c3", "PY"],
+    js: ["#d6a928", "JS"],
+    jsx: ["#3aa6c8", "JS"],
+    ts: ["#3478c8", "TS"],
+    tsx: ["#3478c8", "TS"],
+    html: ["#e56a3a", "HTML"],
+    css: ["#4b83c4", "CSS"],
+    json: ["#b59a2a", "JSON"],
+    ipynb: ["#c96b2c", "PY"],
+  }[extension] || [
+    "#7f9abb",
+    extension ? extension.slice(0, 4).toUpperCase() : "FILE",
+  ];
+
+  return (
+    <svg
+      viewBox="0 0 42 48"
+      className="folder-tree__file-type-icon"
+      aria-hidden="true"
+    >
+      <path d="M7 2h19l9 9v33H7z" fill={config[0]} />
+
+      <path d="M26 2v10h9" fill="#fff" opacity=".45" />
+
+      <text
+        x="21"
+        y="31"
+        textAnchor="middle"
+        fill="#fff"
+        fontSize={config[1].length > 4 ? "5.5" : "9"}
+        fontWeight="700"
+        fontFamily="Arial,sans-serif"
+      >
+        {config[1]}
+      </text>
+    </svg>
+  );
+}
+
+function getExtension(name = "") {
+  const parts = name.toLowerCase().split(".");
+
+  return parts.length > 1 ? parts.pop() : "";
 }
