@@ -20,10 +20,12 @@ export default function FileUpload({ folderId = null, onUploaded }) {
       }
       uploadFiles(droppedFiles);
     };
+
     window.addEventListener(
       "file-manager-external-upload",
       handleExternalUpload,
     );
+
     return () => {
       window.removeEventListener(
         "file-manager-external-upload",
@@ -47,7 +49,11 @@ export default function FileUpload({ folderId = null, onUploaded }) {
 
   const handleSelectFiles = (event) => {
     const selectedFiles = Array.from(event.target.files || []);
-    setSelectedFiles(selectedFiles);
+    if (selectedFiles.length === 0 || uploading) {
+      return;
+    }
+
+    uploadFiles(selectedFiles);
   };
 
   const handleDragOver = (event) => {

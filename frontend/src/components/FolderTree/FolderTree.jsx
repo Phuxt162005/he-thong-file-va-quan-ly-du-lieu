@@ -9,6 +9,8 @@ import "./FolderTree.css";
 export default function FolderTree({
   selectedFolderId,
   onSelect,
+  onDropFile,
+  onDropFolder,
   refreshKey = 0,
 }) {
   const [folders, setFolders] = useState([]);
@@ -101,10 +103,39 @@ export default function FolderTree({
     }
   }
 
+  const handleDragOver = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = "move";
+    event.currentTarget.classList.add("folder-tree__item--drag-over");
+  };
+
+  const handleDragLeave = (event) => {
+    event.currentTarget.classList.remove("folder-tree__item--drag-over");
+  };
+
+  const handleDrop = (event) => {
+    event.preventDefault();
+    event.stopPropagation();
+    event.currentTarget.classList.remove("folder-tree__item--drag-over");
+
+    const fileId = event.dataTransfer.getData("application/x-file-id");
+    const folderId = event.dataTransfer.getData("application/x-folder-id");
+    if (fileId) {
+      onDropFile?.(fileId, folder);
+      return;
+    }
+    if (folderId) {
+      if (String(folderId) === String(folder._id)) {
+        return;
+      }
+      onDropFolder?.(folderId, folder);
+    }
+  };
+
   if (loading) {
     return <div className="folder-tree__loading">Đang tải thư mục...</div>;
   }
-
   if (error) {
     return <div className="folder-tree__error">{error}</div>;
   }
@@ -137,6 +168,8 @@ function FolderTreeItem({
   level,
   selectedFolderId,
   onSelect,
+  onDropFile,
+  onDropFolder,
   expandedIds,
   childrenMap,
   filesMap,
@@ -159,6 +192,9 @@ function FolderTreeItem({
           paddingLeft: `${level * 18}px`,
         }}
         onClick={() => onSelect?.(folder)}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDrop={handleDrop}
       >
         <button
           type="button"
@@ -202,6 +238,8 @@ function FolderTreeItem({
               level={level + 1}
               selectedFolderId={selectedFolderId}
               onSelect={onSelect}
+              onDropFile={onDropFile}
+              onDropFolder={onDropFolder}
               expandedIds={expandedIds}
               childrenMap={childrenMap}
               filesMap={filesMap}

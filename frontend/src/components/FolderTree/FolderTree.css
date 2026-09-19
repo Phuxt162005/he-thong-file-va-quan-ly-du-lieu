@@ -20,6 +20,12 @@
   background: #f4f8ff;
 }
 
+.folder-tree__item--drag-over {
+  background: #e4f0ff !important;
+  outline: 2px dashed #5b8fdc;
+  outline-offset: -2px;
+}
+
 .folder-tree__item--selected {
   background: #e9f2ff;
   color: #2474dc;

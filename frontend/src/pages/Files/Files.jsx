@@ -652,6 +652,8 @@ export default function Files() {
             <FolderTree
               selectedFolderId={currentFolderId}
               onSelect={handleSelectFolder}
+              onDropFile={handleDropFile}
+              onDropFolder={handleDropFolder}
               refreshKey={refreshKey}
             />
           </aside>
