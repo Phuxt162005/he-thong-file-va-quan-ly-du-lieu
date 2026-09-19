@@ -122,6 +122,8 @@ export default function FolderTree({
             level={0}
             selectedFolderId={selectedFolderId}
             onSelect={onSelect}
+            onDropFile={onDropFile}
+            onDropFolder={onDropFolder}
             expandedIds={expandedIds}
             childrenMap={childrenMap}
             filesMap={filesMap}
