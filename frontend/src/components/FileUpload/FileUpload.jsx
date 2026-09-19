@@ -121,7 +121,11 @@ export default function FileUpload({ folderId = null, onUploaded }) {
     for (let index = 0; index < totalChunks; index += 1) {
       const start = index * chunkSize;
       const end = Math.min(start + chunkSize, file.size);
-      const chunk = file.slice(start, end);
+      const chunk = file.slice(
+        start,
+        end,
+        file.type || "application/octet-stream",
+      );
 
       await fileService.uploadChunk(uploadId, index, chunk);
       updateFileState(file, {

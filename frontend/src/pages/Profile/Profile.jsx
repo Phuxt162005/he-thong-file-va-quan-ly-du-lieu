@@ -113,17 +113,13 @@ function Profile() {
 
         const response = await userService.updateProfile({ avatar });
         const data = response?.data || response;
+        const updatedUser = { ...(user || {}), ...(data || {}), avatar };
 
-        setUser((prev) => {
-          const updatedUser = { ...prev, ...data };
-          setCurrentUser(updatedUser);
-          window.dispatchEvent(
-            new CustomEvent("user-profile-updated", {
-              detail: updatedUser,
-            }),
-          );
-          return updatedUser;
-        });
+        setUser(updatedUser);
+        setCurrentUser(updatedUser);
+        window.dispatchEvent(
+          new CustomEvent("user-profile-updated", { detail: updatedUser }),
+        );
       } catch (err) {
         setAvatarPreview(previousAvatar);
         setError(err?.message || "Không thể cập nhật ảnh đại diện.");

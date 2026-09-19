@@ -4,6 +4,7 @@ import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "../../context/AuthContext";
 import fileService from "../../services/fileService";
 import NotificationBell from "../../components/NotificationBell/NotificationBell";
+import userService from "../../services/userService";
 
 import "./MainLayout.css";
 
@@ -201,13 +202,33 @@ export default function MainLayout({ children }) {
   };
 
   useEffect(() => {
-    const handleUserUpdated = (event) => {
-      const updatedUser = event.detail || getCurrentUser();
-      setCurrentUser(updatedUser);
+    let cancelled = false;
+    const loadCurrentUser = async () => {
+      try {
+        const response = await userService.getProfile();
+        const user = response?.data || response;
+        if (cancelled || !user) {
+          return;
+        }
+        setCurrentUser(user);
+        localStorage.setItem("user", JSON.stringify(user));
+      } catch {
+        // Nếu API lỗi thì giữ user hiện tại trong localStorage.
+      }
     };
 
+    const handleUserUpdated = (event) => {
+      const updatedUser = event.detail || getCurrentUser();
+      if (!updatedUser) {
+        return;
+      }
+      setCurrentUser(updatedUser);
+      localStorage.setItem("user", JSON.stringify(updatedUser));
+    };
+    loadCurrentUser();
     window.addEventListener("user-profile-updated", handleUserUpdated);
     return () => {
+      cancelled = true;
       window.removeEventListener("user-profile-updated", handleUserUpdated);
     };
   }, []);

@@ -117,15 +117,13 @@ const fileService = {
 
   // upload một Chunk
   async uploadChunk(uploadId, chunkIndex, chunk) {
-    const checksum = await calculateChecksum(chunk);
     const response = await api.post(`/files/upload/${uploadId}/chunk`, chunk, {
       headers: {
         "Content-Type": "application/octet-stream",
-        "X-Chunk-Index": chunkIndex,
-        "X-Chunk-Checksum": checksum,
+        "X-Chunk-Index": String(chunkIndex),
       },
+      transformRequest: [(data) => data],
     });
-
     return response.data;
   },
 
@@ -154,13 +152,5 @@ const fileService = {
     return response.data;
   },
 };
-
-async function calculateChecksum(blob) {
-  const buffer = await blob.arrayBuffer();
-  const hashBuffer = await crypto.subtle.digest("SHA-256", buffer);
-  const hashArray = Array.from(new Uint8Array(hashBuffer));
-
-  return hashArray.map((byte) => byte.toString(16).padStart(2, "0")).join("");
-}
 
 export default fileService;

@@ -21,10 +21,14 @@ exports.uploadChunk = async (req, res) => {
       return res.status(400).json({ message: "Chunk index is required" });
     }
 
+    const chunk = Buffer.isBuffer(req.body)
+      ? req.body
+      : Buffer.from(req.body || "");
+
     const result = await uploadService.uploadChunk(
       req.params.uploadId,
       chunkIndex,
-      req.body,
+      chunk,
       checksum,
       req.user.id,
     );
